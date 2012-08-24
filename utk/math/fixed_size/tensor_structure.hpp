@@ -20,6 +20,7 @@
 # include <type_traits>
 
 #include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/range_c.hpp>
 #include <boost/mpl/erase.hpp>
 #include <boost/mpl/insert.hpp>
 
@@ -40,7 +41,7 @@ namespace utk
       struct index_vector : public boost::mpl::vector_c< index_type, IndexInfo... >
       {	};
       //using index_vector = boost::mpl::vector_c< index_type, IndexInfo... >;
-      
+
       template< size_type... SizeInfo >
       struct size_vector : public boost::mpl::vector_c< size_type, SizeInfo... >
       {	};
@@ -49,34 +50,38 @@ namespace utk
       namespace helpers
       {
 
-	template< typename >
+	template< typename T, typename >
 	struct repack { /* unspecified */ };
 
-	template< typename T, T...Pack >
-	struct repack< boost::mpl::vector_c< T, Pack...> >
+	template< typename T, T...Pack, template<T...> class Container >
+	struct repack< T, Container< Pack... > >
 	{
-	  typedef typename std::enable_if< std::is_same< T, index_type >::value, index_vector< Pack... > >::type
- 	  index_vector_type;
-	  
-	  typedef typename std::enable_if< std::is_same< T,  size_type >::value,  size_vector< Pack... > >::type
-	  size_vector_type; 
+	  typedef Container< Pack... > type;
 	};
-	
 
-	template < index_type Index, class Sequence, class NewValue>
+	template< typename T, T...Pack, template<T...> class Container >
+	struct repack< T, Container< T, Pack... > >
+	{
+	  typedef Container< T, Pack... > type;
+	};
+
+	template < class Sequence, index_type Index, index_type NewValue>
 	class mpl_assign_element
 	{
+
 	    typedef typename boost::mpl::begin< Sequence>::type begin;
 	    typedef typename boost::mpl::advance_c< begin, Index >::type pos;
 	    typedef typename boost::mpl::erase<Sequence, pos>::type sequence2;
 
 	    typedef typename boost::mpl::begin<sequence2>::type begin2;
 	    typedef typename boost::mpl::advance_c<begin2, Index >::type pos2;
-    	    typedef typename boost::mpl::insert <sequence2, pos2, NewValue>::type result_vec;
 
+
+	    typedef typename Sequence::value_type element_type;
 	  public:
 
-	    typedef repack< result_vec > type;
+	    typedef typename boost::mpl::insert<sequence2, pos2, boost::mpl::integral_c< element_type, NewValue > >::type type;
+
         };
 
       }
@@ -103,7 +108,7 @@ namespace utk
 	  {
 	    return 1;
 	  }
-  
+
 	  template< dimension_type Dim, size_type Size1, size_type... Sizes >
 	  constexpr static stride_type extract_stride_recursion( )
 	  {
@@ -121,20 +126,20 @@ namespace utk
 
 	  template< dimension_type Dim >
 	  constexpr static stride_type stride( )
-	  { 
+	  {
 		static_assert( Dim <= (sizeof...(SizeInfo)+1), "requested dimension does not exist" );
 		return Dim == 0 ? 0 : extract_stride_recursion< Dim - 1 , SizeInfo... >();
 	  }
 
 	  constexpr static const size_type dimension()  { return sizeof...(SizeInfo); }
-		
+
 	  constexpr static const size_type total_size() { return stride< dimension() + 1  >(); }
-		
+
 	  constexpr static const std::array< size_type, dimension()/*TODO: why not dimension()*/ >	size_array()
 	  {
 		return std::array< size_type, dimension() >{ {SizeInfo...} };
 	  }
-	  
+
 	  template< dimension_type Dim, index_type Index >
 	  struct fix_dimension
 	  {
@@ -142,13 +147,13 @@ namespace utk
 		typedef index_vector<  > free_indices;
 		//typedef tensor< T, tensor_impl::replace< free_indices, Dim  >
 	  };
-	      
+
       };
 
-      
+
       template< size_type...SizeInfo >
       using initial_structure = tensor_structure< index_vector< SizeInfo... >, size_vector< SizeInfo... > >;
 
-    } 
+    }
   }
 }

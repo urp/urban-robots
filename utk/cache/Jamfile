@@ -1,6 +1,6 @@
 project utk/cache ;
 
-unit-test test-cache : cache_test.cpp : <library>/collection//boost-unit-test ; 
+unit-test test-cache : cache_test.cpp : <library>/robots//boost-unit-test ;
 
 install install-headers : cache.hpp : <location>$(INSTALL_INC_PREFIX)/utk/cache ;
 explicit install-headers ;
