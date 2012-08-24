@@ -23,11 +23,29 @@
 using namespace utk::math::fixed_size;
 
 
-BOOST_AUTO_TEST_CASE( compile_time_information )
+BOOST_AUTO_TEST_CASE( random_testing )
 {
-  typedef tensor_structure< index_vector<4,5,6>, size_vector<4,5,6> > structure;
-  tensor_interface< double, structure > t(0);
+  typedef index_vector<2,3,4> indices;
+  typedef size_vector<2,3,4>	sizes;
+  typedef tensor_structure< indices , sizes > old_structure;
+  typedef tensor_interface< double, old_structure > tensor;
+  tensor test_tensor(0);
 
-  
+  typedef helpers::repack< index_type, indices >::type n_ind;
+    const int indices_size = boost::mpl::size< n_ind >::type::value;
+    BOOST_CHECK_EQUAL( indices_size, 3 );
+
+
+  typedef helpers::mpl_assign_element< indices, 1, 9 >::type new_indices;
+  typedef helpers::mpl_assign_element< sizes, 1, 9 >::type new_sizes;
+  BOOST_TEST_MESSAGE( "CLASS NAME: " << typeid(new_sizes).name() );
+
+
+  typedef tensor_structure< new_indices , new_sizes > structure;
+  //tensor_interface< double, structure > t(0);
+
+  typedef helpers::repack< index_type, new_indices >::type n_ind2;
+  //typedef typename helpers::repack< new_sizes >::type n_siz;
+
 }
 

@@ -1,4 +1,4 @@
-project collection
+project robots
 : build-dir build
 : requirements <cxxflags>-std=c++0x
 	       #<cxxflags>-ftemplate-depth=1024
@@ -12,7 +12,7 @@ path-constant INSTALL_INC_PREFIX : $(INSTALL_PREFIX)/include ;
 path-constant INSTALL_BIN_PREFIX : $(INSTALL_PREFIX)/bin ;
 path-constant INSTALL_LIB_PREFIX : $(INSTALL_PREFIX)/lib ;
 
-echo "INSTALL_PREFIX = $(INSTALL_PREFIX)" ; 
+echo "INSTALL_PREFIX = $(INSTALL_PREFIX)" ;
 
 using testing ;
 
