@@ -1,0 +1,24 @@
+project collection
+: build-dir build
+: requirements <cxxflags>-std=c++0x
+	       #<cxxflags>-ftemplate-depth=1024
+	       ;
+#<cxxflags>-stdlib=libc++ ;
+
+path-constant TOP : . ;
+
+path-constant INSTALL_PREFIX : /usr/local ;
+path-constant INSTALL_INC_PREFIX : $(INSTALL_PREFIX)/include ;
+path-constant INSTALL_BIN_PREFIX : $(INSTALL_PREFIX)/bin ;
+path-constant INSTALL_LIB_PREFIX : $(INSTALL_PREFIX)/lib ;
+
+echo "INSTALL_PREFIX = $(INSTALL_PREFIX)" ; 
+
+using testing ;
+
+lib boost-unit-test  : : <name>boost_unit_test_framework ;
+lib boost-system     : : <name>boost_system ;
+lib boost-filesystem : : <name>boost_filesystem ;
+
+build-project utk ;
+

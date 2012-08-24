@@ -1,0 +1,68 @@
+project utk/math/fixed_size ;
+
+#---| vector
+#-----------
+
+unit-test test-vector-interface : vector_interface_test.cpp
+                                : <library>/collection//boost-unit-test ;
+unit-test test-vector-array     : vector_array_test.cpp
+                                : <library>/collection//boost-unit-test ;
+unit-test test-vector-operators : vector_operators_test.cpp 
+                                : <library>/collection//boost-unit-test <use>/utk/io//test-io ;
+unit-test test-vector-functions : vector_functions_test.cpp 
+                                : <library>/collection//boost-unit-test <use>/utk/io//test-io ;
+
+alias test-vector : test-vector-interface 
+                    test-vector-array 
+                    test-vector-operators 
+                    test-vector-functions ;
+
+install install-vector-headers 	: /utk/math/special_functions//sgn-install-headers
+								  /utk/math/special_functions//clamp-install-headers
+								  /utk/io//install-headers 
+								  vector_interface.hpp
+                                  vector_array.hpp 
+                                  vector_operators.hpp 
+                                  vector_functions.hpp 
+                                  vector.hpp
+								: <location>$(INSTALL_INC_PREFIX)/utk/math/fixed_size ;
+
+explicit install-vector-headers ;
+
+
+#---| square_matrix
+#------------------
+#
+#unit-test test-square-matrix-interface  : square_matrix_interface_test.cpp 
+#                                        : <library>/collection//boost-unit-test ;
+#unit-test test-square-matrix-array      : square_matrix_array_test.cpp 
+#                                        : <library>/collection//boost-unit-test ;
+#unit-test test-matrix-operators         : square_matrix_operators_test.cpp 
+#                                        : <library>/collection//boost-unit-test <use>/utk/io//test-io ;
+#unit-test test-matrix-functions         : square_matrix_functions_test.cpp 
+#                                        : <library>/collection//boost-unit-test <use>/utk/io//test-io ;
+#
+#alias test-matrix : test-square-matrix-interface 
+#                    test-square-matrix-array 
+#                    test-matrix-operators 
+#                    test-matrix-functions ;
+#
+#install install-matrix-headers 	: /utk/math/fixed_size//install-vector-headers
+#								  square_matrix_interface.hpp
+#                                 square_matrix_array.hpp 
+#                                  square_matrix_operators.hpp 
+#                                  square_matrix_functions.hpp 
+#                                  square_matrix.hpp
+#								: <location>$(INSTALL_INC_PREFIX)/utk/math/fixed_size ;
+#explicit install-matrix-headers ;
+
+
+#---| tensor
+#-----------
+
+unit-test test-tensor-structure  : tensor_structure_test.cpp 
+                                 : <library>/collection//boost-unit-test ;
+
+unit-test test-tensor-interface  : tensor_interface_test.cpp 
+                                 : <library>/collection//boost-unit-test ;
+

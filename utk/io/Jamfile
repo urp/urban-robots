@@ -1,0 +1,8 @@
+project utk/io
+: requirements <library>/collection//boost-system 
+: usage-requirements <library>/collection//boost-system ;
+
+unit-test test-io : io_test.cpp : <library>/collection//boost-unit-test ;
+
+install install-headers : io.hpp : <location>$(INSTALL_INC_PREFIX)/utk/io ;
+explicit install-headers ;

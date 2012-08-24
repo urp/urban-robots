@@ -1,0 +1,7 @@
+project utk/math/special-functions ;
+
+# sgn
+unit-test test-sgn : test/test_sgn.cpp : <library>../..//boost_unit_test ;
+
+install  sgn-install-headers : sgn.hpp : <location>$(INSTALL_INC_PREFIX)/utk/math/special_functions ;
+explicit sgn-install-headers ;

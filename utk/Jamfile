@@ -1,0 +1,5 @@
+project utk : requirements <include>.. ;
+
+build-project io ;
+build-project cache ;
+build-project math ;
