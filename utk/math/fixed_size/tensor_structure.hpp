@@ -17,6 +17,7 @@
 # pragma once
 
 # include <array>
+# include <utility>
 # include <type_traits>
 
 #include <boost/mpl/vector_c.hpp>
@@ -77,18 +78,21 @@ namespace utk
 	  static const T value = Unpacked;
 	};
 
-	template< typename T, index_type Index, template<T...> class Container, T Unpacked, T...Pack >
-	struct at< T, Index, Container< Unpacked, Pack... > >
+	template< typename T, index_type DimIndex, template<T...> class Container, T Unpacked, T...Pack >
+	struct at< T, DimIndex, Container< Unpacked, Pack... > >
 	{
-	  static_assert(Index < sizeof...(Pack)+1, "Index must be smaller than Container size" );
+	  static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than Container size" );
 	  typedef T value_type;
-	  static const T value = at< T, Index-1, Container< Pack... > >::value;
+	  static const T value = at< T, DimIndex-1, Container< Pack... > >::value;
 	};
 
       } // of helpers
 
 
-      // dimension info TODO: avoid repetition
+      //---| dimension info structures
+      //-----TODO: avoid repetition - use template typedef - requires deduction of parameter pack type
+
+      //-----| index_vector
 
       template< index_type... IndexInfo >
       struct index_vector
@@ -96,42 +100,154 @@ namespace utk
 	typedef index_type value_type;
 	typedef boost::mpl::vector_c< index_type, IndexInfo... > mpl_vector;
 
-	template< index_type Index>
+	template< dimension_type DimIndex>
 	constexpr static const value_type at()
-	{ return helpers::at< index_type, Index, index_vector< IndexInfo... > >::value; }
+	{ return helpers::at< index_type, DimIndex, index_vector< IndexInfo... > >::value; }
 
       };
 
+      //-----| size_vector
 
       template< size_type... SizeInfo >
       struct size_vector
       {
 	typedef size_type value_type;
 	typedef boost::mpl::vector_c< size_type, SizeInfo... > mpl_vector;
-	template< index_type Index>
+
+	template< dimension_type DimIndex>
 	constexpr static const value_type at()
-	{ return helpers::at< size_type, Index, size_vector< SizeInfo... > >::value; }
+	{ return helpers::at< size_type, DimIndex, size_vector< SizeInfo... > >::value; }
 
       };
 
       namespace helpers
       {
-	//---| extract_stride
-      /*
-	template< dimension_type Dim,  >
-	struct stride_type extract_stride_recursion( )
+	//---| remove fixed_dimensions
+
+	namespace
 	{
-	  return 1;
+
+	  template< typename, typename, typename, typename >
+	  struct remove_fixed_recursion	{	};
+
+	  // terminate
+	  template< index_type...NewIndices, size_type...NewSizes >
+	  struct remove_fixed_recursion< index_vector< NewIndices... >, index_vector< >
+				       ,  size_vector< NewSizes... >  ,  size_vector< > >
+	  {
+	    typedef std::pair< index_vector< NewIndices... >, size_vector< NewSizes... > > type;
+	  };
+
+	  // remove if UnpackedIndex!=UnpackedSize -> continue
+	  template< index_type...NewIndices, index_type UnpackedIndex, index_type...OldIndices
+		  ,  size_type...NewSizes  ,  size_type UnpackedSize ,  size_type...OldSizes   >
+	  struct remove_fixed_recursion< index_vector< NewIndices... >, index_vector< UnpackedIndex, OldIndices... >
+				       ,  size_vector< NewSizes...   >,  size_vector< UnpackedSize , OldSizes...   > >
+	  {
+	    typedef typename std::conditional< UnpackedIndex != UnpackedSize
+					     , typename remove_fixed_recursion< index_vector< NewIndices... >, index_vector< OldIndices... >
+									      ,  size_vector< NewSizes... >  ,  size_vector< OldSizes...   >
+									      >::type
+    					     , typename remove_fixed_recursion< index_vector< NewIndices..., UnpackedIndex >, index_vector< OldIndices... >
+									      ,  size_vector< NewSizes...  , UnpackedSize  >,  size_vector< OldSizes...   >
+									      >::type
+					     >::type type;
+	  };
 	}
 
-	template< dimension_type Dim, size_type Size1, size_type... Sizes >
-	constexpr static stride_type extract_stride_recursion( )
+	template< typename, typename >  struct remove_fixed_dimensions	{	};
+
+	template< index_type...Indices, size_type...Sizes >
+	struct remove_fixed_dimensions< index_vector< Indices... >, size_vector< Sizes... > >
 	{
-	  return Dim == 0 ? 1 :  Size1 * extract_stride_recursion< Dim - 1 , Sizes... >();
-	}*/
+	  typedef typename remove_fixed_recursion< index_vector<>, index_vector< Indices... >
+						 ,  size_vector<>,  size_vector< Sizes...   >
+						 >::type type;
+	};
+
+
+	//---| stride
+
+	namespace // TODO: gcc-4.7 doesn't interpret this correctly!?
+	{
+	  template< index_type, typename > struct stride_recursion {	};
+
+	  template< dimension_type DimIndex >
+	  struct stride_recursion< DimIndex, size_vector<> >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = 1;
+	  };
+
+	  template< >
+	  struct stride_recursion< 0, size_vector< > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = 1;
+	  };
+
+	  template< size_type Size1 >
+	  struct stride_recursion< 0, size_vector< Size1 > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = 1;
+	  };
+
+	  template< size_type Size1 >
+	  struct stride_recursion< 1, size_vector< Size1 > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = Size1;
+	  };
+
+	  template< size_type Size1, size_type...Sizes >
+	  struct stride_recursion< 0, size_vector< Size1, Sizes... > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = 1;
+	  };
+
+	  template< size_type Size1, size_type...Sizes >
+	  struct stride_recursion< 1, size_vector< Size1, Sizes... > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = Size1;
+	  };
+
+	  template< dimension_type DimIndex, size_type Size1, size_type... Sizes >
+	  struct stride_recursion< DimIndex, size_vector< Size1, Sizes... > >
+	  {
+	    typedef stride_type value_type;
+	    static const stride_type value = Size1 * stride_recursion< DimIndex - 1 , size_vector< Sizes... > >::value;
+	  };
+
+	}
+
+	template< index_type, typename >
+	struct stride {	};
+
+	template< size_type... Sizes >
+	struct stride< 0, size_vector< Sizes... > >
+	{ typedef stride_type value_type;
+	  static const stride_type value = 1;
+	};
+
+	template< size_type Size1, size_type... Sizes >
+	struct stride< 1, size_vector< Size1, Sizes... > >
+	{ typedef stride_type value_type;
+	  static const stride_type value = Size1;
+	};
+
+	template< dimension_type DimIndex, size_type... Sizes >
+	struct stride< DimIndex, size_vector< Sizes... > >
+	{ typedef stride_type value_type;
+	  static const stride_type value = stride_recursion< DimIndex, size_vector< Sizes... > >::value;
+	};
       }
 
-      //-----| tensor structure
+      //---------------------
+      //---| tensor structure
+      //---------------------
 
       template< typename, typename>
       class tensor_structure
@@ -144,7 +260,6 @@ namespace utk
 				   , "the number of indices forwarded in index_vector< ... >"
 				     " and the number sizes forwarded in size_vector< ... > must agree"
 				   );
-
 	  // helpers
 
 	  template< dimension_type Dim >
@@ -172,35 +287,50 @@ namespace utk
 	  constexpr static stride_type stride( )
 	  {
 	    static_assert( Dim <= sizeof...(SizeInfo), "requested dimension does not exist" );
+	    //TODO: find out what gcc goesnt like about my helper
 	    return extract_stride_recursion< Dim, SizeInfo... >();
+		    /*helpers::stride< Dim, size_vector< SizeInfo... > >::value;*/
 	  }
 
-	  constexpr static const size_type dimension()  { return sizeof...(SizeInfo); }
+	  //---| query dimensionality
 
-	  constexpr static const size_type total_size() { return stride< dimension() >(); }
+	  constexpr static const dimension_type dimension()  { return sizeof...(SizeInfo); }
+
+	  //---| query size (number of scalars)
+
+	  constexpr static const size_type total_size()
+	  { return stride< dimension() >(); }
 
 	  constexpr static const std::array< size_type, dimension() >	size_array()
 	  {
 	    return std::array< size_type, dimension() >{ {SizeInfo...} };
 	  }
 
-	  template< dimension_type Dim, index_type Index >
+	  template< dimension_type DimIndex, index_type Index >
 	  class fix_dimension
 	  {
-	      static_assert( Dim < dimension(), "Dim exceeds range");
-	      typedef typename helpers::assign< index_type, Dim, Index, indices >::type new_indices;
+	      static_assert( DimIndex < dimension(), "Dim exceeds range");
+	      typedef typename helpers::assign< index_type, DimIndex, Index, indices >::type new_indices;
 	    public:
 	      typedef tensor_structure< new_indices, sizes > type;
 	  };
 
-	  template< dimension_type Dim >
+	  template< dimension_type DimIndex >
 	  class unfix_dimension
 	  {
-	      static_assert( Dim < dimension(), "Dim exceeds range");
-	      static const index_type dim_size = helpers::at< size_type, Dim, sizes >::value;
+	      static_assert( DimIndex < dimension(), "Dim exceeds range");
+	      static const index_type dim_size = helpers::at< size_type, DimIndex, sizes >::value;
 	    public:
-	      typedef typename fix_dimension< Dim, dim_size >::type type;
+	      typedef typename fix_dimension< DimIndex, dim_size >::type type;
 	  };
+
+	  class remove_fixed
+	  {
+	      typedef typename helpers::remove_fixed_dimensions< indices, sizes >::type sub;
+	    public:
+	      typedef tensor_structure< typename sub::first_type, typename sub::second_type > type;
+	  };
+
       };
 
 

@@ -61,13 +61,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     size_type size0 =  tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>();
     BOOST_CHECK_EQUAL( size0, 1 );
     // size of the first two sub dimensions - in elements
-    size_type size1 = tensor::stride<1>();
-    BOOST_CHECK_EQUAL( size1, 2 );
+
+    size_type stride1 = tensor::structure::stride<1>();
+    BOOST_CHECK_EQUAL( stride1, 2 );
 
     // size of the first three sub dimensions
-    size_type size2 = tensor::structure::stride<2>();
-    BOOST_CHECK_EQUAL( size2, 6 );
-
+    size_type stride2 = tensor::stride<2>();
+    BOOST_CHECK_EQUAL( stride2, 6 );
     // number of elements in the whole tensor
     size_type total_size = tensor::stride<3>();
     BOOST_CHECK_EQUAL( total_size, 24 );
@@ -97,7 +97,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     typedef typename structure::fix_dimension< 0, 1 >::type fixed;
 
     BOOST_CHECK_EQUAL( fixed::indices::at<0>(), 1 );
-    //BOOST_CHECK_EQUAL( fixed::unfixed_total_size(), 12 );
+
+    // remove_fixed
+    typedef typename fixed::remove_fixed::type removed;
+    BOOST_CHECK_EQUAL( removed::indices::at<0>(), 3 );
+    BOOST_CHECK_EQUAL( removed::indices::at<1>(), 4 );
+    BOOST_CHECK_EQUAL( removed::total_size(), 12 );
+    BOOST_CHECK_EQUAL( removed::dimension(), 2 );
 
     // unfix
     typedef typename structure::unfix_dimension< 0 >::type unfixed;
