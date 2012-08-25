@@ -32,18 +32,18 @@ BOOST_AUTO_TEST_SUITE( mpl_interface )
 
     //---| mpl::size
 
-    const int indices_size = boost::mpl::size< indices >::type::value;
+    const int indices_size = boost::mpl::size< indices::mpl_vector >::type::value;
     BOOST_CHECK_EQUAL( indices_size, 3 );
 
-    const int sizes_size = boost::mpl::size< sizes >::type::value;
+    const int sizes_size = boost::mpl::size< sizes::mpl_vector >::type::value;
     BOOST_CHECK_EQUAL( sizes_size, 3 );
 
     //---| mpl::at_c
 
-    static const int at_index2 = boost::mpl::at_c< indices ,2 >::type::value;
+    static const int at_index2 = boost::mpl::at_c< indices::mpl_vector ,2 >::type::value;
     BOOST_CHECK_EQUAL( at_index2, 4 );
 
-    static const int at_size2 = boost::mpl::at_c< sizes ,2 >::type::value;
+    static const int at_size2 = helpers::at< size_type, 2, sizes >::value;
     BOOST_CHECK_EQUAL( at_size2, 4 );
   }
 
@@ -59,28 +59,24 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
     // scalar
     size_type size0 =  tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>();
-    BOOST_CHECK_EQUAL( size0, 0 );
+    BOOST_CHECK_EQUAL( size0, 1 );
     // size of the first two sub dimensions - in elements
     size_type size1 = tensor::stride<1>();
-    BOOST_CHECK_EQUAL( size1, 1 );
+    BOOST_CHECK_EQUAL( size1, 2 );
 
     // size of the first three sub dimensions
     size_type size2 = tensor::structure::stride<2>();
-    BOOST_CHECK_EQUAL( size2, 2 );
-
-    // size of the first three sub dimensions
-    size_type size3 = tensor::structure::stride<3>();
-    BOOST_CHECK_EQUAL( size3, 6 );
+    BOOST_CHECK_EQUAL( size2, 6 );
 
     // number of elements in the whole tensor
-    size_type total_size = tensor::stride<4>();
+    size_type total_size = tensor::stride<3>();
     BOOST_CHECK_EQUAL( total_size, 24 );
 
     // higher (non existing) dimensions should produce a compile time error
     //size_type total_size2 = tensor::stride<5>();
   }
 
-  BOOST_AUTO_TEST_CASE( structure_size_info )
+  BOOST_AUTO_TEST_CASE( size )
   {
     typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
 
@@ -92,6 +88,24 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     auto sizes = structure::size_array();
     BOOST_CHECK_EQUAL( sizes[0], 2 );
   }
+
+  BOOST_AUTO_TEST_CASE( fix_dimension )
+  {
+    typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
+
+    // fix
+    typedef typename structure::fix_dimension< 0, 1 >::type fixed;
+
+    BOOST_CHECK_EQUAL( fixed::indices::at<0>(), 1 );
+    //BOOST_CHECK_EQUAL( fixed::unfixed_total_size(), 12 );
+
+    // unfix
+    typedef typename structure::unfix_dimension< 0 >::type unfixed;
+
+    BOOST_CHECK_EQUAL( unfixed::indices::at<0>(), 2 );
+    BOOST_CHECK_EQUAL( unfixed::total_size(), 24 );
+  }
+
 
 BOOST_AUTO_TEST_SUITE_END()
 

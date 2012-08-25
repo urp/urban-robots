@@ -22,30 +22,44 @@
 
 using namespace utk::math::fixed_size;
 
+BOOST_AUTO_TEST_CASE( using_initial_structure )
+{
+  typedef initial_structure< 1,2,3 > structure;
+  typedef tensor_interface< double, structure > tensor;
+  tensor test_tensor(0);
+}
+
+
 
 BOOST_AUTO_TEST_CASE( random_testing )
 {
-  typedef index_vector<2,3,4> indices;
-  typedef size_vector<2,3,4>	sizes;
-  typedef tensor_structure< indices , sizes > old_structure;
-  typedef tensor_interface< double, old_structure > tensor;
-  tensor test_tensor(0);
+  typedef index_vector<2,3,4> old_indices;
+  typedef size_vector<2,3,4>	old_sizes;
 
-  typedef helpers::repack< index_type, indices >::type n_ind;
-    const int indices_size = boost::mpl::size< n_ind >::type::value;
-    BOOST_CHECK_EQUAL( indices_size, 3 );
+  typedef tensor_structure< old_indices , old_sizes > old_structure;
+  typedef tensor_interface< double, old_structure > old_tensor;
+  old_tensor old_test_tensor(0);
 
-
-  typedef helpers::mpl_assign_element< indices, 1, 9 >::type new_indices;
-  typedef helpers::mpl_assign_element< sizes, 1, 9 >::type new_sizes;
-  BOOST_TEST_MESSAGE( "CLASS NAME: " << typeid(new_sizes).name() );
+  const int old_indices_size = boost::mpl::size< old_indices::mpl_vector >::type::value;
+  BOOST_CHECK_EQUAL( old_indices_size, 3 );
 
 
-  typedef tensor_structure< new_indices , new_sizes > structure;
-  //tensor_interface< double, structure > t(0);
+  typedef helpers::assign< index_type, 0, 7, old_indices >::type new_indices;
+  typedef helpers::assign<  size_type, 0, 9, old_sizes   >::type new_sizes;
 
-  typedef helpers::repack< index_type, new_indices >::type n_ind2;
-  //typedef typename helpers::repack< new_sizes >::type n_siz;
+  typedef tensor_structure< new_indices , new_sizes > new_structure;
+  typedef tensor_interface< double, new_structure > new_tensor;
+  new_tensor new_test_tensor(0);
+
+  const int new_index = boost::mpl::at_c< new_indices::mpl_vector, 0 >::type::value;
+  BOOST_CHECK_EQUAL( new_index, 7 );
+
+  const int new_size = helpers::at< index_type, 0, new_sizes >::value;
+  BOOST_CHECK_EQUAL( new_size, 9 );
+
+
+  const int new_indices_size = boost::mpl::size< new_indices::mpl_vector >::type::value;
+  BOOST_CHECK_EQUAL( new_indices_size, 3 );
 
 }
 
