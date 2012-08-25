@@ -126,7 +126,6 @@ namespace utk
 
 	namespace
 	{
-
 	  template< typename, typename, typename, typename >
 	  struct remove_fixed_recursion	{	};
 
@@ -202,7 +201,8 @@ namespace utk
 	  typedef index_vector< IndexInfo... >	indices;
 	  typedef  size_vector< SizeInfo ... >	sizes;
 
-	  //---| extract stride
+	  //---| stride
+	  //-----extract stride
 
 	  template< dimension_type Dim >
 	  constexpr static stride_type stride( )
@@ -213,20 +213,24 @@ namespace utk
 		    /*helpers::stride< Dim, size_vector< SizeInfo... > >::value;*/
 	  }
 
-	  //---| query dimensionality
-
+	  //---| dimension
+	  //-----query dimensionality
 	  constexpr static const dimension_type dimension()  { return sizeof...(SizeInfo); }
 
-	  //---| query size (number of scalars)
-
+	  //---| total_size
+	  //-----query size (number of scalars)
 	  constexpr static const size_type total_size()
 	  { return stride< dimension() >(); }
 
+	  //---| size_array
+	  //-----returns an std::array containing the size of all tensor-dimensions
 	  constexpr static const std::array< size_type, dimension() >	size_array()
 	  {
 	    return std::array< size_type, dimension() >{ {SizeInfo...} };
 	  }
 
+	  //---| fix_dimension
+	  //-----returns a new tensor_structure with dimension DimIndex fixed
 	  template< dimension_type DimIndex, index_type Index >
 	  class fix_dimension
 	  {
@@ -236,6 +240,8 @@ namespace utk
 	      typedef tensor_structure< new_indices, sizes > type;
 	  };
 
+	  //---| unfix_dimension
+	  //-----returns a new tensor_structure with dimension DimIndex unfixed
 	  template< dimension_type DimIndex >
 	  class unfix_dimension
 	  {
@@ -245,6 +251,8 @@ namespace utk
 	      typedef typename fix_dimension< DimIndex, dim_size >::type type;
 	  };
 
+	  //---| remove_fixed
+	  //-----returns a new tensor_structure with all fixed dimensions removed.
 	  class remove_fixed
 	  {
 	      typedef typename helpers::remove_fixed_dimensions< indices, sizes >::type sub;
