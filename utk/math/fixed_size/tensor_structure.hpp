@@ -38,9 +38,26 @@ namespace utk
       typedef size_type index_type;
       typedef size_type stride_type;
 
+      template<typename T, T Value>
+      struct integral { static const T value = Value; };
+
+
 
       namespace helpers
       {
+	//---| pop_front
+
+	template< typename T, typename >
+	struct pop_front { /* unspecified */ };
+
+	template< typename T, T Unpacked, template<T...> class Container, T...Pack >
+	struct pop_front< T, Container< Unpacked, Pack... > >
+	{
+	  static const T value = Unpacked;
+
+	  typedef Container< Pack... > tail;
+	};
+
 	//---| assign
 
 	namespace
@@ -122,7 +139,7 @@ namespace utk
 
       namespace helpers
       {
-	//---| remove fixed_dimensions
+	//---| remove fixed_dimensions - TODO: add predicate tempalate parameter ( or simply a bool )
 
 	namespace
 	{
@@ -152,7 +169,8 @@ namespace utk
 									      >::type
 					     >::type type;
 	  };
-	}
+
+	} // of <anonymous>
 
 	template< typename, typename >  struct remove_fixed_dimensions	{	};
 
@@ -163,7 +181,64 @@ namespace utk
 						 ,  size_vector<>,  size_vector< Sizes...   >
 						 >::type type;
 	};
-      }
+
+	/***| sub_structure
+
+	namespace
+	{
+	  template< typename, typename, typename, typename >
+	  struct sub_structure_recursion	{	};
+
+	  // terminate
+	  template< index_type...NewIndices, size_type...NewSizes >
+	  class sub_structure_recursion< index_vector< NewIndices... >, index_vector< >
+				       ,  size_vector< NewSizes... >  ,  size_vector< > >
+	  {
+	    typedef std::pair< index_vector< NewIndices... >, size_vector< NewSizes... > > type;
+	  };
+
+	  // remove if UnpackedIndex!=UnpackedSize -> continue
+	  template< index_type UnpackCoord  , index_type...Coords
+		  , index_type UnpackedIndex, index_type...Indices
+		  ,  size_type UnpackedSize ,  size_type...Sizes >
+	  class sub_structure_recursion< index_vector< UnpackedIndex, Indices... >, size_vector< UnpackedSize , Sizes... > >
+	  {
+
+
+	    typedef typename std::conditional< UnpackedIndex != UnpackedSize
+			*/	/*fixed*/ /*   , typename remove_fixed_recursion< index_vector< OldIndices... >
+									      ,  size_vector< OldSizes...   >
+									      >::type
+    			*/	/*free*/ /*     , typename remove_fixed_recursion< index_vector< OldIndices... >
+									      , size_vector< OldSizes...   >
+									      >::type
+					     >::type type;
+
+	    public:
+
+	      typedef typename integral< stride_type, recursion_type::offset >  offset;
+
+	  };
+	}
+
+
+	template< typename, typename >  struct sub:structure {	};
+
+	template< index_type...Indices, size_type...Sizes >
+	class sub_structure< index_vector< Indices... >, size_vector< Sizes... > >
+	{
+	    typedef typename sub_structure_recursion< index_vector<>, index_vector< Indices... >
+						    ,  size_vector<>,  size_vector< Sizes...   >
+						    >::type recursion;
+
+	  public:
+
+	    typedef typename integral< stride_type, recursion_type::offset >  offset;
+
+	    typedef typename result::sub_structure sub_structure;
+	};*/
+
+      } // of helpers
 
       //---------------------
       //---| tensor structure
@@ -203,12 +278,11 @@ namespace utk
 
 	  //---| stride
 	  //-----extract stride
-
 	  template< dimension_type Dim >
 	  constexpr static stride_type stride( )
 	  {
 	    static_assert( Dim <= sizeof...(SizeInfo), "requested dimension does not exist" );
-	    //TODO: find out what gcc goesnt like about my helper
+	    //TODO: find out what gcc doesn't like about my helper
 	    return extract_stride_recursion< Dim, SizeInfo... >();
 		    /*helpers::stride< Dim, size_vector< SizeInfo... > >::value;*/
 	  }
@@ -259,6 +333,37 @@ namespace utk
 	    public:
 	      typedef tensor_structure< typename sub::first_type, typename sub::second_type > type;
 	  };
+
+
+	  //***| free_coord_offset
+	  //-----TODO: rename to inner_product
+
+	  // accumulate
+	  template< typename StrideVector, index_type UnpackedCoord, typename...Coords >
+	  stride_type free_coord_offset( index_type UnpackedCoord, Coords... coords )
+	  {
+	    static const stride_type pop_front< StrideVector >::value 	stride_head;
+	    typename pop_front< StrideVector >::type::tail 		stride_tail;
+	    return  UnpackedCoord * stride_head + free_coord_offset< stride_tail >( coords... )
+	  }
+
+	  // terminate
+	  template< typename StrideVector > stride_type free_coord_offset( )
+	  { return 0 }
+
+	  //start
+  	  //-----return offset for the specified coordinates
+	  template< typename Stridevector/*strides of the full tensor for all free dimensions*/, typename...Coords >
+	  stride_type free_coord_offset( Coords... coords )
+	  {
+	    static const dimension_type coord_size = sizeof...(coords);
+	    static_assert( StrideVector:: == dimension() - reduced::dimension() " BUG ");
+	    static_assert( coord_size <= dimension() - reduced::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
+
+	    typename pop_front< StrideVector >::type::tail stride_tail;
+
+	    return free_coord_offset< stride_tail >( coords... );
+	  }
 
       };
 
