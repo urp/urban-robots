@@ -46,7 +46,7 @@ namespace utk
       namespace helpers
       {
 	//---| pop_front
-
+	//-----splits non-type template sequences
 	template< typename T, typename >
 	struct pop_front { /* unspecified */ };
 
@@ -325,7 +325,7 @@ namespace utk
 	      typedef typename fix_dimension< DimIndex, dim_size >::type type;
 	  };
 
-	  //---| remove_fixed
+	  //---| remove_fixed - TODO: rename to 'compact'
 	  //-----returns a new tensor_structure with all fixed dimensions removed.
 	  class remove_fixed
 	  {
@@ -339,30 +339,30 @@ namespace utk
 	  //-----TODO: rename to inner_product
 
 	  // accumulate
-	  template< typename StrideVector, index_type UnpackedCoord, typename...Coords >
+	  template< typename StrideVector, typename...Coords >
 	  stride_type free_coord_offset( index_type UnpackedCoord, Coords... coords )
 	  {
-	    static const stride_type pop_front< StrideVector >::value 	stride_head;
-	    typename pop_front< StrideVector >::type::tail 		stride_tail;
-	    return  UnpackedCoord * stride_head + free_coord_offset< stride_tail >( coords... )
+	    static const stride_type stride_head = helpers::pop_front< stride_type, StrideVector >::value;
+
+	    typedef typename helpers::pop_front< stride_type, StrideVector >::type::tail stride_tail;
+
+	    return  UnpackedCoord * stride_head + free_coord_offset< stride_tail >( coords... );
 	  }
 
 	  // terminate
 	  template< typename StrideVector > stride_type free_coord_offset( )
-	  { return 0 }
+	  { return 0; }
 
 	  //start
   	  //-----return offset for the specified coordinates
-	  template< typename Stridevector/*strides of the full tensor for all free dimensions*/, typename...Coords >
+	  template< typename StrideVector/*strides of the full tensor for all free dimensions*/, typename...Coords >
 	  stride_type free_coord_offset( Coords... coords )
 	  {
 	    static const dimension_type coord_size = sizeof...(coords);
-	    static_assert( StrideVector:: == dimension() - reduced::dimension() " BUG ");
-	    static_assert( coord_size <= dimension() - reduced::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
+	    static_assert( StrideVector::size::value == dimension() - remove_fixed::dimension(), " BUG ");
+	    static_assert( coord_size <= dimension() - remove_fixed::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
 
-	    typename pop_front< StrideVector >::type::tail stride_tail;
-
-	    return free_coord_offset< stride_tail >( coords... );
+	    return free_coord_offset< StrideVector >( coords... );
 	  }
 
       };
