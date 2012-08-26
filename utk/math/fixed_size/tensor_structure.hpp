@@ -340,7 +340,7 @@ namespace utk
 
 	  // accumulate
 	  template< typename StrideVector, typename...Coords >
-	  stride_type free_coord_offset( index_type UnpackedCoord, Coords... coords )
+	  static const stride_type free_coord_offset( index_type UnpackedCoord, Coords... coords )
 	  {
 	    static const stride_type stride_head = helpers::pop_front< stride_type, StrideVector >::value;
 
@@ -350,17 +350,17 @@ namespace utk
 	  }
 
 	  // terminate
-	  template< typename StrideVector > stride_type free_coord_offset( )
+	  template< typename StrideVector > static const stride_type free_coord_offset( )
 	  { return 0; }
 
 	  //start
   	  //-----return offset for the specified coordinates
 	  template< typename StrideVector/*strides of the full tensor for all free dimensions*/, typename...Coords >
-	  stride_type free_coord_offset( Coords... coords )
+	  static const stride_type free_coord_offset( Coords... coords )
 	  {
 	    static const dimension_type coord_size = sizeof...(coords);
-	    static_assert( StrideVector::size::value == dimension() - remove_fixed::dimension(), " BUG ");
-	    static_assert( coord_size <= dimension() - remove_fixed::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
+	    //static_assert( StrideVector::size::value == remove_fixed::type::dimension(), " BUG ");
+	    static_assert( coord_size <= remove_fixed::type::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
 
 	    return free_coord_offset< StrideVector >( coords... );
 	  }
