@@ -144,7 +144,7 @@ namespace utk
 	namespace
 	{
 	  template< typename, typename, typename, typename >
-	  struct remove_fixed_recursion	{	};
+	  struct remove_fixed_recursion	{ /* unspecified */ };
 
 	  // terminate
 	  template< index_type...NewIndices, size_type...NewSizes >
@@ -340,17 +340,17 @@ namespace utk
 
 	  // accumulate
 	  template< typename StrideVector, typename...Coords >
-	  static const stride_type free_coord_offset( index_type UnpackedCoord, Coords... coords )
+	  static const stride_type free_coord_offset_recurse( index_type UnpackedCoord, Coords... coords )
 	  {
 	    static const stride_type stride_head = helpers::pop_front< stride_type, StrideVector >::value;
 
-	    typedef typename helpers::pop_front< stride_type, StrideVector >::type::tail stride_tail;
+	    typedef typename helpers::pop_front< stride_type, StrideVector >::tail stride_tail;
 
-	    return  UnpackedCoord * stride_head + free_coord_offset< stride_tail >( coords... );
+	    return  UnpackedCoord * stride_head + free_coord_offset_recurse< stride_tail >( coords... );
 	  }
 
 	  // terminate
-	  template< typename StrideVector > static const stride_type free_coord_offset( )
+	  template< typename StrideVector > static const stride_type free_coord_offset_recurse( )
 	  { return 0; }
 
 	  //start
@@ -362,7 +362,7 @@ namespace utk
 	    //static_assert( StrideVector::size::value == remove_fixed::type::dimension(), " BUG ");
 	    static_assert( coord_size <= remove_fixed::type::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
 
-	    return free_coord_offset< StrideVector >( coords... );
+	    return free_coord_offset_recurse< StrideVector >( coords... );
 	  }
 
       };

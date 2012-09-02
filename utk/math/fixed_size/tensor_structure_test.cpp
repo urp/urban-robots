@@ -114,9 +114,9 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   BOOST_AUTO_TEST_CASE( free_coord_offset )
   {
-    typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
+    typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
 
-    const stride_type offset_111 = structure::free_coord_offset< size_vector< 1,2,6 > >( 1,1,1 );
+    const stride_type offset_111 = structure::free_coord_offset< size_vector< 1,2,6,24 > >( 1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 9 );
 
   }
