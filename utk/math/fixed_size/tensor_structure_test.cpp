@@ -112,6 +112,22 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( unfixed::total_size(), 24 );
   }
 
+  BOOST_AUTO_TEST_CASE( stride_vector )
+  {
+    typedef helpers::stride_vector< size_vector<2,3,4,5> >::type strides;
+    static const stride_type s0 = helpers::at<stride_type, 0, strides >::value;
+    BOOST_CHECK_EQUAL( s0, 1 );
+    static const stride_type s1 = helpers::at<stride_type, 1, strides >::value;
+    BOOST_CHECK_EQUAL( s1, 2 );
+    static const stride_type s2 = helpers::at<stride_type, 2, strides >::value;
+    BOOST_CHECK_EQUAL( s2, 6 );
+    static const stride_type s3 = helpers::at<stride_type, 3, strides >::value;
+    BOOST_CHECK_EQUAL( s3, 24 );
+    static const stride_type s4 = helpers::at<stride_type, 4, strides >::value;
+    BOOST_CHECK_EQUAL( s4, 120 );
+
+  }
+
   BOOST_AUTO_TEST_CASE( free_coord_offset )
   {
     typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;

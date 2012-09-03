@@ -38,15 +38,15 @@ namespace utk
       typedef size_type index_type;
       typedef size_type stride_type;
 
+      //-----TODO: move to utk::variadic_vector::
       template<typename T, T Value>
       struct integral { static const T value = Value; };
-
-
 
       namespace helpers
       {
 	//---| pop_front
 	//-----splits non-type template sequences
+	//-----TODO: move to utk::variadic_vector::
 	template< typename T, typename >
 	struct pop_front { /* unspecified */ };
 
@@ -58,8 +58,28 @@ namespace utk
 	  typedef Container< Pack... > tail;
 	};
 
-	//---| assign
+	//---| pop_back
+	//-----splits non-type template sequences
+	//-----TODO: move to utk::variadic_vector::
+	template< typename T, typename >
+	struct pop_back { /* unspecified */ };
 
+	template< typename T, template< T... > class Container, T Back >
+	struct pop_back< T, Container< Back > >
+	{
+	  static const T value = Back;
+	};
+
+	template< typename T, template<T...> class Container, T Unpacked , T...Pack >
+	struct pop_back< T, Container< Unpacked, Pack... > >
+	{
+	  static const T value = pop_back< T, Container< Pack... > >::value;
+	  typedef Container< Pack... > tail;
+	};
+
+
+	//---| assign
+	//-----TODO: move to utk::variadic_vector::
 	namespace
 	{
 	  template< typename T, index_type, T ,typename, typename >
@@ -139,6 +159,41 @@ namespace utk
 
       namespace helpers
       {
+
+	//---| stride
+
+	namespace // TODO: gcc-4.7 doesn't interpret this correctly!?
+ 	{
+	  template< typename, typename > struct stride_recursion {	};
+
+	  template< stride_type...Strides >
+	  struct stride_recursion< size_vector< Strides... >, size_vector< > >
+	  {
+	    typedef size_vector< Strides... > type;
+	  };
+
+	  template< size_type...Strides, size_type...Sizes >
+	  struct stride_recursion< size_vector< Strides... >, size_vector< Sizes... > >
+	  {
+	    typedef typename helpers::pop_front< size_type, size_vector< Sizes... > > stripped;
+
+	    static const stride_type new_stride = helpers::pop_back< stride_type, size_vector< Strides... > >::value * stripped::value;
+	    typedef typename stride_recursion< size_vector< Strides..., new_stride >, typename stripped::tail >::type type;
+	  };
+
+	}
+
+	template< typename >
+	struct stride_vector {	};
+
+	template< size_type... Sizes >
+	struct stride_vector< size_vector< Sizes... > >
+	{
+	 typedef typename stride_recursion< size_vector< 1 >, size_vector< Sizes... > >::type type;
+	};
+
+
+
 	//---| remove fixed_dimensions - TODO: add predicate tempalate parameter ( or simply a bool )
 
 	namespace
