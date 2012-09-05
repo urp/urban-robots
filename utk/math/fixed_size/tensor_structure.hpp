@@ -53,34 +53,36 @@ namespace utk
 	//---| pop_front
 	//-----splits non-type template sequences
 	//-----TODO: move to utk::variadic_vector::
-	template< typename T, typename >
+	template< typename >
 	struct pop_front { /* unspecified */ };
 
-	template< typename T, T Unpacked, template<T...> class Container, T...Pack >
-	struct pop_front< T, Container< Unpacked, Pack... > >
+	template< typename T, T Unpacked, T...Pack >
+	struct pop_front< integral_vector< T, Unpacked, Pack... > >
 	{
 	  static const T value = Unpacked;
 
-	  typedef Container< Pack... > tail;
+	  typedef integral_vector< T, Pack... > tail;
 	};
 
 	//---| pop_back
 	//-----splits non-type template sequences
 	//-----TODO: move to utk::variadic_vector::
-	template< typename T, typename >
+	template< typename >
 	struct pop_back { /* unspecified */ };
 
-	template< typename T, template< T... > class Container, T Back >
-	struct pop_back< T, Container< Back > >
+	// terminate
+	template< typename T, T Back >
+	struct pop_back< integral_vector< T, Back > >
 	{
 	  static const T value = Back;
 	};
 
-	template< typename T, template<T...> class Container, T Unpacked , T...Pack >
-	struct pop_back< T, Container< Unpacked, Pack... > >
+	// pop_front and continue
+	template< typename T, T Unpacked , T...Pack >
+	struct pop_back< integral_vector< T, Unpacked, Pack... > >
 	{
-	  static const T value = pop_back< T, Container< Pack... > >::value;
-	  typedef Container< Pack... > tail;
+	  static const T value = pop_back< integral_vector< T, Pack... > >::value;
+	  typedef integral_vector< T, Pack... > tail;
 	};
 
 
@@ -88,82 +90,95 @@ namespace utk
 	//-----TODO: move to utk::variadic_vector::
 	namespace
 	{
-	  template< typename T, index_type, T ,typename, typename >
+	  template< index_type, typename ,typename, typename >
 	  struct assign_recurse { /* unspecified */ };
 
 	  // assign -> terminate
-	  template< typename T, T NewValue, template<T...> class Container, T Unpacked, T...NewPack, T...OldPack >
-	  struct assign_recurse< T, 0, NewValue, Container< NewPack... >, Container< Unpacked, OldPack... > >
-	  { typedef Container< NewPack..., NewValue , OldPack... > type; };
+	  template< typename T, T NewValue, T Unpacked, T...NewPack, T...OldPack >
+	  struct assign_recurse< 0
+				  , integral< T, NewValue >
+				  , integral_vector< T, NewPack... >
+				  , integral_vector< T, Unpacked, OldPack... >
+				  >
+	  {
+	    typedef integral_vector< T, NewPack..., NewValue , OldPack... > type;
+	  };
 
 	  // move value to result -> recurse
-	  template< typename T, index_type Index, T NewValue, template<T...> class Container, T...NewPack, T Unpacked, T...OldPack  >
-	  struct assign_recurse< T, Index, NewValue, Container< NewPack... >, Container< Unpacked, OldPack... > >
-	  { typedef typename assign_recurse< T, Index-1, NewValue, Container< NewPack..., Unpacked >, Container< OldPack... > >::type type; };
+	  template< typename T, index_type Index, T NewValue, T...NewPack, T Unpacked, T...OldPack  >
+	  struct assign_recurse< Index, integral< T, NewValue >, integral_vector< T, NewPack... >, integral_vector< T, Unpacked, OldPack... > >
+	  { typedef typename assign_recurse< Index-1
+					       , integral< T, NewValue >
+					       , integral_vector< T, NewPack..., Unpacked >
+					       , integral_vector< T, OldPack... >
+					       >::type type; };
 	}
 
 	// start recursion
-	template< typename T, index_type, T, typename  > struct assign {  };
-	template< typename T, index_type Index, T NewValue, template<T...> class Container, T...OldPack >
-	struct assign< T, Index, NewValue, Container< OldPack... > >
+	template< index_type, typename NewIntegral, typename > struct assign {  };
+	template< typename T, index_type Index, T NewValue, T...OldPack >
+	struct assign< Index, integral< T, NewValue >, integral_vector< T, OldPack... > >
 	{
-	  static_assert( Index < sizeof...(OldPack), "Index must be smaller than Container size" );
-	  typedef typename assign_recurse< typename Container<>::value_type, Index, NewValue, Container<>, Container< OldPack... > >::type type;
+	  static_assert( Index < sizeof...(OldPack), "Index must be smaller than integral_vector size" );
+	  typedef typename assign_recurse< Index
+					     , integral< T, NewValue >
+					     , integral_vector< T >
+					     , integral_vector< T, OldPack... >
+					     >::type type;
 	};
 
 	//---| at
 
-	template< typename T, index_type, typename > struct at {  };
+	template< index_type, typename > struct at {  };
 
-	template< typename T, template<T...> class Container, T Unpacked, T...Pack >
-	struct at< T, 0, Container< Unpacked, Pack... > >
+	template< typename T, T Unpacked, T...Pack >
+	struct at< 0, integral_vector< T, Unpacked, Pack... > >
 	{
 	  static const T value = Unpacked;
 	};
 
-	template< typename T, index_type DimIndex, template<T...> class Container, T Unpacked, T...Pack >
-	struct at< T, DimIndex, Container< Unpacked, Pack... > >
+	template< typename T, index_type DimIndex, T Unpacked, T...Pack >
+	struct at< DimIndex, integral_vector< T, Unpacked, Pack... > >
 	{
-	  static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than Container size" );
+	  static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than integral_vector size" );
 	  typedef T value_type;
-	  static const T value = at< T, DimIndex-1, Container< Pack... > >::value;
+	  static const T value = at< DimIndex-1, integral_vector< T, Pack... > >::value;
 	};
 
 	//---| equal
 
 	namespace
 	{
-	  template< typename, typename, typename, typename > struct equal_recursion { /* unspecified */ };
+	  template< typename, typename, typename > struct equal_recursion { /* unspecified */ };
 
 	  // terminate
-	  template< typename T, template< T... > class Container, bool...Result >
-	  struct equal_recursion< T, Container< >, Container< >, integral_vector< bool, Result... > >
+	  template< typename T, bool...Result >
+	  struct equal_recursion< integral_vector< T >, integral_vector< T >, integral_vector< bool, Result... > >
 	  {
 	    typedef integral_vector< bool, Result... > type;
 	  };
 
 	  // compare -> continue
-	  template< typename T, template< T... > class Container, T...A, T...B, bool...Result >
-	  class equal_recursion< T, Container< A... >, Container< B... >, integral_vector< bool, Result... > >
+	  template< typename T, T...A, T...B, bool...Result >
+	  class equal_recursion< integral_vector< T, A... >, integral_vector< T, B... >, integral_vector< bool, Result... > >
 	  {
-	      typedef helpers::pop_front< T, Container< A... > > pop_A;
-	      typedef helpers::pop_front< T, Container< B... > > pop_B;
+	      typedef helpers::pop_front< integral_vector< T, A... > > pop_A;
+	      typedef helpers::pop_front< integral_vector< T, B... > > pop_B;
 	    public:
-	      typedef typename equal_recursion< T
-					      , typename pop_A::tail
-					      , typename pop_B::tail
-					      , integral_vector< bool, Result..., pop_A::value == pop_B::value >
-					      >::type type;
+	      typedef typename equal_recursion< typename pop_A::tail
+						, typename pop_B::tail
+						, integral_vector< bool, Result..., pop_A::value == pop_B::value >
+						>::type type;
 	  };
 	} // of <anonymous>::
 
-	template< typename, typename, typename > struct equal { /* unspecified */ };
+	template< typename, typename > struct equal { /* unspecified */ };
 
 	// start
-	template< typename T, template< T... > class Container, T...A, T...B >
-	struct equal< T, Container< A... >, Container< B... > >
+	template< typename T, T...A, T...B >
+	struct equal< integral_vector< T, A... >, integral_vector< T, B... > >
 	{
-	  typedef typename equal_recursion< T, Container< A... >, Container< B... >, integral_vector< bool > >::type type;
+	  typedef typename equal_recursion< integral_vector< T, A... >, integral_vector< T, B... >, integral_vector< bool > >::type type;
 	};
 
       } // of helpers
@@ -178,18 +193,18 @@ namespace utk
 
       template< index_type, typename > struct at_i {  };
 
-      template< typename T, template<class, T...> class Container, T Unpacked, T...Pack >
-      struct at_i< 0, Container< T, Unpacked, Pack... > >
+      template< typename T, template<class, T...> class integral_vector, T Unpacked, T...Pack >
+      struct at_i< 0, integral_vector< T, Unpacked, Pack... > >
       {
 	static const T value = Unpacked;
       };
 
-      template< typename T, index_type DimIndex, template<class,T...> class Container, T Unpacked, T...Pack >
-      struct at_i< DimIndex, Container< T, Unpacked, Pack... > >
+      template< typename T, index_type DimIndex, template<class,T...> class integral_vector, T Unpacked, T...Pack >
+      struct at_i< DimIndex, integral_vector< T, Unpacked, Pack... > >
       {
-	static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than Container size" );
+	static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than integral_vector size" );
 	typedef T value_type;
-	static const T value = at_i< DimIndex-1, Container< T, Pack... > >::value;
+	static const T value = at_i< DimIndex-1, integral_vector< T, Pack... > >::value;
       };
 
 
@@ -204,36 +219,26 @@ namespace utk
 	{ return at_i<  DimIndex, integral_vector< T, Content... > >::value; }
       };
 
-      template< bool...Content >
-      using bool_vector = integral_vector< bool, Content... >;
+      //-----| bool_vector
+
+      template< bool...Bools >
+      using bool_vector = integral_vector< bool, Bools... >;
 
       //-----| index_vector
 
-      template< index_type... IndexInfo >
-      struct index_vector
-      {
-	typedef index_type value_type;
-	typedef boost::mpl::vector_c< index_type, IndexInfo... > mpl_vector;
-
-	template< dimension_type DimIndex>
-	constexpr static const value_type at()
-	{ return helpers::at< index_type, DimIndex, index_vector< IndexInfo... > >::value; }
-
-      };
+      template< index_type... Indices >
+      using index_vector = integral_vector< index_type, Indices... >;
 
       //-----| size_vector
 
-      template< size_type... SizeInfo >
-      struct size_vector
-      {
-	typedef size_type value_type;
-	typedef boost::mpl::vector_c< size_type, SizeInfo... > mpl_vector;
+      template< size_type... Sizes >
+      using size_vector = integral_vector< size_type, Sizes... >;
 
-	template< dimension_type DimIndex>
-	constexpr static const value_type at()
-	{ return helpers::at< size_type, DimIndex, size_vector< SizeInfo... > >::value; }
+      //-----| stride_vector
 
-      };
+      template< size_type... Strides >
+      using stride_vector = integral_vector< stride_type, Strides... >;
+
 
       namespace helpers
       {
@@ -251,23 +256,23 @@ namespace utk
 	  };
 
 	  template< size_type...Strides, size_type...Sizes >
-	  struct stride_recursion< size_vector< Strides... >, size_vector< Sizes... > >
+	  struct stride_recursion< stride_vector< Strides... >, size_vector< Sizes... > >
 	  {
-	    typedef typename helpers::pop_front< size_type, size_vector< Sizes... > > stripped;
+	    typedef typename helpers::pop_front< size_vector< Sizes... > > stripped;
 
-	    static const stride_type new_stride = helpers::pop_back< stride_type, size_vector< Strides... > >::value * stripped::value;
-	    typedef typename stride_recursion< size_vector< Strides..., new_stride >, typename stripped::tail >::type type;
+	    static const stride_type new_stride = helpers::pop_back< stride_vector< Strides... > >::value * stripped::value;
+	    typedef typename stride_recursion< stride_vector< Strides..., new_stride >, typename stripped::tail >::type type;
 	  };
 
 	}
 
 	template< typename >
-	struct stride_vector {	};
+	struct stride_sequence {	};
 
 	template< size_type... Sizes >
-	struct stride_vector< size_vector< Sizes... > >
+	struct stride_sequence< size_vector< Sizes... > >
 	{
-	 typedef typename stride_recursion< size_vector< 1 >, size_vector< Sizes... > >::type type;
+	 typedef typename stride_recursion< stride_vector< 1 >, size_vector< Sizes... > >::type type;
 	};
 
 
@@ -408,7 +413,7 @@ namespace utk
 
 	  typedef tensor_structure< indices, sizes > type;
 
-	  typedef typename helpers::stride_vector< sizes >::type strides;
+	  typedef typename helpers::stride_sequence< sizes >::type strides;
 
 	  //---| stride
 	  //-----extract stride
@@ -443,7 +448,7 @@ namespace utk
 	  class fix_dimension
 	  {
 	      static_assert( DimIndex < dimension(), "Dim exceeds range");
-	      typedef typename helpers::assign< index_type, DimIndex, Index, indices >::type new_indices;
+	      typedef typename helpers::assign< DimIndex, integral< index_type, Index >, indices >::type new_indices;
 	    public:
 	      typedef tensor_structure< new_indices, sizes > type;
 	  };
@@ -454,7 +459,7 @@ namespace utk
 	  class unfix_dimension
 	  {
 	      static_assert( DimIndex < dimension(), "Dim exceeds range");
-	      static const index_type dim_size = helpers::at< size_type, DimIndex, sizes >::value;
+	      static const index_type dim_size = helpers::at< DimIndex, sizes >::value;
 	    public:
 	      typedef typename fix_dimension< DimIndex, dim_size >::type type;
 	  };
@@ -476,9 +481,9 @@ namespace utk
 	  template< typename StrideVector, typename...Coords >
 	  static const stride_type free_coord_offset_recurse( index_type UnpackedCoord, Coords... coords )
 	  {
-	    static const stride_type stride_head = helpers::pop_front< stride_type, StrideVector >::value;
+	    static const stride_type stride_head = helpers::pop_front< StrideVector >::value;
 
-	    typedef typename helpers::pop_front< stride_type, StrideVector >::tail stride_tail;
+	    typedef typename helpers::pop_front< StrideVector >::tail stride_tail;
 
 	    return  UnpackedCoord * stride_head + free_coord_offset_recurse< stride_tail >( coords... );
 	  }

@@ -43,15 +43,28 @@ BOOST_AUTO_TEST_SUITE( variadic_vectors )
     static const int at_index2 = boost::mpl::at_c< indices::mpl_vector ,2 >::type::value;
     BOOST_CHECK_EQUAL( at_index2, 4 );
 
-    static const int at_size2 = helpers::at< size_type, 2, sizes >::value;
+    static const int at_size2 = helpers::at< 2, sizes >::value;
     BOOST_CHECK_EQUAL( at_size2, 4 );
   }
+
+  BOOST_AUTO_TEST_CASE( bool_vector_at )
+  {
+    typedef bool_vector< false,true,false >  bools;
+
+    static const bool b0 = bools::at<0>();
+    BOOST_CHECK( !b0 );
+    static const bool b1 = bools::at<1>();
+    BOOST_CHECK(  b1 );
+    static const bool b2 = bools::at<2>();
+    BOOST_CHECK( !b2 );
+  }
+
 
   BOOST_AUTO_TEST_CASE( equal )
   {
     typedef size_vector< 1,2,3 >  A;
     typedef size_vector< 3,2,1 >  B;
-    typedef typename helpers::equal< size_type, A, B >::type equal_result;
+    typedef typename helpers::equal< A, B >::type equal_result;
 
     static const bool eq0 = equal_result::at<0>();
     BOOST_CHECK( !eq0 );
@@ -127,16 +140,16 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   BOOST_AUTO_TEST_CASE( stride_vector )
   {
-    typedef helpers::stride_vector< size_vector<2,3,4,5> >::type strides;
-    static const stride_type s0 = helpers::at<stride_type, 0, strides >::value;
+    typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
+    static const stride_type s0 = helpers::at< 0, strides >::value;
     BOOST_CHECK_EQUAL( s0, 1 );
-    static const stride_type s1 = helpers::at<stride_type, 1, strides >::value;
+    static const stride_type s1 = helpers::at< 1, strides >::value;
     BOOST_CHECK_EQUAL( s1, 2 );
-    static const stride_type s2 = helpers::at<stride_type, 2, strides >::value;
+    static const stride_type s2 = helpers::at< 2, strides >::value;
     BOOST_CHECK_EQUAL( s2, 6 );
-    static const stride_type s3 = helpers::at<stride_type, 3, strides >::value;
+    static const stride_type s3 = helpers::at< 3, strides >::value;
     BOOST_CHECK_EQUAL( s3, 24 );
-    static const stride_type s4 = helpers::at<stride_type, 4, strides >::value;
+    static const stride_type s4 = helpers::at< 4, strides >::value;
     BOOST_CHECK_EQUAL( s4, 120 );
 
   }
@@ -144,7 +157,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   BOOST_AUTO_TEST_CASE( free_coord_offset )
   {
     typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
-    typedef helpers::stride_vector< structure::sizes >::type strides;
+    //typedef helpers::stride_sequence< structure::sizes >::type strides;
 
     const stride_type offset_111 = structure::free_coord_offset( 1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 9 );

@@ -44,8 +44,8 @@ BOOST_AUTO_TEST_CASE( random_testing )
   BOOST_CHECK_EQUAL( old_indices_size, 3 );
 
 
-  typedef helpers::assign< index_type, 0, 7, old_indices >::type new_indices;
-  typedef helpers::assign<  size_type, 0, 9, old_sizes   >::type new_sizes;
+  typedef helpers::assign< 0, integral< index_type, 7 >, old_indices >::type new_indices;
+  typedef helpers::assign< 0, integral< index_type, 9 >, old_sizes   >::type new_sizes;
 
   typedef tensor_structure< new_indices , new_sizes > new_structure;
   typedef tensor_interface< double, new_structure > new_tensor;
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( random_testing )
   const int new_index = boost::mpl::at_c< new_indices::mpl_vector, 0 >::type::value;
   BOOST_CHECK_EQUAL( new_index, 7 );
 
-  const int new_size = helpers::at< index_type, 0, new_sizes >::value;
+  const int new_size = helpers::at< 0, new_sizes >::value;
   BOOST_CHECK_EQUAL( new_size, 9 );
 
 
