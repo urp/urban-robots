@@ -280,46 +280,52 @@ namespace utk
 
 	namespace
 	{
-	  template< typename, typename, typename, typename >
-	  struct remove_fixed_recursion	{ /* unspecified */ };
+	  template< typename, typename, typename >
+	  struct remove_false_recursion	{ /* unspecified */ };
 
 	  // terminate
-	  template< index_type...NewIndices, size_type...NewSizes >
-	  struct remove_fixed_recursion< index_vector< NewIndices... >, index_vector< >
-				       ,  size_vector< NewSizes... >  ,  size_vector< > >
+	  template< typename T, T...NewValues >
+	  struct remove_false_recursion< bool_vector< >
+					, integral_vector< T, NewValues... >
+					, integral_vector< T >
+					>
 	  {
-	    typedef std::pair< index_vector< NewIndices... >, size_vector< NewSizes... > > type;
+	    typedef integral_vector< T, NewValues... > type;
 	  };
 
 	  // remove if UnpackedIndex!=UnpackedSize -> continue
 	  // TODO: replace UnpackedIndex/Size by helpers::pop_front
-	  template< index_type...NewIndices, index_type UnpackedIndex, index_type...OldIndices
-		  ,  size_type...NewSizes  ,  size_type UnpackedSize ,  size_type...OldSizes   >
-	  struct remove_fixed_recursion< integral_vector< index_type, NewIndices... >
-					, integral_vector< index_type, UnpackedIndex, OldIndices... >
-				        , integral_vector< size_type, NewSizes...   >
-				        , integral_vector< size_type, UnpackedSize , OldSizes...   > >
+	  template< bool...Bools, typename T, T... NewValues, T...OldValues >
+	  struct remove_false_recursion< integral_vector< bool, Bools... >
+					, integral_vector< T, NewValues... >
+					, integral_vector< T, OldValues... >
+					>
 	  {
-	    typedef typename std::conditional< UnpackedIndex != UnpackedSize
-					     , typename remove_fixed_recursion< index_vector< NewIndices... >, index_vector< OldIndices... >
-									      ,  size_vector< NewSizes... >  ,  size_vector< OldSizes...   >
-									      >::type
-    					     , typename remove_fixed_recursion< index_vector< NewIndices..., UnpackedIndex >, index_vector< OldIndices... >
-									      ,  size_vector< NewSizes...  , UnpackedSize  >,  size_vector< OldSizes...   >
-									      >::type
-					     >::type type;
+	    typedef helpers::pop_front< bool_vector< Bools... > > bools;
+	    typedef helpers::pop_front< integral_vector< T, OldValues... > > old_values;
+	    typedef typename std::conditional< bools::value
+					       , typename remove_false_recursion< typename bools::tail
+										 , integral_vector< T, NewValues... , old_values::value >
+										 , typename old_values::tail
+										 >::type
+					       , typename remove_false_recursion< typename bools::tail
+										 , integral_vector< T, NewValues... >
+										 , typename old_values::tail
+										 >::type
+					       >::type type;
 	  };
 
 	} // of <anonymous>
 
-	template< typename, typename >  struct remove_fixed_dimensions	{	};
+	template< typename, typename >  struct remove_false	{	};
 
-	template< index_type...Indices, size_type...Sizes >
-	struct remove_fixed_dimensions< index_vector< Indices... >, size_vector< Sizes... > >
+	template< bool...Bools, typename T, T...Values >
+	struct remove_false< integral_vector< bool, Bools... >, integral_vector< T, Values... > >
 	{
-	  typedef typename remove_fixed_recursion< index_vector<>, index_vector< Indices... >
-						 ,  size_vector<>,  size_vector< Sizes...   >
-						 >::type type;
+	  typedef typename remove_false_recursion< bool_vector< Bools... >
+						   , integral_vector< T >
+						   , integral_vector< T, Values... >
+						   >::type type;
 	};
 
 	/***| sub_structure
@@ -471,9 +477,11 @@ namespace utk
 	  //-----returns a new tensor_structure with all fixed dimensions removed.
 	  class remove_fixed
 	  {
-	      typedef typename helpers::remove_fixed_dimensions< indices, sizes >::type sub;
+	      typedef typename helpers::equal< indices, sizes >::type free_dimensions;
+	      typedef typename helpers::remove_false< free_dimensions, indices >::type sub_indices;
+	      typedef typename helpers::remove_false< free_dimensions, sizes   >::type sub_sizes;
 	    public:
-	      typedef tensor_structure< typename sub::first_type, typename sub::second_type > type;
+	      typedef tensor_structure< sub_indices, sub_sizes > type;
 	  };
 
 
