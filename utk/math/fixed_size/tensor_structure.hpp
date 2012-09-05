@@ -255,8 +255,8 @@ namespace utk
 	    typedef size_vector< Strides... > type;
 	  };
 
-	  template< size_type...Strides, size_type...Sizes >
-	  struct stride_recursion< stride_vector< Strides... >, size_vector< Sizes... > >
+	  template< stride_type...Strides, size_type...Sizes >
+	  struct stride_recursion< integral_vector< stride_type, Strides... >, integral_vector< size_type, Sizes... > >
 	  {
 	    typedef typename helpers::pop_front< size_vector< Sizes... > > stripped;
 
@@ -292,10 +292,13 @@ namespace utk
 	  };
 
 	  // remove if UnpackedIndex!=UnpackedSize -> continue
+	  // TODO: replace UnpackedIndex/Size by helpers::pop_front
 	  template< index_type...NewIndices, index_type UnpackedIndex, index_type...OldIndices
 		  ,  size_type...NewSizes  ,  size_type UnpackedSize ,  size_type...OldSizes   >
-	  struct remove_fixed_recursion< index_vector< NewIndices... >, index_vector< UnpackedIndex, OldIndices... >
-				       ,  size_vector< NewSizes...   >,  size_vector< UnpackedSize , OldSizes...   > >
+	  struct remove_fixed_recursion< integral_vector< index_type, NewIndices... >
+					, integral_vector< index_type, UnpackedIndex, OldIndices... >
+				        , integral_vector< size_type, NewSizes...   >
+				        , integral_vector< size_type, UnpackedSize , OldSizes...   > >
 	  {
 	    typedef typename std::conditional< UnpackedIndex != UnpackedSize
 					     , typename remove_fixed_recursion< index_vector< NewIndices... >, index_vector< OldIndices... >
