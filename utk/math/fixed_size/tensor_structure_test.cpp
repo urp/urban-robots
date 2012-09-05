@@ -22,9 +22,9 @@
 
 using namespace utk::math::fixed_size;
 
-BOOST_AUTO_TEST_SUITE( mpl_interface )
+BOOST_AUTO_TEST_SUITE( variadic_vectors )
 
-  BOOST_AUTO_TEST_CASE( dim_info_to_mpl_vector_c )
+  BOOST_AUTO_TEST_CASE( mpl_vector_c )
   {
     typedef index_vector<2,3,4> indices;
     typedef size_vector<2,3,4>	sizes;
@@ -47,6 +47,19 @@ BOOST_AUTO_TEST_SUITE( mpl_interface )
     BOOST_CHECK_EQUAL( at_size2, 4 );
   }
 
+  BOOST_AUTO_TEST_CASE( equal )
+  {
+    typedef size_vector< 1,2,3 >  A;
+    typedef size_vector< 3,2,1 >  B;
+    typedef typename helpers::equal< size_type, A, B >::type equal_result;
+
+    static const bool eq0 = equal_result::at<0>();
+    BOOST_CHECK( !eq0 );
+    static const bool eq1 = equal_result::at<1>();
+    BOOST_CHECK(  eq1 );
+    static const bool eq2 = equal_result::at<2>();
+    BOOST_CHECK( !eq2 );
+  }
 BOOST_AUTO_TEST_SUITE_END()
 
 
@@ -131,8 +144,9 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   BOOST_AUTO_TEST_CASE( free_coord_offset )
   {
     typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
+    typedef helpers::stride_vector< structure::sizes >::type strides;
 
-    const stride_type offset_111 = structure::free_coord_offset< size_vector< 1,2,6,24 > >( 1,1,1 );
+    const stride_type offset_111 = structure::free_coord_offset( 1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 9 );
 
   }

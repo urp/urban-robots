@@ -42,6 +42,12 @@ namespace utk
       template<typename T, T Value>
       struct integral { static const T value = Value; };
 
+      template< typename T, T... Content >
+      struct integral_vector;
+
+
+//      template< bool... > struct bool_vector;
+
       namespace helpers
       {
 	//---| pop_front
@@ -123,11 +129,83 @@ namespace utk
 	  static const T value = at< T, DimIndex-1, Container< Pack... > >::value;
 	};
 
+	//---| equal
+
+	namespace
+	{
+	  template< typename, typename, typename, typename > struct equal_recursion { /* unspecified */ };
+
+	  // terminate
+	  template< typename T, template< T... > class Container, bool...Result >
+	  struct equal_recursion< T, Container< >, Container< >, integral_vector< bool, Result... > >
+	  {
+	    typedef integral_vector< bool, Result... > type;
+	  };
+
+	  // compare -> continue
+	  template< typename T, template< T... > class Container, T...A, T...B, bool...Result >
+	  class equal_recursion< T, Container< A... >, Container< B... >, integral_vector< bool, Result... > >
+	  {
+	      typedef helpers::pop_front< T, Container< A... > > pop_A;
+	      typedef helpers::pop_front< T, Container< B... > > pop_B;
+	    public:
+	      typedef typename equal_recursion< T
+					      , typename pop_A::tail
+					      , typename pop_B::tail
+					      , integral_vector< bool, Result..., pop_A::value == pop_B::value >
+					      >::type type;
+	  };
+	} // of <anonymous>::
+
+	template< typename, typename, typename > struct equal { /* unspecified */ };
+
+	// start
+	template< typename T, template< T... > class Container, T...A, T...B >
+	struct equal< T, Container< A... >, Container< B... > >
+	{
+	  typedef typename equal_recursion< T, Container< A... >, Container< B... >, integral_vector< bool > >::type type;
+	};
+
       } // of helpers
 
 
       //---| dimension info structures
       //-----TODO: avoid repetition - use template typedef - requires deduction of parameter pack type
+
+      //-----| bool_vector
+
+      //---| at
+
+      template< index_type, typename > struct at_i {  };
+
+      template< typename T, template<class, T...> class Container, T Unpacked, T...Pack >
+      struct at_i< 0, Container< T, Unpacked, Pack... > >
+      {
+	static const T value = Unpacked;
+      };
+
+      template< typename T, index_type DimIndex, template<class,T...> class Container, T Unpacked, T...Pack >
+      struct at_i< DimIndex, Container< T, Unpacked, Pack... > >
+      {
+	static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than Container size" );
+	typedef T value_type;
+	static const T value = at_i< DimIndex-1, Container< T, Pack... > >::value;
+      };
+
+
+      template< typename T, T... Content >
+      struct integral_vector
+      {
+	typedef T value_type;
+	typedef boost::mpl::vector_c< T, Content... > mpl_vector;
+
+	template< dimension_type DimIndex>
+	constexpr static const T at()
+	{ return at_i<  DimIndex, integral_vector< T, Content... > >::value; }
+      };
+
+      template< bool...Content >
+      using bool_vector = integral_vector< bool, Content... >;
 
       //-----| index_vector
 
@@ -191,7 +269,6 @@ namespace utk
 	{
 	 typedef typename stride_recursion< size_vector< 1 >, size_vector< Sizes... > >::type type;
 	};
-
 
 
 	//---| remove fixed_dimensions - TODO: add predicate tempalate parameter ( or simply a bool )
@@ -326,10 +403,12 @@ namespace utk
 
 	public:
 
-	  typedef tensor_structure< index_vector< IndexInfo... >, size_vector< SizeInfo... > > type;
-
 	  typedef index_vector< IndexInfo... >	indices;
 	  typedef  size_vector< SizeInfo ... >	sizes;
+
+	  typedef tensor_structure< indices, sizes > type;
+
+	  typedef typename helpers::stride_vector< sizes >::type strides;
 
 	  //---| stride
 	  //-----extract stride
@@ -410,14 +489,14 @@ namespace utk
 
 	  //start
   	  //-----return offset for the specified coordinates
-	  template< typename StrideVector/*strides of the full tensor for all free dimensions*/, typename...Coords >
+	  template< typename...Coords >
 	  static const stride_type free_coord_offset( Coords... coords )
 	  {
 	    static const dimension_type coord_size = sizeof...(coords);
 	    //static_assert( StrideVector::size::value == remove_fixed::type::dimension(), " BUG ");
 	    static_assert( coord_size <= remove_fixed::type::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
 
-	    return free_coord_offset_recurse< StrideVector >( coords... );
+	    return free_coord_offset_recurse< strides >( coords... );
 	  }
 
       };
