@@ -72,6 +72,17 @@ BOOST_AUTO_TEST_SUITE( variadic_vectors )
     BOOST_CHECK(  eq1 );
     static const bool eq2 = equal_result::at<2>();
     BOOST_CHECK( !eq2 );
+
+    typedef size_vector< 1,1,3 >  A2;
+    typedef size_vector< 1,2,3 >  B2;
+    typedef typename helpers::equal< A2, B2 >::type equal_result2;
+
+    static const bool eq20 = equal_result2::at<0>();
+    BOOST_CHECK(  eq20 );
+    static const bool eq21 = equal_result2::at<1>();
+    BOOST_CHECK( !eq21 );
+    static const bool eq22 = equal_result2::at<2>();
+    BOOST_CHECK(  eq22 );
   }
 BOOST_AUTO_TEST_SUITE_END()
 
@@ -160,7 +171,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     //typedef helpers::stride_sequence< structure::sizes >::type strides;
 
     const stride_type offset_111 = structure::free_coord_offset( 1,1,1 );
-    BOOST_CHECK_EQUAL( offset_111, 9 );
+    BOOST_CHECK_EQUAL( offset_111, 6 );
+
+    // fix
+    typedef typename structure::fix_dimension< 0, 1 >::type fixed;
+
+    const stride_type fixed_111 = fixed::free_coord_offset( 1,1 );
+    BOOST_CHECK_EQUAL( fixed_111, 6 );
 
   }
 
