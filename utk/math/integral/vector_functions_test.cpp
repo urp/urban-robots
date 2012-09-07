@@ -158,4 +158,14 @@ BOOST_AUTO_TEST_SUITE( algorithms )
     BOOST_CHECK_EQUAL( n2, 5 );
   }
 
+  BOOST_AUTO_TEST_CASE( vector_inner_product )
+  {
+    typedef vector< int, 1,2,3,4,5 >  a;
+
+    static const int result = inner_product< a >( 3,0,0,1,1);
+    BOOST_CHECK_EQUAL( result, 12 );
+
+  }
+
+
 BOOST_AUTO_TEST_SUITE_END()

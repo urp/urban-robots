@@ -279,11 +279,8 @@ namespace utk
 
 	typedef integral::pop_front< VectorA > A;
 
-	return typename VectorA::value_type(b_head) * A::value + inner_product< typename A::tail >( b_tail... );
+	return A::value * typename VectorA::value_type(b_head) + inner_product< typename A::tail >( b_tail... );
       }
-
-
-
 
     } // of integral::
   } // of math::
