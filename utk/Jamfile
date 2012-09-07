@@ -1,4 +1,4 @@
-project utk : requirements <include>.. ;
+project utk : requirements <include>/$(TOP) ;
 
 build-project io ;
 build-project cache ;

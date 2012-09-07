@@ -1,9 +1,7 @@
 project robots
 : build-dir build
 : requirements <cxxflags>-std=c++0x
-	       #<cxxflags>-ftemplate-depth=1024
-	       ;
-#<cxxflags>-stdlib=libc++ ;
+	    				 <cxxflags>-ftemplate-depth=2048 ;
 
 path-constant TOP : . ;
 

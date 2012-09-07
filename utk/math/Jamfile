@@ -1,5 +1,6 @@
 project utk/math ;
 
+build-project integral ;
 build-project fixed_size ;
 #build-project special-functions ;
 

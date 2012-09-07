@@ -60,8 +60,8 @@ explicit install-vector-headers ;
 #---| tensor
 #-----------
 
-run tensor_structure_test.cpp /robots//boost-unit-test : --log_level=test_suite ;
+run tensor_structure_test.cpp /utk/math/integral//test /robots//boost-unit-test : --log_level=test_suite ;
 
-unit-test test-tensor-interface  : tensor_interface_test.cpp
-                                 : <library>/robots//boost-unit-test ;
+unit-test test-tensor-interface  : tensor_interface_test.cpp 
+                                 : <library>/robots//boost-unit-test  ;
 

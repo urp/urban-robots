@@ -20,13 +20,14 @@
 #define BOOST_TEST_MODULE tensor interface
 #include <boost/test/unit_test.hpp>
 
+using namespace utk::math;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( using_initial_structure )
 {
   typedef initial_structure< 1,2,3 > structure;
   typedef tensor_interface< double, structure > tensor;
-  tensor test_tensor(0);
+  tensor test_tensor( nullptr );
 }
 
 
@@ -40,26 +41,25 @@ BOOST_AUTO_TEST_CASE( random_testing )
   typedef tensor_interface< double, old_structure > old_tensor;
   old_tensor old_test_tensor(0);
 
-  const int old_indices_size = boost::mpl::size< old_indices::mpl_vector >::type::value;
+  const int old_indices_size = boost::mpl::size< old_indices::mpl_vector_c >::type::value;
   BOOST_CHECK_EQUAL( old_indices_size, 3 );
 
 
-  typedef helpers::assign< 0, integral< index_type, 7 >, old_indices >::type new_indices;
-  typedef helpers::assign< 0, integral< index_type, 9 >, old_sizes   >::type new_sizes;
+  typedef integral::assign< old_indices, 0, integral::constant< index_type, 7 > >::type new_indices;
+  typedef integral::assign< old_sizes  , 0, integral::constant< index_type, 9 > >::type new_sizes;
 
   typedef tensor_structure< new_indices , new_sizes > new_structure;
   typedef tensor_interface< double, new_structure > new_tensor;
-  new_tensor new_test_tensor(0);
+  new_tensor new_test_tensor( nullptr );
 
-  const int new_index = boost::mpl::at_c< new_indices::mpl_vector, 0 >::type::value;
+  const int new_index = boost::mpl::at_c< new_indices::mpl_vector_c, 0 >::type::value;
   BOOST_CHECK_EQUAL( new_index, 7 );
 
-  const int new_size = helpers::at< 0, new_sizes >::value;
+  const int new_size = integral::at< new_sizes, 0 >::value;
   BOOST_CHECK_EQUAL( new_size, 9 );
 
 
-  const int new_indices_size = boost::mpl::size< new_indices::mpl_vector >::type::value;
+  const int new_indices_size = boost::mpl::size< new_indices::mpl_vector_c >::type::value;
   BOOST_CHECK_EQUAL( new_indices_size, 3 );
 
 }
-

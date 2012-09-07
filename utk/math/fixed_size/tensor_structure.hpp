@@ -16,14 +16,10 @@
 
 # pragma once
 
-# include <array>
-# include <utility>
-# include <type_traits>
+# include <boost/mpl/at.hpp>
 
-#include <boost/mpl/vector_c.hpp>
-#include <boost/mpl/range_c.hpp>
-#include <boost/mpl/erase.hpp>
-#include <boost/mpl/insert.hpp>
+
+# include "utk/math/integral/integral.hpp"
 
 namespace utk
 {
@@ -31,304 +27,87 @@ namespace utk
   {
     namespace fixed_size
     {
+
+      using integral::index_type;
+
       // TODO: bad
-      typedef unsigned int size_type;
-      typedef unsigned int param_type;
-      typedef unsigned int dimension_type;
-      typedef size_type index_type;
-      typedef size_type stride_type;
 
-      //-----TODO: move to utk::math::fixed_size::integral_vector
-      template<typename T, T Value>
-      struct integral { static const T value = Value; };
-
-      template< typename T, T... Content >
-      struct integral_vector;
+      typedef unsigned size_type;
+      typedef unsigned param_type;
+      typedef unsigned dimension_type;
+      typedef unsigned stride_type;
 
       //-----| bool_vector
 
       template< bool...Bools >
-      using bool_vector = integral_vector< bool, Bools... >;
+      using bool_vector = integral::vector< bool, Bools... >;
 
       //-----| index_vector
 
       template< index_type... Indices >
-      using index_vector = integral_vector< index_type, Indices... >;
+      using index_vector = integral::vector< index_type, Indices... >;
 
       //-----| size_vector
 
       template< size_type... Sizes >
-      using size_vector = integral_vector< size_type, Sizes... >;
+      using size_vector = integral::vector< size_type, Sizes... >;
 
       //-----| stride_vector
 
       template< size_type... Strides >
-      using stride_vector = integral_vector< stride_type, Strides... >;
-
-
-      namespace helpers
-      {
-	//---| pop_front
-	//-----splits non-type template sequences
-	//-----TODO: move to utk::variadic_vector::
-	template< typename >
-	struct pop_front { /* unspecified */ };
-
-	template< typename T, T Unpacked, T...Pack >
-	struct pop_front< integral_vector< T, Unpacked, Pack... > >
-	{
-	  static const T value = Unpacked;
-
-	  typedef integral_vector< T, Pack... > tail;
-	};
-
-	//---| pop_back
-	//-----splits non-type template sequences
-	//-----TODO: move to utk::variadic_vector::
-	template< typename >
-	struct pop_back { /* unspecified */ };
-
-	// terminate
-	template< typename T, T Back >
-	struct pop_back< integral_vector< T, Back > >
-	{
-	  static const T value = Back;
-	};
-
-	// pop_front and continue
-	template< typename T, T Unpacked , T...Pack >
-	struct pop_back< integral_vector< T, Unpacked, Pack... > >
-	{
-	  static const T value = pop_back< integral_vector< T, Pack... > >::value;
-	  typedef integral_vector< T, Pack... > tail;
-	};
-
-
-	//---| assign
-	//-----TODO: move to utk::variadic_vector::
-	namespace
-	{
-	  template< index_type, typename ,typename, typename >
-	  struct assign_recurse { /* unspecified */ };
-
-	  // assign -> terminate
-	  template< typename T, T NewValue, T Unpacked, T...NewPack, T...OldPack >
-	  struct assign_recurse< 0
-				  , integral< T, NewValue >
-				  , integral_vector< T, NewPack... >
-				  , integral_vector< T, Unpacked, OldPack... >
-				  >
-	  {
-	    typedef integral_vector< T, NewPack..., NewValue , OldPack... > type;
-	  };
-
-	  // move value to result -> recurse
-	  template< typename T, index_type Index, T NewValue, T...NewPack, T Unpacked, T...OldPack  >
-	  struct assign_recurse< Index, integral< T, NewValue >, integral_vector< T, NewPack... >, integral_vector< T, Unpacked, OldPack... > >
-	  { typedef typename assign_recurse< Index-1
-					       , integral< T, NewValue >
-					       , integral_vector< T, NewPack..., Unpacked >
-					       , integral_vector< T, OldPack... >
-					       >::type type; };
-	}
-
-	// start recursion
-	template< index_type, typename NewIntegral, typename > struct assign {  };
-	template< typename T, index_type Index, T NewValue, T...OldPack >
-	struct assign< Index, integral< T, NewValue >, integral_vector< T, OldPack... > >
-	{
-	  static_assert( Index < sizeof...(OldPack), "Index must be smaller than integral_vector size" );
-	  typedef typename assign_recurse< Index
-					     , integral< T, NewValue >
-					     , integral_vector< T >
-					     , integral_vector< T, OldPack... >
-					     >::type type;
-	};
-
-	//---| at
-
-	template< index_type, typename > struct at {  };
-
-	template< typename T, T Unpacked, T...Pack >
-	struct at< 0, integral_vector< T, Unpacked, Pack... > >
-	{
-	  static const T value = Unpacked;
-	};
-
-	template< typename T, index_type DimIndex, T Unpacked, T...Pack >
-	struct at< DimIndex, integral_vector< T, Unpacked, Pack... > >
-	{
-	  static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than integral_vector size" );
-	  typedef T value_type;
-	  static const T value = at< DimIndex-1, integral_vector< T, Pack... > >::value;
-	};
-
-	//---| equal
-
-	namespace
-	{
-	  template< typename, typename, typename > struct equal_recursion { /* unspecified */ };
-
-	  // terminate
-	  template< typename T, bool...Result >
-	  struct equal_recursion< integral_vector< T >, integral_vector< T >, integral_vector< bool, Result... > >
-	  {
-	    typedef integral_vector< bool, Result... > type;
-	  };
-
-	  // compare -> continue
-	  template< typename T, T...A, T...B, bool...Result >
-	  class equal_recursion< integral_vector< T, A... >, integral_vector< T, B... >, integral_vector< bool, Result... > >
-	  {
-	      typedef helpers::pop_front< integral_vector< T, A... > > pop_A;
-	      typedef helpers::pop_front< integral_vector< T, B... > > pop_B;
-	    public:
-	      typedef typename equal_recursion< typename pop_A::tail
-						, typename pop_B::tail
-						, integral_vector< bool, Result..., pop_A::value == pop_B::value >
-						>::type type;
-	  };
-	} // of <anonymous>::
-
-	template< typename, typename > struct equal { /* unspecified */ };
-
-	// start
-	template< typename T, T...A, T...B >
-	struct equal< integral_vector< T, A... >, integral_vector< T, B... > >
-	{
-	  typedef typename equal_recursion< integral_vector< T, A... >, integral_vector< T, B... >, integral_vector< bool > >::type type;
-	};
-
-      } // of helpers
-
-
-      //---| dimension info structures
-      //-----TODO: avoid repetition - use template typedef - requires deduction of parameter pack type
-
-      //-----| bool_vector
-
-      /*---| at
-
-      template< index_type, typename > struct at_i {  };
-
-      template< typename T, template<class, T...> class integral_vector, T Unpacked, T...Pack >
-      struct at_i< 0, integral_vector< T, Unpacked, Pack... > >
-      {
-	static const T value = Unpacked;
-      };
-
-      template< typename T, index_type DimIndex, template<class,T...> class integral_vector, T Unpacked, T...Pack >
-      struct at_i< DimIndex, integral_vector< T, Unpacked, Pack... > >
-      {
-	static_assert( DimIndex < sizeof...(Pack)+1, "Index must be smaller than integral_vector size" );
-	typedef T value_type;
-	static const T value = at_i< DimIndex-1, integral_vector< T, Pack... > >::value;
-      };
-*/
-
-      template< typename T, T... Content >
-      struct integral_vector
-      {
-	typedef T value_type;
-	typedef boost::mpl::vector_c< T, Content... > mpl_vector;
-
-	template< dimension_type DimIndex>
-	constexpr static const T at()
-	{ return helpers::at<  DimIndex, integral_vector< T, Content... > >::value; }
-      };
+      using stride_vector = integral::vector< stride_type, Strides... >;
 
       namespace helpers
       {
+	//---| stride_sequence
 
-	//---| stride
-
-	namespace // TODO: gcc-4.7 doesn't interpret this correctly!?
+	namespace
  	{
-	  template< typename, typename > struct stride_recursion {	};
+	  template< typename, typename > struct stride_sequence_recursion { /* unspecified */ };
 
 	  template< stride_type...Strides >
-	  struct stride_recursion< stride_vector< Strides... >, size_vector< > >
+	  struct stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type > >
 	  {
 	    typedef stride_vector< Strides... > type;
 	  };
 
 	  template< stride_type...Strides, size_type...Sizes >
-	  struct stride_recursion< integral_vector< stride_type, Strides... >, integral_vector< size_type, Sizes... > >
+	  class stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type, Sizes... > >
 	  {
-	    typedef typename helpers::pop_front< size_vector< Sizes... > > stripped;
+	      typedef typename integral::pop_front< integral::vector< size_type, Sizes... > > stripped;
 
-	    static const stride_type new_stride = helpers::pop_back< stride_vector< Strides... > >::value * stripped::value;
-	    typedef typename stride_recursion< stride_vector< Strides..., new_stride >, typename stripped::tail >::type type;
+	      static const stride_type new_stride = integral::pop_back< integral::vector< stride_type, Strides... > >::value * stripped::value;
+
+	    public:
+
+	      typedef typename stride_sequence_recursion< integral::vector< stride_type, Strides..., new_stride >, typename stripped::tail >::type type;
 	  };
-
 	}
 
-	template< typename >
-	struct stride_sequence {	};
+	template< typename > struct stride_sequence { /* unspecified */ };
 
 	template< size_type... Sizes >
-	struct stride_sequence< size_vector< Sizes... > >
+	struct stride_sequence< integral::vector< size_type, Sizes... > >
 	{
-	 typedef typename stride_recursion< stride_vector< 1 >, size_vector< Sizes... > >::type type;
+	  typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
+							, integral::vector< size_type, Sizes... > >::type type;
 	};
 
 
-	//---| remove fixed_dimensions - TODO: add predicate tempalate parameter ( or simply a bool )
-
-	namespace
+	//---| stride
+	//-----extract stride
+	template< typename StrideVector, dimension_type Dim >
+	struct stride
 	{
-	  template< typename, typename, typename >
-	  class remove_false_recursion	{ /* unspecified */ };
-
-	  // terminate
-	  template< typename T, T...NewValues >
-	  class remove_false_recursion< integral_vector< bool >
-					, integral_vector< T, NewValues... >
-					, integral_vector< T >
-					>
-	  {
-	    public:
-	      typedef integral_vector< T, NewValues... > type;
-	  };
-
-	  // remove if UnpackedIndex!=UnpackedSize -> continue
-	  // TODO: replace UnpackedIndex/Size by helpers::pop_front
-	  template< bool...Bools, typename T, T... NewValues, T...OldValues >
-	  class remove_false_recursion< integral_vector< bool, Bools... >
-					, integral_vector< T, NewValues... >
-					, integral_vector< T, OldValues... >
-					>
-	  {
-	      typedef helpers::pop_front< bool_vector< Bools... > > bools;
-	      typedef helpers::pop_front< integral_vector< T, OldValues... > > old_values;
-	    public:
-	      typedef typename std::conditional< bools::value
-						 , typename remove_false_recursion< typename bools::tail
-										   , integral_vector< T, NewValues... , old_values::value >
-										   , typename old_values::tail
-										   >::type
-						 , typename remove_false_recursion< typename bools::tail
-										   , integral_vector< T, NewValues... >
-										   , typename old_values::tail
-										   >::type
-						 >::type type;
-	  };
-
-	} // of <anonymous>
-
-	template< typename, typename >  struct remove_false	{	};
-
-	template< bool...Predicates, typename T, T...Values >
-	struct remove_false< integral_vector< bool, Predicates... >, integral_vector< T, Values... > >
-	{
-	  static_assert( sizeof...(Predicates) == sizeof...(Values), "Size of packs Predicates and Values must agree." );
-	  typedef typename remove_false_recursion< bool_vector< Predicates... >
-						   , integral_vector< T >
-						   , integral_vector< T, Values... >
-						   >::type type;
+	  static_assert( Dim <= StrideVector::size, "requested stride is undefined" );
+	  //TODO: find out what gcc doesn't like about my helper.
+	  //NOTE: SUPERSTRANGE works with Dim soecified explicitly (by using a constant)
+	  //static constexpr stride_type value = integral::at< StrideVector, Dim >::value ;
+	  const static stride_type value = boost::mpl::at_c< typename StrideVector::mpl_vector_c, Dim >::type::value;
 	};
 
-      } // of helpers
+
+      } // of helpers::
 
       //---------------------
       //---| tensor structure
@@ -338,31 +117,17 @@ namespace utk
       class tensor_structure
       { /* unspecified*/ };
 
-      template< index_type... IndexInfo, size_type... SizeInfo >
-      class tensor_structure< index_vector< IndexInfo... >, size_vector< SizeInfo... > >
+      template< index_type... IndexInfo, size_type... Sizes >
+      class tensor_structure< index_vector< IndexInfo... >, size_vector< Sizes... > >
       {
-	  static_assert( sizeof...(IndexInfo) == sizeof...(SizeInfo)
-				   , "the number of indices forwarded in index_vector< ... >"
-				     " and the number sizes forwarded in size_vector< ... > must agree"
-				   );
-	  // helpers
-
-	  template< dimension_type Dim >
-	  constexpr static stride_type extract_stride_recursion( )
-	  {
-	    return 1;
-	  }
-
-	  template< dimension_type Dim, size_type Size1, size_type... Sizes >
-	  constexpr static stride_type extract_stride_recursion( )
-	  {
-	    return Dim == 0 ? 1 :  Size1 * extract_stride_recursion< Dim - 1 , Sizes... >();
-	  }
+	  static_assert( sizeof...(IndexInfo) == sizeof...(Sizes)
+			 , "the number of indices forwarded in index_vector< ... >"
+			   " and the number sizes forwarded in size_vector< ... > must agree" );
 
 	public:
 
 	  typedef index_vector< IndexInfo... >	indices;
-	  typedef  size_vector< SizeInfo ... >	sizes;
+	  typedef  size_vector< Sizes ... >	sizes;
 
 	  typedef tensor_structure< indices, sizes > type;
 
@@ -371,59 +136,51 @@ namespace utk
 	  //---| stride
 	  //-----extract stride
 	  template< dimension_type Dim >
-	  constexpr static stride_type stride( )
+	  struct stride
 	  {
-	    static_assert( Dim <= sizeof...(SizeInfo), "requested dimension does not exist" );
+	    static_assert( Dim <= sizeof...(Sizes), "requested dimension does not exist" );
 	    //TODO: find out what gcc doesn't like about my helper
-	    return extract_stride_recursion< Dim, SizeInfo... >();
-		    /*helpers::stride< Dim, size_vector< SizeInfo... > >::value;*/
-	  }
+	    const static stride_type value = integral::at< strides, Dim >::value;
+	  };
 
 	  //---| dimension
 	  //-----query dimensionality
-	  constexpr static const dimension_type dimension()  { return sizeof...(SizeInfo); }
+	  constexpr static const dimension_type dimension()  { return sizeof...(Sizes); }
 
 	  //---| total_size
 	  //-----query size (number of scalars)
 	  constexpr static const size_type total_size()
-	  { return stride< dimension() >(); }
-
-	  //---| size_array
-	  //-----returns an std::array containing the size of all tensor-dimensions
-	  constexpr static const std::array< size_type, dimension() >	size_array()
-	  {
-	    return std::array< size_type, dimension() >{ {SizeInfo...} };
-	  }
+	  { return helpers::stride< strides, dimension() >::value; }
 
 	  //---| fix_dimension
 	  //-----returns a new tensor_structure with dimension DimIndex fixed
-	  template< dimension_type DimIndex, index_type Index >
+	  template< dimension_type Dim, index_type Index >
 	  class fix_dimension
 	  {
-	      static_assert( DimIndex < dimension(), "Dim exceeds range");
-	      typedef typename helpers::assign< DimIndex, integral< index_type, Index >, indices >::type new_indices;
+	      static_assert( Dim < dimension(), "Dim exceeds range");
+	      typedef typename integral::assign< indices, Dim, integral::constant< index_type, Index > >::type new_indices;
 	    public:
 	      typedef tensor_structure< new_indices, sizes > type;
 	  };
 
 	  //---| unfix_dimension
 	  //-----returns a new tensor_structure with dimension DimIndex unfixed
-	  template< dimension_type DimIndex >
+	  template< dimension_type Dim >
 	  class unfix_dimension
 	  {
-	      static_assert( DimIndex < dimension(), "Dim exceeds range");
-	      static const index_type dim_size = helpers::at< DimIndex, sizes >::value;
+	      static_assert( Dim < dimension(), "Dim exceeds range");
+	      static const index_type dim_size = integral::at< sizes, Dim >::value;
 	    public:
-	      typedef typename fix_dimension< DimIndex, dim_size >::type type;
+	      typedef typename fix_dimension< Dim, dim_size >::type type;
 	  };
 
 	  //---| remove_fixed - TODO: rename to 'compact'
 	  //-----returns a new tensor_structure with all fixed dimensions removed.
 	  class remove_fixed
 	  {
-	      typedef typename helpers::equal< indices, sizes >::type free_dimensions;
-	      typedef typename helpers::remove_false< free_dimensions, indices >::type sub_indices;
-	      typedef typename helpers::remove_false< free_dimensions, sizes   >::type sub_sizes;
+	      typedef typename integral::equal< indices, sizes >::type free_dimensions;
+	      typedef typename integral::remove_false< indices, free_dimensions >::type sub_indices;
+	      typedef typename integral::remove_false< sizes  , free_dimensions >::type sub_sizes;
 	    public:
 	      typedef tensor_structure< sub_indices, sub_sizes > type;
 	  };
@@ -436,9 +193,9 @@ namespace utk
 	  template< typename StrideVector, typename...Coords >
 	  static const stride_type free_coord_offset_recurse( index_type UnpackedCoord, Coords... coords )
 	  {
-	    static const stride_type stride_head = helpers::pop_front< StrideVector >::value;
+	    typedef integral::pop_front< StrideVector > strides;
 
-	    return  UnpackedCoord * stride_head + free_coord_offset_recurse< StrideVector >( coords... );
+	    return  UnpackedCoord * strides::value + free_coord_offset_recurse< typename strides::tail >( coords... );
 	  }
 
 	  // terminate
@@ -454,9 +211,9 @@ namespace utk
 	    //static_assert( StrideVector::size::value == remove_fixed::type::dimension(), " BUG ");
 	    static_assert( coord_size <= remove_fixed::type::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
 
-	    typedef typename helpers::equal< indices, sizes >::type free_dimensions;
-	    typedef typename helpers::pop_back< strides >::tail strides_tail;
-	    typedef typename helpers::remove_false< free_dimensions, strides_tail >::type free_strides;
+	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
+	    typedef typename integral::pop_back< strides >::tail strides_tail;
+	    typedef typename integral::remove_false< strides_tail, free_dimensions >::type free_strides;
 
 	    return free_coord_offset_recurse< free_strides >( coords... );
 	  }
@@ -464,8 +221,8 @@ namespace utk
       };
 
 
-      template< size_type...SizeInfo >
-      using initial_structure = tensor_structure< index_vector< SizeInfo... >, size_vector< SizeInfo... > >;
+      template< size_type...Sizes >
+      using initial_structure = tensor_structure< index_vector< Sizes... >, size_vector< Sizes... > >;
 
     }
   }

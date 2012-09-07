@@ -26,43 +26,30 @@ namespace utk
 {
   namespace math
   {
-	namespace fixed_size
-	{
-	  
-	  //-----| tensor_interface
-  
-	  template< typename, typename > struct tensor_interface
-	  { /* unspecified */ };
-  
-	  template < typename T, typename...Structure >
-	  struct tensor_interface< T, tensor_structure< Structure... > > 
-	  : public tensor_structure< Structure... >
-	  ,	public vector_interface< T, tensor_structure< Structure... >::total_size() >
-	  {
-		  //---| 
+    namespace fixed_size
+    {
 
-		  typedef tensor_structure< Structure... > 				 structure;
-		
-		  typedef vector_interface< T, structure::total_size() > storage_base;
+      //-----| tensor_interface
 
-		  //---| constructor with storage pointer
+      template< typename, typename > struct tensor_interface
+      { /* unspecified */ };
 
-		  explicit
-		  tensor_interface( typename storage_base::pointer_type pointer ) : storage_base( pointer )  {	}
+      template < typename T, typename...Structure >
+      struct tensor_interface< T, tensor_structure< Structure... > >
+      : public tensor_structure< Structure... >
+      ,	public vector_interface< T, tensor_structure< Structure... >::total_size() >
+      {
+	typedef tensor_structure< Structure... > structure;
 
-		  //---| fix dimension
-	  
-			
-		  /*
-		  std::conditional< dimension() > 1 )
-					  , tensor_interface< T, strip_dimension< Dim-1,  >
-					  , 
-					  > 
-		  operator[] ( size_t index ) { return ptr()+(O+S*index); }*/
-			
-	  };
+	typedef vector_interface< T, structure::total_size() > storage_base;
 
+	//---| constructor with storage pointer
 
-	} // of fixed_size::
+	explicit
+	tensor_interface( typename storage_base::pointer_type pointer ) : storage_base( pointer )  {	}
+
+      };
+
+    } // of fixed_size::
   } // of math::
 } // of utk::
