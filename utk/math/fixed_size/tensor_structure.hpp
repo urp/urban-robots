@@ -106,7 +106,6 @@ namespace utk
 	  const static stride_type value = boost::mpl::at_c< typename StrideVector::mpl_vector_c, Dim >::type::value;
 	};
 
-
       } // of helpers::
 
       //---------------------
@@ -202,7 +201,8 @@ namespace utk
 	  template< typename StrideVector > static const stride_type free_coord_offset_recurse( )
 	  { return 0; }
 
-	  //start
+	  //:::| memory model
+
   	  //-----return offset for the specified coordinates
 	  template< typename...Coords >
 	  static const stride_type free_coord_offset( Coords... coords )
@@ -215,7 +215,7 @@ namespace utk
 	    typedef typename integral::pop_back< strides >::tail strides_tail;
 	    typedef typename integral::remove_false< strides_tail, free_dimensions >::type free_strides;
 
-	    return free_coord_offset_recurse< free_strides >( coords... );
+	    return integral::inner_product< free_strides >( coords... );
 	  }
 
       };

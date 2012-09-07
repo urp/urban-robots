@@ -17,6 +17,7 @@
 # pragma once
 
 # include <array>
+# include <type_traits>
 
 # include "utk/math/integral/constant.hpp"
 # include "utk/math/integral/vector.hpp"
@@ -168,6 +169,7 @@ namespace utk
 	  typedef typename push_front< typename popped::tail, constant< T, Unpacked > >::type tail;
       };
 
+
       //:::| algorithms
 
       //---| equal_recursion
@@ -259,6 +261,30 @@ namespace utk
 	static_assert( sizeof...(Predicates) == sizeof...(Values), "Size of packs Predicates and Values must agree." );
 	typedef typename remove_false_recursion< vector< bool, Predicates... >, vector< T >, vector< T, Values... > >::type type;
       };
+
+      //---| inner_product
+
+      //-----|terminate
+      template< typename VectorA >
+      static const typename VectorA::value_type inner_product( )
+      { return 0; }
+
+      //-----|accumulate
+      template< typename VectorA, typename HeadTypeB, typename...TailTypesB >
+      static const typename VectorA::value_type inner_product( HeadTypeB b_head, TailTypesB... b_tail )
+      {
+	static_assert( std::is_convertible< HeadTypeB, typename VectorA::value_type >::value
+		       , "type of coordinates must be convertible to VectorA::value_type."
+		       );
+
+	typedef integral::pop_front< VectorA > A;
+
+	return typename VectorA::value_type(b_head) * A::value + inner_product< typename A::tail >( b_tail... );
+      }
+
+
+
+
     } // of integral::
   } // of math::
 } // of utk::
