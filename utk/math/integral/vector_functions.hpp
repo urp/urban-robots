@@ -172,8 +172,130 @@ namespace utk
 
       //:::| algorithms
 
-      //---| equal_recursion
+      //---| unary transform
 
+      template< typename, typename > struct transform { /* unspecified */ };
+
+      template< typename T, typename UnaryScalarOperator >
+      struct transform< vector< T >, UnaryScalarOperator >
+      {
+	typedef vector< T > type;
+      };
+
+      template< typename T, T...Input, typename UnaryScalarOperator >
+      class transform< vector< T, Input... >, UnaryScalarOperator >
+      {
+	  typedef pop_front< vector< T, Input... > > input;
+
+	  typedef typename transform< typename input::tail, UnaryScalarOperator >::type results;
+
+	public:
+	  typedef typename push_front< results
+				       , constant< T, UnaryScalarOperator::template apply< input::value >::value >
+				       >::type type;
+      };
+
+
+      //:::| unary operators
+
+      //---| negate (operator)
+
+      template< typename T >
+      struct negate
+      {
+	template< T Value >
+	struct apply
+	{ static constexpr T value = !Value; };
+
+      };
+
+      //---| binary apply
+
+      template< typename, typename, typename > struct apply { /* unspecified */ };
+
+      template< typename T, typename BinaryScalarOperator >
+      struct apply< vector< T >, vector< T >, BinaryScalarOperator >
+      {
+	typedef vector< T > type;
+      };
+
+      template< typename T1, T1...Input1, typename T2, T2...Input2 , typename BinaryScalarOperator >
+      class apply< vector< T1, Input1... >, vector< T2, Input2... >, BinaryScalarOperator >
+      {
+	  typedef pop_front< vector< T1, Input1... > > input1;
+	  typedef pop_front< vector< T2, Input2... > > input2;
+
+	  typedef typename apply< typename input1::tail, typename input2::tail, BinaryScalarOperator >::type results;
+
+	public:
+	  typedef typename push_front< results
+				       , constant< typename BinaryScalarOperator::value_type
+						  , BinaryScalarOperator::template apply< input1::value
+											 , input2::value
+											 >::value
+						  >
+				       >::type type;
+      };
+
+      //---| accumulate
+
+      template< typename, typename > struct accumulate { /* unspecified */ };
+
+      template< typename T, typename BinaryScalarOperator >
+      struct accumulate< vector< T >, BinaryScalarOperator >
+      {
+        typedef typename BinaryScalarOperator::value_type value_type;
+	static constexpr value_type value = value_type(0);
+      };
+
+      template< typename T, T...Input, typename BinaryScalarOperator >
+      class accumulate< vector< T, Input... >, BinaryScalarOperator >
+      {
+	  typedef pop_front< vector< T, Input... > > input;
+	  typedef accumulate< typename input::tail, BinaryScalarOperator > accum;
+	  static constexpr typename accum::value_type old_value = accum::value;
+
+	public:
+
+	  typedef typename BinaryScalarOperator::value_type value_type;
+	  static constexpr value_type value = BinaryScalarOperator::template apply< input::value, old_value >::value;
+      };
+
+      //:::| binary operators
+
+      //---| multiply (operator)
+
+      template< typename T1, typename T2 >
+      struct multiply
+      {
+	typedef decltype( T1(1)*T2(1) ) value_type;
+
+	template< T1 Value1, T2 Value2 >
+	struct apply
+	{
+	  static constexpr value_type value = Value1 * Value2;
+	};
+
+      };
+
+      //---| add (operator)
+
+      template< typename T1, typename T2 >
+      struct add
+      {
+	typedef decltype( T1(1)+T2(1) ) value_type;
+
+	template< T1 Value1, T2 Value2 >
+	struct apply
+	{
+	  static constexpr value_type value = Value1 + Value2;
+	};
+
+      };
+
+
+      //---| equal_recursion
+      //---| use binary_apply
       namespace
       {
 	template< typename, typename, typename > class equal_recursion { /* unspecified */ };
@@ -262,16 +384,30 @@ namespace utk
 	typedef typename remove_false_recursion< vector< bool, Predicates... >, vector< T >, vector< T, Values... > >::type type;
       };
 
+      //:::| inner_product
+
       //---| inner_product
+
+      template< typename, typename > struct inner_product { /* unspecified */ };
+
+      template< typename T1, T1...Values1, typename T2, T2...Values2 >
+      struct inner_product< vector< T1, Values1... >, vector< T2, Values2... > >
+      {
+	typedef typename apply< vector< T1, Values1... >, vector< T2, Values2... >, multiply< T1,T2 > >::type mult;
+	typedef accumulate< mult, add< T1, T2 > > accum;
+	static constexpr typename accum::value_type value = accum::value;
+      };
+
+      //---| inner_product_with_arguments
 
       //-----|terminate
       template< typename VectorA >
-      static const typename VectorA::value_type inner_product( )
+      static const typename VectorA::value_type inner_product_with_arguments( )
       { return 0; }
 
       //-----|accumulate
       template< typename VectorA, typename HeadTypeB, typename...TailTypesB >
-      static const typename VectorA::value_type inner_product( HeadTypeB b_head, TailTypesB... b_tail )
+      static const typename VectorA::value_type inner_product_with_arguments( HeadTypeB b_head, TailTypesB... b_tail )
       {
 	static_assert( std::is_convertible< HeadTypeB, typename VectorA::value_type >::value
 		       , "type of coordinates must be convertible to VectorA::value_type."
@@ -279,7 +415,7 @@ namespace utk
 
 	typedef integral::pop_front< VectorA > A;
 
-	return A::value * typename VectorA::value_type(b_head) + inner_product< typename A::tail >( b_tail... );
+	return A::value * typename VectorA::value_type(b_head) + inner_product_with_arguments< typename A::tail >( b_tail... );
       }
 
     } // of integral::

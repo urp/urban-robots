@@ -207,15 +207,31 @@ namespace utk
 	  template< typename...Coords >
 	  static const stride_type free_coord_offset( Coords... coords )
 	  {
-	    static const dimension_type coord_size = sizeof...(coords);
-	    //static_assert( StrideVector::size::value == remove_fixed::type::dimension(), " BUG ");
-	    static_assert( coord_size <= remove_fixed::type::dimension(), "number of coordinates must be smaller than number of 'free' dimensions." );
+	    static_assert( sizeof...(coords) <= remove_fixed::type::dimension()
+			   , "number of coordinates must be smaller than number of 'free' dimensions." );
 
+	    // detect fixed dimensions
 	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
+	    // remove last element (total_size) from strides
 	    typedef typename integral::pop_back< strides >::tail strides_tail;
+	    // remove fixed dimensions from the vectors
 	    typedef typename integral::remove_false< strides_tail, free_dimensions >::type free_strides;
 
-	    return integral::inner_product< free_strides >( coords... );
+	    return integral::inner_product_with_arguments< free_strides >( coords... );
+	  }
+
+	  //---| fixed_dimension_offset
+
+	  static constexpr stride_type fixed_dimensions_offset()
+	  {
+	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
+	    typedef typename integral::transform< free_dimensions , integral::negate<bool> >::type fixed_dimensions;
+
+	    typedef typename integral::pop_back< strides >::tail strides_tail;
+	    typedef typename integral::remove_false< strides_tail, fixed_dimensions >::type fixed_strides;
+	    typedef typename integral::remove_false< indices     , fixed_dimensions >::type fixed_indices;
+
+	    return integral::inner_product< fixed_strides, fixed_indices >::value;
 	  }
 
       };

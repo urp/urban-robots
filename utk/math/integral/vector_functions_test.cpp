@@ -162,7 +162,7 @@ BOOST_AUTO_TEST_SUITE( algorithms )
   {
     typedef vector< int, 1,2,3,4,5 >  a;
 
-    static const int result = inner_product< a >( 3,0,0,1,1);
+    static const int result = inner_product_with_arguments< a >( 3,0,0,1,1);
     BOOST_CHECK_EQUAL( result, 12 );
 
   }

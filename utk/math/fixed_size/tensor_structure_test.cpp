@@ -121,5 +121,19 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( fixed_11, 7 );
   }
 
+  BOOST_AUTO_TEST_CASE( fixed_coord_offset )
+  {
+    typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
+
+    const stride_type offset = structure::fixed_dimensions_offset();
+    BOOST_CHECK_EQUAL( offset, 0 );
+
+    // fix
+    typedef typename structure::fix_dimension< 1, 0 >::type fixed;
+
+    const stride_type fixed1 = fixed::fixed_dimensions_offset();
+    BOOST_CHECK_EQUAL( fixed1, 2 );
+  }
+
 
 BOOST_AUTO_TEST_SUITE_END()
