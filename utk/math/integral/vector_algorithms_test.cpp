@@ -22,7 +22,52 @@
 
 using namespace utk::math::integral;
 
-BOOST_AUTO_TEST_SUITE( unary_transform )
+BOOST_AUTO_TEST_SUITE( unary_transforms )
+
+  BOOST_AUTO_TEST_CASE( vector_negate )
+  {
+    typedef vector< bool, true,false,true > bools;
+    typedef typename negate< bools >::type  result;
+    static const int r0 = at< result, 0 >::value;
+    BOOST_CHECK_EQUAL( r0,  false );
+    static const int r1 = at< result, 1 >::value;
+    BOOST_CHECK_EQUAL( r1,  true );
+    static const int r2 = at< result, 2 >::value;
+    BOOST_CHECK_EQUAL( r2,  false );
+
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( binary_transforms )
+
+  BOOST_AUTO_TEST_CASE( vector_multiply )
+  {
+    typedef vector< int, 1,2, 3 >  A;
+    typedef vector< int, 3,2,-1 >  B;
+    typedef typename multiply< A, B >::type result;
+
+    static const int r0 = at< result, 0 >::value;
+    BOOST_CHECK_EQUAL( r0,  3 );
+    static const int r1 = at< result, 1 >::value;
+    BOOST_CHECK_EQUAL( r1,  4 );
+    static const int r2 = at< result, 2 >::value;
+    BOOST_CHECK_EQUAL( r2, -3 );
+  }
+
+  BOOST_AUTO_TEST_CASE( vector_add )
+  {
+    typedef vector< int, 1,2, 3 >  A;
+    typedef vector< int, 3,2,-1 >  B;
+    typedef typename add< A, B >::type result;
+
+    static const int r0 = at< result, 0 >::value;
+    BOOST_CHECK_EQUAL( r0,  4 );
+    static const int r1 = at< result, 1 >::value;
+    BOOST_CHECK_EQUAL( r1,  4 );
+    static const int r2 = at< result, 2 >::value;
+    BOOST_CHECK_EQUAL( r2,  2 );
+  }
 
   BOOST_AUTO_TEST_CASE( vector_equal )
   {
@@ -37,17 +82,10 @@ BOOST_AUTO_TEST_SUITE( unary_transform )
     static const bool eq2 = at< result, 2 >::value;
     BOOST_CHECK( !eq2 );
 
-    typedef vector< int, 1,1,3 >  A2;
-    typedef vector< int, 1,2,3 >  B2;
-    typedef typename equal< A2, B2 >::type result2;
-
-    static const bool eq20 = at< result2, 0 >::value;
-    BOOST_CHECK(  eq20 );
-    static const bool eq21 = at< result2, 1 >::value;
-    BOOST_CHECK( !eq21 );
-    static const bool eq22 = at< result2, 2 >::value;
-    BOOST_CHECK(  eq22 );
   }
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( conditional_remove )
 
   BOOST_AUTO_TEST_CASE( vector_remove_false )
   {
@@ -67,6 +105,10 @@ BOOST_AUTO_TEST_SUITE( unary_transform )
     BOOST_CHECK_EQUAL( n2, 5 );
   }
 
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( misc )
+
   BOOST_AUTO_TEST_CASE( vector_inner_product )
   {
     typedef vector< int, 1,2,3,4,5 >  a;
@@ -75,6 +117,5 @@ BOOST_AUTO_TEST_SUITE( unary_transform )
     BOOST_CHECK_EQUAL( result, 12 );
 
   }
-
 
 BOOST_AUTO_TEST_SUITE_END()
