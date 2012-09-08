@@ -19,6 +19,7 @@
 # include "utk/math/integral/constant.hpp"
 # include "utk/math/integral/vector.hpp"
 # include "utk/math/integral/vector_functions.hpp"
+# include "utk/math/integral/vector_algorithms.hpp"
 
 namespace utk
 {
