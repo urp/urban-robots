@@ -129,7 +129,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( offset, 0 );
 
     // fix
-    typedef typename structure::fix_dimension< 1, 0 >::type fixed;
+    typedef typename structure::fix_dimension< 1, 1 >::type fixed;
 
     const stride_type fixed1 = fixed::fixed_dimensions_offset();
     BOOST_CHECK_EQUAL( fixed1, 2 );
