@@ -107,7 +107,21 @@ BOOST_AUTO_TEST_SUITE( conditional_remove )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( misc )
+BOOST_AUTO_TEST_SUITE( miscellanious )
+
+  BOOST_AUTO_TEST_CASE( vector_reverse )
+  {
+    typedef vector< int, 1,2,3 >  forward;
+    typedef typename reverse< forward >::type backward;
+
+    static const int b0 = at< backward, 0 >::value;
+    BOOST_CHECK_EQUAL( b0, 3 );
+    static const int b1 = at< backward, 1 >::value;
+    BOOST_CHECK_EQUAL( b1, 2 );
+    static const int b2 = at< backward, 2 >::value;
+    BOOST_CHECK_EQUAL( b2, 1 );
+
+  }
 
   BOOST_AUTO_TEST_CASE( vector_inner_product )
   {

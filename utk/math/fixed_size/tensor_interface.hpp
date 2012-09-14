@@ -19,7 +19,6 @@
 # include "utk/math/fixed_size/vector_interface.hpp"
 # include "utk/math/fixed_size/tensor_structure.hpp"
 
-
 # pragma GCC visibility push(default)
 
 namespace utk
@@ -39,6 +38,8 @@ namespace utk
       : public tensor_structure< Structure... >
       ,	public vector_interface< T, tensor_structure< Structure... >::total_size() >
       {
+	typedef T value_type;
+
 	typedef tensor_structure< Structure... > structure;
 
 	typedef vector_interface< T, structure::total_size() > storage_base;
@@ -48,6 +49,16 @@ namespace utk
 	explicit
 	tensor_interface( typename storage_base::pointer_type pointer ) : storage_base( pointer )  {	}
 
+	// element access
+
+	template< typename...CoordTypes >
+	value_type at( CoordTypes...coords )
+	{
+	  //TODO: checks
+	  return storage_base::at( structure::free_coord_offset( coords... )
+				    + structure::fixed_dimensions_offset()
+				    );
+	}
       };
 
     } // of fixed_size::

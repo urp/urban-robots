@@ -29,20 +29,21 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   {
     typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
 
-    // scalar
+    // number of elements in the whole tensor
     size_type size0 =  tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>::value;
-    BOOST_CHECK_EQUAL( size0, 1 );
+    BOOST_CHECK_EQUAL( size0, 24 );
     // size of the first two sub dimensions - in elements
 
     size_type stride1 = structure::stride<1>::value;
-    BOOST_CHECK_EQUAL( stride1, 2 );
+    BOOST_CHECK_EQUAL( stride1, 12 );
 
     // size of the first three sub dimensions
     size_type stride2 = structure::stride<2>::value;
-    BOOST_CHECK_EQUAL( stride2, 6 );
-    // number of elements in the whole tensor
+    BOOST_CHECK_EQUAL( stride2, 4 );
+
+    // scalar
     size_type total_size = structure::stride<3>::value;
-    BOOST_CHECK_EQUAL( total_size, 24 );
+    BOOST_CHECK_EQUAL( total_size, 1 );
 
     // higher (non existing) dimensions should produce a compile time error
     //size_type total_size2 = tensor::stride<5>();
@@ -90,35 +91,53 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   }
 
-  BOOST_AUTO_TEST_CASE( stride_vector )
+  BOOST_AUTO_TEST_CASE( strides_vector )
   {
     typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
 
     static const stride_type s0 = integral::at< strides, 0 >::value;
-    BOOST_CHECK_EQUAL( s0, 1 );
+    BOOST_CHECK_EQUAL( s0, 120 );
     static const stride_type s1 = integral::at< strides, 1 >::value;
-    BOOST_CHECK_EQUAL( s1, 2 );
+    BOOST_CHECK_EQUAL( s1, 60 );
     static const stride_type s2 = integral::at< strides, 2 >::value;
-    BOOST_CHECK_EQUAL( s2, 6 );
+    BOOST_CHECK_EQUAL( s2, 20 );
     static const stride_type s3 = integral::at< strides, 3 >::value;
-    BOOST_CHECK_EQUAL( s3, 24 );
+    BOOST_CHECK_EQUAL( s3, 5 );
     static const stride_type s4 = integral::at< strides, 4 >::value;
-    BOOST_CHECK_EQUAL( s4, 120 );
+    BOOST_CHECK_EQUAL( s4, 1 );
 
+  }
+  // used by free_coord_offset & fixed_coord_offset
+  BOOST_AUTO_TEST_CASE( strides_stripping_and_reversal )
+  {
+
+    typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
+
+    // remove last element (total_size) from strides
+    typedef typename integral::pop_front< strides >::tail strides_tail;
+    // reverse strides (last dimension has stride=1)
+    typedef typename integral::reverse< strides_tail >::type strides_reverse;
+
+
+
+    strides         strides_instance;
+    strides_reverse strides_reverse_instance;
+
+    BOOST_TEST_MESSAGE( strides_instance << " -> " << strides_reverse_instance );
   }
 
   BOOST_AUTO_TEST_CASE( free_coord_offset )
   {
-    typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
+    typedef tensor_structure< index_vector<1,2,3,4>, size_vector<1,2,3,4> > structure;
 
-    const stride_type offset_111 = structure::free_coord_offset( 1,1,1 );
-    BOOST_CHECK_EQUAL( offset_111, 9 );
+    const stride_type offset_111 = structure::free_coord_offset( 0,1,1,1 );
+    BOOST_CHECK_EQUAL( offset_111, 17 );
 
     // fix
-    typedef typename structure::fix_dimension< 1, 0 >::type fixed;
+    typedef typename structure::fix_dimension< 3, 0 >::type fixed;
 
-    const stride_type fixed_11 = fixed::free_coord_offset( 1,1 );
-    BOOST_CHECK_EQUAL( fixed_11, 7 );
+    const stride_type fixed_11 = fixed::free_coord_offset( 0,1,1 );
+    BOOST_CHECK_EQUAL( fixed_11, 16 );
   }
 
   BOOST_AUTO_TEST_CASE( fixed_coord_offset )
@@ -128,11 +147,19 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     const stride_type offset = structure::fixed_dimensions_offset();
     BOOST_CHECK_EQUAL( offset, 0 );
 
-    // fix
-    typedef typename structure::fix_dimension< 1, 1 >::type fixed;
+    // fix 1
+    typedef typename structure::fix_dimension< 1, 1 >::type fixed0100;
 
-    const stride_type fixed1 = fixed::fixed_dimensions_offset();
-    BOOST_CHECK_EQUAL( fixed1, 2 );
+    const stride_type fixed1 = fixed0100::fixed_dimensions_offset();
+    BOOST_CHECK_EQUAL( fixed1, 20 );
+
+    // fix 1
+    typedef typename fixed0100::fix_dimension< 2, 2 >::type fixed0120;
+
+    const stride_type fixed2 = fixed0120::fixed_dimensions_offset();
+    BOOST_CHECK_EQUAL( fixed2, 30 );
+
+
   }
 
 

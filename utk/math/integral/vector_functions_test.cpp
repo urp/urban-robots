@@ -112,3 +112,13 @@ BOOST_AUTO_TEST_SUITE( sequence_manipulators )
   }
 
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( vector_instance_operators )
+
+  BOOST_AUTO_TEST_CASE( stream_insertion )
+  {
+    const vector< int, 1,2,3 > instance;
+    BOOST_MESSAGE( instance );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()

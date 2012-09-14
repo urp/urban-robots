@@ -17,8 +17,10 @@
 # pragma once
 
 # include <array>
-//# include <type_traits>
+# include <iostream>
+# include <iomanip>
 
+# include "utk/io/io.hpp"
 # include "utk/math/integral/constant.hpp"
 # include "utk/math/integral/vector.hpp"
 
@@ -168,6 +170,14 @@ namespace utk
 
 	  typedef typename push_front< typename popped::tail, constant< T, Unpacked > >::type tail;
       };
+
+      template< typename T, T...Values >
+      std::ostream& operator<<( std::ostream& os, const vector< T, Values... >& vec )
+      {
+	std::array< T, sizeof...(Values) > arr = make_array< vector< T, Values... > >::value;
+	os << '{' << utk::io::sequence_to_stream( os, arr.begin(), arr.end(), "," ) << '}' << std::endl;
+	return os;
+      }
 
     } // of integral::
   } // of math::

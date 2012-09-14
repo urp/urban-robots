@@ -1,12 +1,13 @@
-project utk/math/integral ;
+project utk/math/integral
+: requirements <use>/utk/io//io ;
 
 
 unit-test test-constant  : constant_test.cpp
                          : <library>/robots//boost-unit-test ;
-                                  
+
 unit-test test-vector	  : vector_test.cpp
                	        : <library>/robots//boost-unit-test ;
-                        	        
+
 unit-test test-vector-functions : vector_functions_test.cpp
                         	      : <library>/robots//boost-unit-test ;
 
@@ -15,7 +16,7 @@ unit-test test-vector-algorithms : vector_algorithms_test.cpp
 
 alias test : test-constant
              test-vector
-             test-vector-functions 
+             test-vector-functions
              test-vector-functions ;
 
 install install-headers 	: integral.hpp
@@ -26,4 +27,3 @@ install install-headers 	: integral.hpp
 													: <location>$(INSTALL_INC_PREFIX)/utk/math/integral ;
 
 explicit install-headers ;
-

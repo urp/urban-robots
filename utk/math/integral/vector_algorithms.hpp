@@ -208,6 +208,28 @@ namespace utk
       : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, equal< T1, T2 > >
       {	};
 
+
+      //:::| miscellianous
+
+      //---| reverse
+
+      template< typename > struct reverse { /* unspecified */ };
+
+      template< typename T >
+      struct reverse< vector< T > >
+      {
+	typedef vector< T > type;
+      };
+
+      template< typename T, T...Values >
+      class reverse< vector< T, Values... > >
+      {
+	  typedef pop_front< vector< T, Values... > > values;
+	  typedef typename reverse< typename values::tail >::type reverse_tail;
+	public:
+	  typedef typename push_back< reverse_tail, constant< T, values::value > >::type type;
+      };
+
       //---| remove_false
 
       namespace
@@ -218,9 +240,9 @@ namespace utk
 	// terminate
 	template< typename T, T...NewValues >
 	class remove_false_recursion< vector< bool >
-				      , vector< T, NewValues... >
-				      , vector< T >
-				      >
+					, vector< T, NewValues... >
+					, vector< T >
+					>
 	{
 	  public:
 	    typedef vector< T, NewValues... > type;

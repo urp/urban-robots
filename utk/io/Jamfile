@@ -1,8 +1,19 @@
-project utk/io
-: requirements <library>/robots//boost-system
-: usage-requirements <library>/robots//boost-system ;
+project utk/io : : usage-requirements <library>/robots//boost-system ;
 
-unit-test test-io : io_test.cpp : <library>/robots//boost-unit-test ;
+lib io : io.hpp io.cpp : <library>/robots//boost-system ;
 
-install install-headers : io.hpp : <location>$(INSTALL_INC_PREFIX)/utk/io ;
+unit-test test-io : io_test.cpp : <library>io <library>/robots//boost-unit-test ;
+
+install install-io-headers : io.hpp : <location>$(INSTALL_INC_PREFIX)/utk/io ;
+explicit install-io-headers ;
+install install-io-lib : io.hpp : <location>$(INSTALL_INC_PREFIX)/utk/io ;
+explicit install-io-lib ;
+
+alias install-headers : install-io-headers ;
 explicit install-headers ;
+
+alias install-libs : install-io-lib ;
+explicit install-libs ;
+
+alias install : install-headers install-libs ;
+explicit install ;

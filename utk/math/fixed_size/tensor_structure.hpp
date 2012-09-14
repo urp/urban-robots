@@ -89,9 +89,16 @@ namespace utk
 	template< size_type... Sizes >
 	struct stride_sequence< integral::vector< size_type, Sizes... > >
 	{
-	  typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
-							, integral::vector< size_type, Sizes... > >::type type;
+	  private:
+	    typedef typename integral::reverse< integral::vector< size_type, Sizes... > >::type reverse_sizes;
+	    typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
+							    ,  reverse_sizes >::type reverse_result;
+
+	  public:
+	    typedef typename integral::reverse< reverse_result >::type type;
 	};
+
+
 
 
 	//---| stride
@@ -149,7 +156,7 @@ namespace utk
 	  //---| total_size
 	  //-----query size (number of scalars)
 	  constexpr static const size_type total_size()
-	  { return helpers::stride< strides, dimension() >::value; }
+	  { return helpers::stride< strides, 0 >::value; }
 
 	  //---| fix_dimension
 	  //-----returns a new tensor_structure with dimension DimIndex fixed
@@ -184,36 +191,20 @@ namespace utk
 	      typedef tensor_structure< sub_indices, sub_sizes > type;
 	  };
 
-
-	  //***| free_coord_offset
-	  //-----TODO: rename to inner_product
-
-	  // accumulate
-	  template< typename StrideVector, typename...Coords >
-	  static const stride_type free_coord_offset_recurse( index_type UnpackedCoord, Coords... coords )
-	  {
-	    typedef integral::pop_front< StrideVector > strides;
-
-	    return  UnpackedCoord * strides::value + free_coord_offset_recurse< typename strides::tail >( coords... );
-	  }
-
-	  // terminate
-	  template< typename StrideVector > static const stride_type free_coord_offset_recurse( )
-	  { return 0; }
-
 	  //:::| memory model
 
+	  //---| free_coord_offset
   	  //-----return offset for the specified coordinates
 	  template< typename...Coords >
 	  static const stride_type free_coord_offset( Coords... coords )
 	  {
-	    static_assert( sizeof...(coords) <= remove_fixed::type::dimension()
+	    static_assert( sizeof...(coords) == remove_fixed::type::dimension()
 			   , "number of coordinates must be smaller than number of 'free' dimensions." );
 
 	    // detect fixed dimensions
 	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
 	    // remove last element (total_size) from strides
-	    typedef typename integral::pop_back< strides >::tail strides_tail;
+	    typedef typename integral::pop_front< strides >::tail strides_tail;
 	    // remove fixed dimensions from the vectors
 	    typedef typename integral::remove_false< strides_tail, free_dimensions >::type free_strides;
 
@@ -227,9 +218,9 @@ namespace utk
 	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
 	    typedef typename integral::transform< free_dimensions , integral::negate<bool> >::type fixed_dimensions;
 
-	    typedef typename integral::pop_back< strides >::tail strides_tail;
+	    typedef typename integral::pop_front< strides >::tail strides_tail;
 	    typedef typename integral::remove_false< strides_tail, fixed_dimensions >::type fixed_strides;
-	    typedef typename integral::remove_false< indices     , fixed_dimensions >::type fixed_indices;
+	    typedef typename integral::remove_false< indices     	 , fixed_dimensions >::type fixed_indices;
 
 	    return integral::inner_product< fixed_strides, fixed_indices >::value;
 	  }
