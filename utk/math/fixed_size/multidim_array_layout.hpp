@@ -97,33 +97,18 @@ namespace utk
 	    typedef typename integral::reverse< reverse_result >::type type;
 	};
 
-
-
-/*
-	//---| stride
-	//-----extract stride
-	template< typename StrideVector, index_type Index >
-	struct stride
-	{
-	  static_assert( Index <= StrideVector::size, "requested stride is undefined (Index must be smaller than StrideVector::size)" );
-	  //TODO: find out what gcc doesn't like about my helper.
-	  //NOTE: SUPERSTRANGE works with Dim soecified explicitly (by using a constant)
-	  //static constexpr stride_type value = integral::at< StrideVector, Dim >::value ;
-	  const static stride_type value = boost::mpl::at_c< typename StrideVector::mpl_vector_c, Dim >::type::value;
-	};
-*/
       } // of helpers::
 
       //---------------------
-      //---| tensor structure
+      //---| tensor layout
       //---------------------
 
       template< typename, typename>
-      class tensor_structure
+      class multidim_array_layout
       { /* unspecified*/ };
 
       template< index_type... IndexInfo, size_type... Sizes >
-      class tensor_structure< index_vector< IndexInfo... >, size_vector< Sizes... > >
+      class multidim_array_layout< index_vector< IndexInfo... >, size_vector< Sizes... > >
       {
 	  static_assert( sizeof...(IndexInfo) == sizeof...(Sizes)
 			 , "the number of indices forwarded in index_vector< ... >"
@@ -134,7 +119,7 @@ namespace utk
 	  typedef index_vector< IndexInfo... >	indices;
 	  typedef  size_vector< Sizes ... >	sizes;
 
-	  typedef tensor_structure< indices, sizes > type;
+	  typedef multidim_array_layout< indices, sizes > type;
 
 	  typedef typename helpers::stride_sequence< sizes >::type strides;
 
@@ -157,18 +142,18 @@ namespace utk
 	  { return stride< 0 >::value; }
 
 	  //---| fix_dimension
-	  //-----returns a new tensor_structure with Index fixed (to Value)
+	  //-----returns a new multidim_array_layout with Index fixed (to Value)
 	  template< index_type Index, index_type Value >
 	  class fix_index
 	  {
 	      static_assert( Index < rank(), "Index greater or equal than tensor rank");
 	      typedef typename integral::assign< indices, Index, integral::constant< index_type, Value > >::type new_indices;
 	    public:
-	      typedef tensor_structure< new_indices, sizes > type;
+	      typedef multidim_array_layout< new_indices, sizes > type;
 	  };
 
 	  //---| unfix_dimension
-	  //-----returns a new tensor_structure with Index released.
+	  //-----returns a new multidim_array_layout with Index released.
 	  template< index_type Index >
 	  class release_index
 	  {
@@ -179,14 +164,14 @@ namespace utk
 	  };
 
 	  //---| remove_fixed - TODO: rename to 'compact'
-	  //-----returns a new tensor_structure with all fixed dimensions removed.
+	  //-----returns a new multidim_array_layout with all fixed dimensions removed.
 	  class remove_fixed
 	  {
 	      typedef typename integral::equal< indices, sizes >::type free_dimensions;
 	      typedef typename integral::remove_false< indices, free_dimensions >::type sub_indices;
 	      typedef typename integral::remove_false< sizes  , free_dimensions >::type sub_sizes;
 	    public:
-	      typedef tensor_structure< sub_indices, sub_sizes > type;
+	      typedef multidim_array_layout< sub_indices, sub_sizes > type;
 	  };
 
 	  //:::| memory model
@@ -219,7 +204,7 @@ namespace utk
 
 	    typedef typename integral::pop_front< strides >::tail strides_tail;
 	    typedef typename integral::remove_false< strides_tail, fixed_dimensions >::type fixed_strides;
-	    typedef typename integral::remove_false< indices     	 , fixed_dimensions >::type fixed_indices;
+	    typedef typename integral::remove_false< indices    , fixed_dimensions >::type fixed_indices;
 
 	    return integral::inner_product< fixed_strides, fixed_indices >::value;
 	  }
@@ -227,7 +212,7 @@ namespace utk
       };
 
       template< size_type...Sizes >
-      using initial_structure = tensor_structure< index_vector< Sizes... >, size_vector< Sizes... > >;
+      using initial_layout = multidim_array_layout< index_vector< Sizes... >, size_vector< Sizes... > >;
 
     }
   }

@@ -14,10 +14,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor_structure.hpp"
+# include "utk/math/fixed_size/multidim_array_layout.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE tensor structure
+#define BOOST_TEST_MODULE tensor layout
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math;
@@ -25,24 +25,24 @@ using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_SUITE( compile_time_information )
 
-  BOOST_AUTO_TEST_CASE( structure_stride )
+  BOOST_AUTO_TEST_CASE( layout_stride )
   {
-    typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
+    typedef multidim_array_layout< index_vector<2,3,4>, size_vector<2,3,4> > layout;
 
     // number of elements in the whole tensor
-    size_type size0 =  tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>::value;
+    size_type size0 =  multidim_array_layout< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>::value;
     BOOST_CHECK_EQUAL( size0, 24 );
     // size of the first two sub dimensions - in elements
 
-    size_type stride1 = structure::stride<1>::value;
+    size_type stride1 = layout::stride<1>::value;
     BOOST_CHECK_EQUAL( stride1, 12 );
 
     // size of the first three sub dimensions
-    size_type stride2 = structure::stride<2>::value;
+    size_type stride2 = layout::stride<2>::value;
     BOOST_CHECK_EQUAL( stride2, 4 );
 
     // scalar
-    size_type total_size = structure::stride<3>::value;
+    size_type total_size = layout::stride<3>::value;
     BOOST_CHECK_EQUAL( total_size, 1 );
 
     // higher (non existing) dimensions should produce a compile time error
@@ -51,23 +51,23 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   BOOST_AUTO_TEST_CASE( size )
   {
-    typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
+    typedef multidim_array_layout< index_vector<2,3,4>, size_vector<2,3,4> > layout;
 
-    BOOST_CHECK_EQUAL( structure::rank(), 3 );
+    BOOST_CHECK_EQUAL( layout::rank(), 3 );
 
-    BOOST_CHECK_EQUAL( structure::total_size(), 24 );
+    BOOST_CHECK_EQUAL( layout::total_size(), 24 );
 
 
-    std::array< size_type, 3 > size_array = utk::math::integral::make_array< structure::sizes >::value;
+    std::array< size_type, 3 > size_array = utk::math::integral::make_array< layout::sizes >::value;
     BOOST_CHECK_EQUAL( size_array[0], 2 );
   }
 
   BOOST_AUTO_TEST_CASE( fix_dimension )
   {
-    typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
+    typedef multidim_array_layout< index_vector<2,3,4>, size_vector<2,3,4> > layout;
 
     // fix
-    typedef typename structure::fix_index< 0, 1 >::type fixed;
+    typedef typename layout::fix_index< 0, 1 >::type fixed;
 
     index_type fixed0 = integral::at< typename fixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( fixed0 , 1 );
@@ -84,7 +84,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( removed::rank(), 2 );
 
     // unfix
-    typedef typename structure::release_index< 0 >::type unfixed;
+    typedef typename layout::release_index< 0 >::type unfixed;
     BOOST_CHECK_EQUAL( unfixed::total_size(), 24 );
     index_type unfixed0 = integral::at< unfixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( unfixed0, 2 );
@@ -126,13 +126,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   BOOST_AUTO_TEST_CASE( free_indices_offset )
   {
-    typedef tensor_structure< index_vector<1,2,3,4>, size_vector<1,2,3,4> > structure;
+    typedef multidim_array_layout< index_vector<1,2,3,4>, size_vector<1,2,3,4> > layout;
 
-    const stride_type offset_111 = structure::free_indices_offset( 0,1,1,1 );
+    const stride_type offset_111 = layout::free_indices_offset( 0,1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 17 );
 
     // fix
-    typedef typename structure::fix_index< 3, 0 >::type fixed;
+    typedef typename layout::fix_index< 3, 0 >::type fixed;
 
     const stride_type fixed_11 = fixed::free_indices_offset( 0,1,1 );
     BOOST_CHECK_EQUAL( fixed_11, 16 );
@@ -140,13 +140,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   BOOST_AUTO_TEST_CASE( fixed_coord_offset )
   {
-    typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
+    typedef multidim_array_layout< index_vector<2,3,4,5>, size_vector<2,3,4,5> > layout;
 
-    const stride_type offset = structure::fixed_indices_offset();
+    const stride_type offset = layout::fixed_indices_offset();
     BOOST_CHECK_EQUAL( offset, 0 );
 
     // fix 1
-    typedef typename structure::fix_index< 1, 1 >::type fixed0100;
+    typedef typename layout::fix_index< 1, 1 >::type fixed0100;
 
     const stride_type fixed1 = fixed0100::fixed_indices_offset();
     BOOST_CHECK_EQUAL( fixed1, 20 );

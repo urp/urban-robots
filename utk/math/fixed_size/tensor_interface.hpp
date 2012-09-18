@@ -14,10 +14,12 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+
+
 # pragma once
 
 # include "utk/math/fixed_size/vector_interface.hpp"
-# include "utk/math/fixed_size/tensor_structure.hpp"
+# include "utk/math/fixed_size/multidim_array_layout.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -33,16 +35,16 @@ namespace utk
       template< typename, typename > struct tensor_interface
       { /* unspecified */ };
 
-      template < typename T, typename...Structure >
-      struct tensor_interface< T, tensor_structure< Structure... > >
-      : public tensor_structure< Structure... >
-      ,	public vector_interface< T, tensor_structure< Structure... >::total_size() >
+      template < typename T, typename...LayoutData >
+      struct tensor_interface< T, multidim_array_layout< LayoutData... > >
+      : public multidim_array_layout< LayoutData... >
+      ,	public vector_interface< T, multidim_array_layout< LayoutData... >::total_size() >
       {
 	typedef T value_type;
 
-	typedef tensor_structure< Structure... > structure;
+	typedef multidim_array_layout< LayoutData... > layout;
 
-	typedef vector_interface< T, structure::total_size() > storage_base;
+	typedef vector_interface< T, layout::total_size() > storage_base;
 
 	//---| constructor with storage pointer
 
@@ -55,8 +57,8 @@ namespace utk
 	value_type at( CoordTypes...coords )
 	{
 	  //TODO: checks
-	  return storage_base::at( structure::free_indices_offset( coords... )
-				    + structure::fixed_indices_offset()
+	  return storage_base::at( layout::free_indices_offset( coords... )
+				    + layout::fixed_indices_offset()
 				    );
 	}
       };
