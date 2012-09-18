@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   {
     typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
 
-    BOOST_CHECK_EQUAL( structure::dimension(), 3 );
+    BOOST_CHECK_EQUAL( structure::rank(), 3 );
 
     BOOST_CHECK_EQUAL( structure::total_size(), 24 );
 
@@ -67,7 +67,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     typedef tensor_structure< index_vector<2,3,4>, size_vector<2,3,4> > structure;
 
     // fix
-    typedef typename structure::fix_dimension< 0, 1 >::type fixed;
+    typedef typename structure::fix_index< 0, 1 >::type fixed;
 
     index_type fixed0 = integral::at< typename fixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( fixed0 , 1 );
@@ -81,10 +81,10 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( removed1, 4 );
 
     BOOST_CHECK_EQUAL( removed::total_size(), 12 );
-    BOOST_CHECK_EQUAL( removed::dimension(), 2 );
+    BOOST_CHECK_EQUAL( removed::rank(), 2 );
 
     // unfix
-    typedef typename structure::unfix_dimension< 0 >::type unfixed;
+    typedef typename structure::release_index< 0 >::type unfixed;
     BOOST_CHECK_EQUAL( unfixed::total_size(), 24 );
     index_type unfixed0 = integral::at< unfixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( unfixed0, 2 );
@@ -107,7 +107,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( s4, 1 );
 
   }
-  // used by free_coord_offset & fixed_coord_offset
+  // used by free_indices_offset & fixed_coord_offset
   BOOST_AUTO_TEST_CASE( strides_stripping_and_reversal )
   {
 
@@ -115,10 +115,8 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
     // remove last element (total_size) from strides
     typedef typename integral::pop_front< strides >::tail strides_tail;
-    // reverse strides (last dimension has stride=1)
+    // reverse strides (last index has stride=1)
     typedef typename integral::reverse< strides_tail >::type strides_reverse;
-
-
 
     strides         strides_instance;
     strides_reverse strides_reverse_instance;
@@ -126,17 +124,17 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_TEST_MESSAGE( strides_instance << " -> " << strides_reverse_instance );
   }
 
-  BOOST_AUTO_TEST_CASE( free_coord_offset )
+  BOOST_AUTO_TEST_CASE( free_indices_offset )
   {
     typedef tensor_structure< index_vector<1,2,3,4>, size_vector<1,2,3,4> > structure;
 
-    const stride_type offset_111 = structure::free_coord_offset( 0,1,1,1 );
+    const stride_type offset_111 = structure::free_indices_offset( 0,1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 17 );
 
     // fix
-    typedef typename structure::fix_dimension< 3, 0 >::type fixed;
+    typedef typename structure::fix_index< 3, 0 >::type fixed;
 
-    const stride_type fixed_11 = fixed::free_coord_offset( 0,1,1 );
+    const stride_type fixed_11 = fixed::free_indices_offset( 0,1,1 );
     BOOST_CHECK_EQUAL( fixed_11, 16 );
   }
 
@@ -144,23 +142,22 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   {
     typedef tensor_structure< index_vector<2,3,4,5>, size_vector<2,3,4,5> > structure;
 
-    const stride_type offset = structure::fixed_dimensions_offset();
+    const stride_type offset = structure::fixed_indices_offset();
     BOOST_CHECK_EQUAL( offset, 0 );
 
     // fix 1
-    typedef typename structure::fix_dimension< 1, 1 >::type fixed0100;
+    typedef typename structure::fix_index< 1, 1 >::type fixed0100;
 
-    const stride_type fixed1 = fixed0100::fixed_dimensions_offset();
+    const stride_type fixed1 = fixed0100::fixed_indices_offset();
     BOOST_CHECK_EQUAL( fixed1, 20 );
 
     // fix 1
-    typedef typename fixed0100::fix_dimension< 2, 2 >::type fixed0120;
+    typedef typename fixed0100::fix_index< 2, 2 >::type fixed0120;
 
-    const stride_type fixed2 = fixed0120::fixed_dimensions_offset();
+    const stride_type fixed2 = fixed0120::fixed_indices_offset();
     BOOST_CHECK_EQUAL( fixed2, 30 );
 
 
   }
-
 
 BOOST_AUTO_TEST_SUITE_END()

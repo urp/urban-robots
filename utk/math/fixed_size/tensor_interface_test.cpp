@@ -49,7 +49,7 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
 BOOST_AUTO_TEST_CASE( tensor_at_with_fixed_dimensions )
 {
   typedef initial_structure< 3,2,3 > unfixed_structure;
-  typedef typename unfixed_structure::fix_dimension< 2, 2 >::type structure;
+  typedef typename unfixed_structure::fix_index< 2, 2 >::type structure;
   typedef tensor_interface< double, structure > tensor_type;
   double  data[ structure::total_size() ] = {  0., 1., 2., 3., 4., 5.
                                               ,  6.,  7., 8., 9.,10.,11.

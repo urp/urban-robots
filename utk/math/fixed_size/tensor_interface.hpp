@@ -55,8 +55,8 @@ namespace utk
 	value_type at( CoordTypes...coords )
 	{
 	  //TODO: checks
-	  return storage_base::at( structure::free_coord_offset( coords... )
-				    + structure::fixed_dimensions_offset()
+	  return storage_base::at( structure::free_indices_offset( coords... )
+				    + structure::fixed_indices_offset()
 				    );
 	}
       };

@@ -30,11 +30,10 @@ namespace utk
 
       using integral::index_type;
 
-      // TODO: bad
+      // TODO: move to common header?
 
       typedef unsigned size_type;
       typedef unsigned param_type;
-      typedef unsigned dimension_type;
       typedef unsigned stride_type;
 
       //-----| bool_vector
@@ -100,19 +99,19 @@ namespace utk
 
 
 
-
+/*
 	//---| stride
 	//-----extract stride
-	template< typename StrideVector, dimension_type Dim >
+	template< typename StrideVector, index_type Index >
 	struct stride
 	{
-	  static_assert( Dim <= StrideVector::size, "requested stride is undefined" );
+	  static_assert( Index <= StrideVector::size, "requested stride is undefined (Index must be smaller than StrideVector::size)" );
 	  //TODO: find out what gcc doesn't like about my helper.
 	  //NOTE: SUPERSTRANGE works with Dim soecified explicitly (by using a constant)
 	  //static constexpr stride_type value = integral::at< StrideVector, Dim >::value ;
 	  const static stride_type value = boost::mpl::at_c< typename StrideVector::mpl_vector_c, Dim >::type::value;
 	};
-
+*/
       } // of helpers::
 
       //---------------------
@@ -141,43 +140,42 @@ namespace utk
 
 	  //---| stride
 	  //-----extract stride
-	  template< dimension_type Dim >
+	  template< index_type Index >
 	  struct stride
 	  {
-	    static_assert( Dim <= sizeof...(Sizes), "requested dimension does not exist" );
-	    //TODO: find out what gcc doesn't like about my helper
-	    const static stride_type value = integral::at< strides, Dim >::value;
+	    static_assert( Index <= sizeof...(Sizes), "requested dimension does not exist" );
+	    const static stride_type value = integral::at< strides, Index >::value;
 	  };
 
 	  //---| dimension
 	  //-----query dimensionality
-	  constexpr static const dimension_type dimension()  { return sizeof...(Sizes); }
+	  constexpr static const index_type rank()  { return sizeof...(Sizes); }
 
 	  //---| total_size
 	  //-----query size (number of scalars)
 	  constexpr static const size_type total_size()
-	  { return helpers::stride< strides, 0 >::value; }
+	  { return stride< 0 >::value; }
 
 	  //---| fix_dimension
-	  //-----returns a new tensor_structure with dimension DimIndex fixed
-	  template< dimension_type Dim, index_type Index >
-	  class fix_dimension
+	  //-----returns a new tensor_structure with Index fixed (to Value)
+	  template< index_type Index, index_type Value >
+	  class fix_index
 	  {
-	      static_assert( Dim < dimension(), "Dim exceeds range");
-	      typedef typename integral::assign< indices, Dim, integral::constant< index_type, Index > >::type new_indices;
+	      static_assert( Index < rank(), "Index greater or equal than tensor rank");
+	      typedef typename integral::assign< indices, Index, integral::constant< index_type, Value > >::type new_indices;
 	    public:
 	      typedef tensor_structure< new_indices, sizes > type;
 	  };
 
 	  //---| unfix_dimension
-	  //-----returns a new tensor_structure with dimension DimIndex unfixed
-	  template< dimension_type Dim >
-	  class unfix_dimension
+	  //-----returns a new tensor_structure with Index released.
+	  template< index_type Index >
+	  class release_index
 	  {
-	      static_assert( Dim < dimension(), "Dim exceeds range");
-	      static const index_type dim_size = integral::at< sizes, Dim >::value;
+	     static_assert( Index < rank(), "Index greater or equal than tensor rank");
+	      static const index_type dim_size = integral::at< sizes, Index >::value;
 	    public:
-	      typedef typename fix_dimension< Dim, dim_size >::type type;
+	      typedef typename fix_index< Index, dim_size >::type type;
 	  };
 
 	  //---| remove_fixed - TODO: rename to 'compact'
@@ -192,18 +190,19 @@ namespace utk
 	  };
 
 	  //:::| memory model
-
-	  //---| free_coord_offset
+	  // TODO: free_indices_offset< Coords >
+	  // TODO: use free_indices_offset and fixed_dimension_offset in specializations of 'at< Coords >( dyn_coords )'
+	  //---| free_indices_offset
   	  //-----return offset for the specified coordinates
 	  template< typename...Coords >
-	  static const stride_type free_coord_offset( Coords... coords )
+	  static const stride_type free_indices_offset( Coords... coords )
 	  {
-	    static_assert( sizeof...(coords) == remove_fixed::type::dimension()
-			   , "number of coordinates must be smaller than number of 'free' dimensions." );
+	    static_assert( sizeof...(coords) == remove_fixed::type::rank()
+			   , "number of coordinates must be smaller than number of 'free' indices." );
 
 	    // detect fixed dimensions
 	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
-	    // remove last element (total_size) from strides
+	    // remove first element (total_size) from strides
 	    typedef typename integral::pop_front< strides >::tail strides_tail;
 	    // remove fixed dimensions from the vectors
 	    typedef typename integral::remove_false< strides_tail, free_dimensions >::type free_strides;
@@ -213,7 +212,7 @@ namespace utk
 
 	  //---| fixed_dimension_offset
 
-	  static constexpr stride_type fixed_dimensions_offset()
+	  static constexpr stride_type fixed_indices_offset()
 	  {
 	    typedef typename integral::equal< indices, sizes >::type free_dimensions;
 	    typedef typename integral::transform< free_dimensions , integral::negate<bool> >::type fixed_dimensions;
@@ -226,7 +225,6 @@ namespace utk
 	  }
 
       };
-
 
       template< size_type...Sizes >
       using initial_structure = tensor_structure< index_vector< Sizes... >, size_vector< Sizes... > >;
