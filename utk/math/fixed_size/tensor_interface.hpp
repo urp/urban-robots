@@ -14,12 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 # pragma once
 
-# include "utk/math/fixed_size/vector_interface.hpp"
-# include "utk/math/fixed_size/multidim_array_layout.hpp"
+# include "utk/math/fixed_size/multidim_interface.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -30,38 +27,53 @@ namespace utk
     namespace fixed_size
     {
 
+      typedef enum { contravariant=false, covariant=true } variance_type;
+
       //-----| tensor_interface
 
-      template< typename, typename > struct tensor_interface
+      template< typename, typename, typename > struct tensor_interface
       { /* unspecified */ };
 
-      template < typename T, typename...LayoutData >
-      struct tensor_interface< T, multidim_array_layout< LayoutData... > >
-      : public multidim_array_layout< LayoutData... >
-      ,	public vector_interface< T, multidim_array_layout< LayoutData... >::total_size() >
+      template < typename T, typename...LayoutData, variance_type...Variances >
+      struct tensor_interface< T, multidim_layout< LayoutData... >, integral::vector< variance_type, Variances... > >
+      :	public multidim_interface< T, multidim_layout< LayoutData... > >
       {
-	typedef T value_type;
 
-	typedef multidim_array_layout< LayoutData... > layout;
+	typedef multidim_interface< T, multidim_layout< LayoutData... > > multidim_base;
 
-	typedef vector_interface< T, layout::total_size() > storage_base;
+	typedef integral::vector< variance_type, Variances... > variances;
+
+	static_assert( variances::size == multidim_base::rank(), "size of variances must agree with tensor rank." );
 
 	//---| constructor with storage pointer
 
 	explicit
-	tensor_interface( typename storage_base::pointer_type pointer ) : storage_base( pointer )  {	}
-
-	// element access
-
-	template< typename...CoordTypes >
-	value_type at( CoordTypes...coords )
-	{
-	  //TODO: checks
-	  return storage_base::at( layout::free_indices_offset( coords... )
-				    + layout::fixed_indices_offset()
-				    );
-	}
+	tensor_interface( typename multidim_base::storage_base::pointer_type pointer ) : multidim_base( pointer )  {	}
       };
+
+      template< typename T, typename MultiDimLayout, variance_type Variance >
+      struct make_non_mixed_tensor_interface
+      {
+	typedef tensor_interface< T, MultiDimLayout
+				  , typename integral::make_uniform_vector< T, MultiDimLayout::rank(), Variance >::type
+				  > type;
+
+      };
+
+      template< typename T, typename MultiDimLayout, index_type ContravariantIndices >
+      class make_mixed_tensor_interface
+      {
+
+	typedef typename integral::make_uniform_vector< T, ContravariantIndices, contravariant >::type contravar;
+	typedef typename integral::make_uniform_vector< T, MultiDimLayout::rank() - ContravariantIndices, covariant >::type covar;
+
+	typedef tensor_interface< T, MultiDimLayout
+				  , typename integral::concatinate< contravar, covar >::type
+				  > type;
+
+      };
+
+
 
     } // of fixed_size::
   } // of math::

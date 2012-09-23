@@ -26,9 +26,9 @@ BOOST_AUTO_TEST_SUITE( data_access )
 
 BOOST_AUTO_TEST_CASE( array_conversion )
 {
-  typedef vector< int, 1,2,3 >  bools;
+  typedef vector< int, 1,2,3 > ints;
 
-  std::array< int,3 > array = make_array< bools >::value;
+  std::array< int,3 > array = make_array< ints >::value;
 
   BOOST_CHECK_EQUAL( array[0], 1 );
   BOOST_CHECK_EQUAL( array[1], 2 );
@@ -111,7 +111,49 @@ BOOST_AUTO_TEST_SUITE( sequence_manipulators )
     BOOST_CHECK_EQUAL( ni2,  2 );
   }
 
+  BOOST_AUTO_TEST_CASE( vector_concatinate )
+  {
+    typedef vector< int, 1, 2 >  intsA;
+    typedef vector< int, 3, 4 >  intsB;
+    typedef typename concatinate< intsA, intsB >::type cat;
+
+    static const int size = cat::size;
+    BOOST_CHECK_EQUAL( size, 4 );
+
+    static const int ni0 = at< cat, 0 >::value;
+    BOOST_CHECK_EQUAL( ni0, 1 );
+    static const int ni1 = at< cat, 1 >::value;
+    BOOST_CHECK_EQUAL( ni1, 2 );
+    static const int ni2 = at< cat, 2 >::value;
+    BOOST_CHECK_EQUAL( ni2, 3 );
+    static const int ni3 = at< cat, 3 >::value;
+    BOOST_CHECK_EQUAL( ni3, 4 );
+
+  }
+
+
 BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_AUTO_TEST_SUITE( vector_create_functions )
+
+  BOOST_AUTO_TEST_CASE( make_uniform )
+  {
+    typedef typename make_uniform_vector< int, 3,2 >::type  ints;
+
+    static const int size = ints::size;
+    BOOST_CHECK_EQUAL( size, 3 );
+
+    static const int i0 = at< ints, 0 >::value;
+    BOOST_CHECK_EQUAL( i0, 2 );
+    static const int i1 = at< ints, 1 >::value;
+    BOOST_CHECK_EQUAL( i1, 2 );
+    static const int i2 = at< ints, 2 >::value;
+    BOOST_CHECK_EQUAL( i2, 2 );
+
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
+
 
 BOOST_AUTO_TEST_SUITE( vector_instance_operators )
 

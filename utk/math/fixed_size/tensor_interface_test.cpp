@@ -26,14 +26,16 @@ using namespace utk::math::fixed_size;
 BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
 {
   typedef initial_layout< 1,2,3 > layout;
-  typedef tensor_interface< double, layout > tensor;
+  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef tensor_interface< double, layout, variances > tensor;
   tensor test_tensor( nullptr );
 }
 
 BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
 {
   typedef initial_layout< 1,2,3 > layout;
-  typedef tensor_interface< double, layout > tensor_type;
+  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef tensor_interface< double, layout, variances > tensor_type;
   double  data[ layout::total_size() ] = { 0.,1.,2.,3.,4.,5. };
   tensor_type   tensor( data );
 
@@ -50,10 +52,11 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_fixed_dimensions )
 {
   typedef initial_layout< 3,2,3 > unfixed_layout;
   typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
-  typedef tensor_interface< double, layout > tensor_type;
+  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef tensor_interface< double, layout, variances > tensor_type;
   double  data[ layout::total_size() ] = {  0., 1., 2., 3., 4., 5.
-                                              ,  6.,  7., 8., 9.,10.,11.
-                                              , 12., 13.,14.,15.,16.,17. };
+                                           ,  6.,  7., 8., 9.,10.,11.
+                                           , 12., 13.,14.,15.,16.,17. };
   tensor_type   tensor( data );
 
   //right
@@ -73,8 +76,9 @@ BOOST_AUTO_TEST_CASE( random_testing )
   typedef index_vector<2,3,4> old_indices;
   typedef size_vector<2,3,4>	old_sizes;
 
-  typedef multidim_array_layout< old_indices , old_sizes > old_layout;
-  typedef tensor_interface< double, old_layout > old_tensor;
+  typedef multidim_layout< old_indices , old_sizes > old_layout;
+  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef tensor_interface< double, old_layout, variances > old_tensor;
   old_tensor old_test_tensor(0);
 
   const int old_indices_size = boost::mpl::size< old_indices::mpl_vector_c >::type::value;
@@ -84,8 +88,9 @@ BOOST_AUTO_TEST_CASE( random_testing )
   typedef integral::assign< old_indices, 0, integral::constant< index_type, 7 > >::type new_indices;
   typedef integral::assign< old_sizes  , 0, integral::constant< index_type, 9 > >::type new_sizes;
 
-  typedef multidim_array_layout< new_indices , new_sizes > new_layout;
-  typedef tensor_interface< double, new_layout > new_tensor;
+  typedef multidim_layout< new_indices , new_sizes > new_layout;
+  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef tensor_interface< double, new_layout, variances > new_tensor;
   new_tensor new_test_tensor( nullptr );
 
   const int new_index = boost::mpl::at_c< new_indices::mpl_vector_c, 0 >::type::value;

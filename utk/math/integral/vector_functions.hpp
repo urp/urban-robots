@@ -36,6 +36,32 @@ namespace utk
 
       //:::| data access
 
+      //---| make_uniform_vector
+
+      namespace
+      {
+	template< typename T, index_type, T, typename > struct make_uniform_recursion { /* unspecified */ };
+
+	template< typename T, T Value, T... Values >
+	struct make_uniform_recursion< T, 0, Value, vector< T, Values... > >
+	{
+	  typedef vector< T, Values... > type;
+	};
+
+	template< typename T, index_type ElementsLeft, T Value, T... Values >
+	struct make_uniform_recursion< T, ElementsLeft, Value, vector< T, Values... > >
+	{
+	  typedef typename make_uniform_recursion< T, ElementsLeft-1 , Value, vector< T, Value, Values... > >::type type;
+	};
+      }
+
+      template< typename T, index_type Size, T Value >
+      struct make_uniform_vector
+      {
+
+	typedef typename make_uniform_recursion< T, Size, Value, vector< T > >::type type;
+      };
+
       //---| make_array
 
       template< typename > struct make_array { /* unspecified */ };
@@ -170,6 +196,19 @@ namespace utk
 
 	  typedef typename push_front< typename popped::tail, constant< T, Unpacked > >::type tail;
       };
+
+
+      //---| concatinate
+      template< typename, typename > struct concatinate { /* unspecified */ };
+
+      template< typename T, T... ValuesA, T... ValuesB >
+      struct concatinate< vector< T, ValuesA... >, vector< T, ValuesB... > >
+      {
+	typedef vector< T, ValuesA... , ValuesB... > type;
+      };
+
+
+      //---| io-stream insertion operator
 
       template< typename T, T...Values >
       std::ostream& operator<<( std::ostream& os, const vector< T, Values... >& vec )

@@ -60,7 +60,7 @@ explicit install-vector-headers ;
 #---| tensor
 #-----------
 
-run multidim_array_layout_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_layout_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
 
 unit-test test-tensor-interface  : tensor_interface_test.cpp /utk/io//io
                                  : <library>/robots//boost-unit-test ;
