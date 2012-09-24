@@ -58,8 +58,8 @@ namespace utk
       template< typename T, index_type Size, T Value >
       struct make_uniform_vector
       {
-
-	typedef typename make_uniform_recursion< T, Size, Value, vector< T > >::type type;
+	// TODO: initialize with size and empty vector (gcc-4.7 error)
+	typedef typename make_uniform_recursion< T, Size-1, Value, vector< T, Value > >::type type;
       };
 
       //---| make_array

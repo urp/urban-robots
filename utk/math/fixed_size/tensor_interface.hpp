@@ -51,30 +51,6 @@ namespace utk
 	tensor_interface( typename multidim_base::storage_base::pointer_type pointer ) : multidim_base( pointer )  {	}
       };
 
-      template< typename T, typename MultiDimLayout, variance_type Variance >
-      struct make_non_mixed_tensor_interface
-      {
-	typedef tensor_interface< T, MultiDimLayout
-				  , typename integral::make_uniform_vector< T, MultiDimLayout::rank(), Variance >::type
-				  > type;
-
-      };
-
-      template< typename T, typename MultiDimLayout, index_type ContravariantIndices >
-      class make_mixed_tensor_interface
-      {
-
-	typedef typename integral::make_uniform_vector< T, ContravariantIndices, contravariant >::type contravar;
-	typedef typename integral::make_uniform_vector< T, MultiDimLayout::rank() - ContravariantIndices, covariant >::type covar;
-
-	typedef tensor_interface< T, MultiDimLayout
-				  , typename integral::concatinate< contravar, covar >::type
-				  > type;
-
-      };
-
-
-
     } // of fixed_size::
   } // of math::
 } // of utk::
