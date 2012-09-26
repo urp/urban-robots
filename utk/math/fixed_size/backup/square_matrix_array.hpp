@@ -32,7 +32,7 @@ namespace utk
       template< typename T, size_t Cnt >
       class mata : public matn<T,Cnt>
       { 
-          vector_array<T,Cnt*Cnt> arr[Cnt*Cnt];
+          vector_array<T,Cnt*Cnt> arr;
           
         public:
   

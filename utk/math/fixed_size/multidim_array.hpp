@@ -17,6 +17,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/multidim_interface.hpp"
+# include "utk/math/fixed_size/vector_array.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -27,29 +28,31 @@ namespace utk
     namespace fixed_size
     {
 
-      typedef enum { contravariant=false, covariant=true } variance_type;
+      //-----| multidim_array
 
-      //-----| tensor_interface
-
-      template< typename, typename, typename > struct tensor_interface
+      template< typename, typename > struct multidim_array
       { /* unspecified */ };
 
-      template < typename T, typename...LayoutData, variance_type...Variances >
-      struct tensor_interface< T, multidim_layout< LayoutData... >, integral::vector< variance_type, Variances... > >
-      :	public multidim_interface< T, multidim_layout< LayoutData... > >
+      template < typename T, typename...LayoutData >
+      struct multidim_array< T, multidim_layout< LayoutData... > >
+      : public multidim_interface< T, multidim_layout< LayoutData... > >
       {
-	typedef multidim_interface< T, multidim_layout< LayoutData... > > multidim;
+	typedef multidim_interface < T, multidim_layout< LayoutData... > > interface;
 
-	typedef integral::vector< variance_type, Variances... > variances;
+	typedef vector_array< T, interface::layout::total_size() > storage_array;
 
-	static_assert( variances::size == multidim::rank(), "size of variances must agree with tensor rank." );
+	//---| data storage
 
-	//---| constructor with storage pointer
+	storage_array data;
 
-	explicit
-	tensor_interface( typename multidim::storage_interface::pointer_type pointer ) : multidim( pointer )  {	}
+	//---| constructor (create with uninitialized data)
+
+	explicit multidim_array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
+
       };
 
     } // of fixed_size::
   } // of math::
 } // of utk::
+
+# pragma GCC visibility pop

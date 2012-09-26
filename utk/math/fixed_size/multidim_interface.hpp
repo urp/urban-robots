@@ -44,12 +44,12 @@ namespace utk
 
 	typedef multidim_layout< LayoutData... > layout;
 
-	typedef vector_interface< value_type, layout::total_size() > storage_base;
+	typedef vector_interface< value_type, layout::total_size() > storage_interface;
 
 	//---| constructor with storage pointer
 
 	explicit
-	multidim_interface( typename storage_base::pointer_type pointer ) : storage_base( pointer )  {	}
+	multidim_interface( typename storage_interface::pointer_type pointer ) : storage_interface( pointer )  {	}
 
 	// element access
 
@@ -57,7 +57,7 @@ namespace utk
 	value_type& at( CoordTypes...coords )
 	{
 	  //TODO: checks
-	  return storage_base::at( layout::free_indices_offset( coords... )
+	  return storage_interface::at( layout::free_indices_offset( coords... )
 				    + layout::fixed_indices_offset()
 				    );
 	}
@@ -66,9 +66,9 @@ namespace utk
 	const value_type& at( CoordTypes...coords ) const
 	{
 	  //TODO: checks
-	  return storage_base::at( layout::free_indices_offset( coords... )
-				    + layout::fixed_indices_offset()
-				    );
+	  return storage_interface::at( layout::free_indices_offset( coords... )
+					  + layout::fixed_indices_offset()
+					  );
 	}
 
       };
