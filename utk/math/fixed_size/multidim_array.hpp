@@ -30,14 +30,11 @@ namespace utk
 
       //-----| multidim_array
 
-      template< typename, typename > struct multidim_array
-      { /* unspecified */ };
-
-      template < typename T, typename...LayoutData >
-      struct multidim_array< T, multidim_layout< LayoutData... > >
-      : public multidim_interface< T, multidim_layout< LayoutData... > >
+      template < typename T, typename Layout >
+      struct multidim_array
+      : public multidim_interface< T, Layout >
       {
-	typedef multidim_interface < T, multidim_layout< LayoutData... > > interface;
+	typedef multidim_interface < T, Layout > interface;
 
 	typedef vector_array< T, interface::layout::total_size() > storage_array;
 

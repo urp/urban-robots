@@ -29,25 +29,41 @@ namespace utk
 
       typedef enum { contravariant=false, covariant=true } variance_type;
 
+      template< variance_type... Variances >
+      using variance_vector = integral::vector< variance_type, Variances... >;
+
       //-----| tensor_interface
 
-      template< typename, typename, typename > struct tensor_interface
-      { /* unspecified */ };
-
-      template < typename T, typename...LayoutData, variance_type...Variances >
-      struct tensor_interface< T, multidim_layout< LayoutData... >, integral::vector< variance_type, Variances... > >
-      :	public multidim_interface< T, multidim_layout< LayoutData... > >
+      // TODO: replace integral::vector< variance_type, Variances... > with variance_vector< Variances... >
+      template < typename T, typename Layout, typename VarianceVector >
+      struct tensor_interface
+      :	public multidim_interface< T, Layout >
       {
-	typedef multidim_interface< T, multidim_layout< LayoutData... > > multidim;
+	typedef multidim_interface< T, Layout > multidim;
 
-	typedef integral::vector< variance_type, Variances... > variances;
+	typedef VarianceVector variances;
 
-	static_assert( variances::size == multidim::rank(), "size of variances must agree with tensor rank." );
+	static_assert( variances::size == multidim::layout::full_order, "size of variances must agree with tensor order." );
 
 	//---| constructor with storage pointer
 
 	explicit
 	tensor_interface( typename multidim::storage_interface::pointer_type pointer ) : multidim( pointer )  {	}
+
+	/*template< index_type Index >
+	change_basis( const tensor_interface< T
+					       , initial_layout< integral::at< sizes, Index >::value
+							       , integral::at< sizes, Index >::value
+							       >
+					       , variance_vector< contravariant
+								, covariant
+								>
+					       >& matrix_transform
+		    )
+	{
+	  std::
+	}*/
+
       };
 
     } // of fixed_size::

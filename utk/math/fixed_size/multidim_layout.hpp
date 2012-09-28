@@ -21,83 +21,14 @@
 
 # include "utk/math/integral/integral.hpp"
 
+# include "utk/math/fixed_size/multidim_layout_helpers.hpp"
+
 namespace utk
 {
   namespace math
   {
     namespace fixed_size
     {
-
-      using integral::index_type;
-
-      // TODO: move to common header?
-
-      typedef unsigned size_type;
-      typedef unsigned param_type;
-      typedef unsigned stride_type;
-
-      //-----| bool_vector
-
-      template< bool...Bools >
-      using bool_vector = integral::vector< bool, Bools... >;
-
-      //-----| index_vector
-
-      template< index_type... Indices >
-      using index_vector = integral::vector< index_type, Indices... >;
-
-      //-----| size_vector
-
-      template< size_type... Sizes >
-      using size_vector = integral::vector< size_type, Sizes... >;
-
-      //-----| stride_vector
-
-      template< size_type... Strides >
-      using stride_vector = integral::vector< stride_type, Strides... >;
-
-      namespace helpers
-      {
-	//---| stride_sequence
-
-	namespace
- 	{
-	  template< typename, typename > struct stride_sequence_recursion { /* unspecified */ };
-
-	  template< stride_type...Strides >
-	  struct stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type > >
-	  {
-	    typedef stride_vector< Strides... > type;
-	  };
-
-	  template< stride_type...Strides, size_type...Sizes >
-	  class stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type, Sizes... > >
-	  {
-	      typedef typename integral::pop_front< integral::vector< size_type, Sizes... > > stripped;
-
-	      static const stride_type new_stride = integral::pop_back< integral::vector< stride_type, Strides... > >::value * stripped::value;
-
-	    public:
-
-	      typedef typename stride_sequence_recursion< integral::vector< stride_type, Strides..., new_stride >, typename stripped::tail >::type type;
-	  };
-	}
-
-	template< typename > struct stride_sequence { /* unspecified */ };
-
-	template< size_type... Sizes >
-	struct stride_sequence< integral::vector< size_type, Sizes... > >
-	{
-	  private:
-	    typedef typename integral::reverse< integral::vector< size_type, Sizes... > >::type reverse_sizes;
-	    typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
-							    ,  reverse_sizes >::type reverse_result;
-
-	  public:
-	    typedef typename integral::reverse< reverse_result >::type type;
-	};
-
-      } // of helpers::
 
       //---------------------
       //---| tensor layout
@@ -123,6 +54,12 @@ namespace utk
 
 	  typedef typename helpers::stride_sequence< sizes >::type strides;
 
+	  //---| order
+	  //-----number of dimensions
+	  //order is defined below!
+	  static constexpr index_type full_order = sizes::size;
+
+
 	  //---| stride
 	  //-----extract stride
 	  template< index_type Index >
@@ -131,10 +68,6 @@ namespace utk
 	    static_assert( Index <= sizeof...(Sizes), "requested dimension does not exist" );
 	    const static stride_type value = integral::at< strides, Index >::value;
 	  };
-
-	  //---| dimension
-	  //-----query dimensionality
-	  constexpr static const index_type rank()  { return sizeof...(Sizes); }
 
 	  //---| total_size
 	  //-----query size (number of scalars)
@@ -146,7 +79,7 @@ namespace utk
 	  template< index_type Index, index_type Value >
 	  class fix_index
 	  {
-	      static_assert( Index < rank(), "Index greater or equal than tensor rank");
+	      static_assert( Index < full_order, "Index greater or equal than tensor order");
 	      typedef typename integral::assign< indices, Index, integral::constant< index_type, Value > >::type new_indices;
 	    public:
 	      typedef multidim_layout< new_indices, sizes > type;
@@ -157,7 +90,7 @@ namespace utk
 	  template< index_type Index >
 	  class release_index
 	  {
-	     static_assert( Index < rank(), "Index greater or equal than tensor rank");
+	     static_assert( Index < full_order, "Index greater or equal than tensor order");
 	      static const index_type dim_size = integral::at< sizes, Index >::value;
 	    public:
 	      typedef typename fix_index< Index, dim_size >::type type;
@@ -174,6 +107,10 @@ namespace utk
 	      typedef multidim_layout< sub_indices, sub_sizes > type;
 	  };
 
+	  //---| order
+	  //-----number of dimensions
+	  static constexpr index_type order = remove_fixed::type::sizes::size;
+
 	  //:::| memory model
 	  // TODO: free_indices_offset< Coords >
 	  // TODO: use free_indices_offset and fixed_dimension_offset in specializations of 'at< Coords >( dyn_coords )'
@@ -182,7 +119,7 @@ namespace utk
 	  template< typename...Coords >
 	  static const stride_type free_indices_offset( Coords... coords )
 	  {
-	    static_assert( sizeof...(coords) == remove_fixed::type::rank()
+	    static_assert( sizeof...(coords) == remove_fixed::type::order
 			   , "number of coordinates must be smaller than number of 'free' indices." );
 
 	    // detect fixed dimensions

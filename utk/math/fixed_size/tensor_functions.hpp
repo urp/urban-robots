@@ -17,6 +17,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor_interface.hpp"
+# include "utk/math/fixed_size/tensor_array.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -31,24 +32,52 @@ namespace utk
       struct make_non_mixed_tensor_interface
       {
 	typedef tensor_interface< T, MultiDimLayout
-				  , typename integral::make_uniform_vector< variance_type, MultiDimLayout::rank(), Variance >::type
-				  > type;
-
+							      , typename integral::make_uniform_vector< variance_type, MultiDimLayout::order, Variance >::type
+							      > type;
       };
 
       template< typename T, typename MultiDimLayout, index_type ContravariantIndices >
       class make_mixed_tensor_interface
       {
+	typedef typename integral::make_uniform_vector< variance_type, ContravariantIndices, contravariant >::type contravar;
+	typedef typename integral::make_uniform_vector< variance_type, MultiDimLayout::order - ContravariantIndices, covariant >::type covar;
 
-	typedef typename integral::make_uniform_vector< T, ContravariantIndices, contravariant >::type contravar;
-	typedef typename integral::make_uniform_vector< T, MultiDimLayout::rank() - ContravariantIndices, covariant >::type covar;
+	public:
 
-	typedef tensor_interface< T, MultiDimLayout
+	  typedef tensor_interface< T, MultiDimLayout
 				  , typename integral::concatinate< contravar, covar >::type
 				  > type;
-
       };
 
+      template< typename TensorA, typename TensorB >
+      struct product_tensor_array { /* unspecified */ };
+
+      template< typename T, typename LayoutA, typename VariancesA, typename LayoutB, typename VariancesB >
+      struct product_tensor_array< tensor_interface<T, LayoutA, VariancesA >
+				 , tensor_interface<T, LayoutB, VariancesB >
+				 >
+      {
+	typedef tensor_array< T
+			    , typename product_layout< LayoutA, LayoutB >::type
+			    , typename integral::concatinate< VariancesA, VariancesB >::type
+			    > type;
+      };
+
+      // tensor_product
+
+      template< typename T, typename LayoutA, typename LayoutB, typename VariancesA, typename VariancesB >
+      auto tensor_product( const tensor_interface<T, LayoutA, VariancesA >& a
+			 , const tensor_interface<T, LayoutB, VariancesB >& b
+			 )
+      -> typename product_tensor_array< tensor_interface<T, LayoutA, VariancesA >
+				      , tensor_interface<T, LayoutB, VariancesB >
+				      >::type
+      {
+	typedef typename product_tensor_array< tensor_interface<T, LayoutA, VariancesA >
+					     , tensor_interface<T, LayoutB, VariancesB >
+					     >::type array_type;
+	return array_type();
+      }
 
 
     } // of fixed_size::

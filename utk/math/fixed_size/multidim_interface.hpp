@@ -20,6 +20,7 @@
 
 # include "utk/math/fixed_size/vector_interface.hpp"
 # include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim_layout_functions.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -32,19 +33,17 @@ namespace utk
 
       //-----| multidim_interface
 
-      template< typename, typename > struct multidim_interface
-      { /* unspecified */ };
-
-      template < typename T, typename...LayoutData >
-      struct multidim_interface< T, multidim_layout< LayoutData... > >
-      : public multidim_layout< LayoutData... >
-      ,	public vector_interface< T, multidim_layout< LayoutData... >::total_size() >
+      template < typename T, typename Layout >
+      struct multidim_interface
+      :	public vector_interface< T, Layout::total_size() >
       {
 	typedef T value_type;
 
-	typedef multidim_layout< LayoutData... > layout;
+	typedef Layout layout;
 
 	typedef vector_interface< value_type, layout::total_size() > storage_interface;
+
+	static constexpr index_type order = layout::order;
 
 	//---| constructor with storage pointer
 
@@ -67,8 +66,8 @@ namespace utk
 	{
 	  //TODO: checks
 	  return storage_interface::at( layout::free_indices_offset( coords... )
-					  + layout::fixed_indices_offset()
-					  );
+				      + layout::fixed_indices_offset()
+				      );
 	}
 
       };

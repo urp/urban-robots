@@ -53,7 +53,8 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   {
     typedef multidim_layout< index_vector<2,3,4>, size_vector<2,3,4> > layout;
 
-    BOOST_CHECK_EQUAL( layout::rank(), 3 );
+    const index_type order = layout::order;
+    BOOST_CHECK_EQUAL( order, 3 );
 
     BOOST_CHECK_EQUAL( layout::total_size(), 24 );
 
@@ -81,7 +82,9 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( removed1, 4 );
 
     BOOST_CHECK_EQUAL( removed::total_size(), 12 );
-    BOOST_CHECK_EQUAL( removed::rank(), 2 );
+
+    const index_type order = removed::order;
+    BOOST_CHECK_EQUAL( order, 2 );
 
     // unfix
     typedef typename layout::release_index< 0 >::type unfixed;
