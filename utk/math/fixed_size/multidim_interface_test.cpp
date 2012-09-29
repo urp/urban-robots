@@ -46,6 +46,39 @@ BOOST_AUTO_TEST_CASE( multidim_at_with_free_dimensions )
   BOOST_CHECK_EQUAL( multidim.at( 0,1,2 ) , 5. );
 }
 
+BOOST_AUTO_TEST_CASE( multidim_copy )
+{
+  typedef initial_layout< 1,2,3 > layout;
+  typedef multidim_interface< double, layout > multidim_type;
+  double  data[ layout::total_size() ] = { 0.,1.,2.,3.,4.,5. };
+  multidim_type original( data );
+
+  // check identical copy
+  multidim_type id_copy( original );
+
+  BOOST_CHECK_EQUAL( id_copy.at( 0,0,0 ) , 0. );
+  BOOST_CHECK_EQUAL( id_copy.at( 0,0,1 ) , 1. );
+  BOOST_CHECK_EQUAL( id_copy.at( 0,0,2 ) , 2. );
+  BOOST_CHECK_EQUAL( id_copy.at( 0,1,0 ) , 3. );
+  BOOST_CHECK_EQUAL( id_copy.at( 0,1,1 ) , 4. );
+  BOOST_CHECK_EQUAL( id_copy.at( 0,1,2 ) , 5. );
+
+  // check general copy
+  typedef multidim_interface< double, typename multidim_type::layout::fix_index< 1, 0 >::type > fixed_type;
+
+  fixed_type fixed_copy( original );
+  multidim_type copy( fixed_copy );
+
+  BOOST_CHECK_EQUAL( copy.at( 0,0,0 ) , 0. );
+  BOOST_CHECK_EQUAL( copy.at( 0,0,1 ) , 1. );
+  BOOST_CHECK_EQUAL( copy.at( 0,0,2 ) , 2. );
+  BOOST_CHECK_EQUAL( copy.at( 0,1,0 ) , 3. );
+  BOOST_CHECK_EQUAL( copy.at( 0,1,1 ) , 4. );
+  BOOST_CHECK_EQUAL( copy.at( 0,1,2 ) , 5. );
+
+}
+
+
 BOOST_AUTO_TEST_CASE( multidim_at_with_fixed_dimensions )
 {
   typedef initial_layout< 3,2,3 > unfixed_layout;

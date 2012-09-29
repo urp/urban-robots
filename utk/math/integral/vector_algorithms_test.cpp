@@ -37,6 +37,19 @@ BOOST_AUTO_TEST_SUITE( unary_transforms )
 
   }
 
+  BOOST_AUTO_TEST_CASE( vector_is_true )
+  {
+    typedef vector< bool, true,false,true > bools;
+    typedef typename is_true< bools >::type  result;
+    static const bool r0 = at< result, 0 >::value;
+    BOOST_CHECK(  r0 );
+    static const bool r1 = at< result, 1 >::value;
+    BOOST_CHECK( !r1 );
+    static const bool r2 = at< result, 2 >::value;
+    BOOST_CHECK(  r2 );
+  }
+
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE( binary_transforms )
@@ -69,20 +82,70 @@ BOOST_AUTO_TEST_SUITE( binary_transforms )
     BOOST_CHECK_EQUAL( r2,  2 );
   }
 
+  BOOST_AUTO_TEST_CASE( vector_conjunction )
+  {
+    typedef vector< bool, true,false,true >  A;
+    typedef vector< bool, false,false,true >  B;
+
+    typedef typename conjunction< A, B >::type AandB;
+
+    static const bool AandB0 = at< AandB, 0 >::value;
+    BOOST_CHECK( !AandB0 );
+    static const bool AandB1 = at< AandB, 1 >::value;
+    BOOST_CHECK( !AandB1 );
+    static const bool AandB2 = at< AandB, 2 >::value;
+    BOOST_CHECK(  AandB2 );
+
+    typedef typename conjunction< A, A >::type AandA;
+
+    static const bool AandA0 = at< AandA, 0 >::value;
+    BOOST_CHECK( AandA0 );
+    static const bool AandA1 = at< AandA, 1 >::value;
+    BOOST_CHECK( !AandA1 );
+    static const bool AandA2 = at< AandA, 2 >::value;
+    BOOST_CHECK( AandA2 );
+  }
+
   BOOST_AUTO_TEST_CASE( vector_equal )
   {
     typedef vector< int, 1,2,3 >  A;
     typedef vector< int, 3,2,1 >  B;
-    typedef typename equal< A, B >::type result;
+    typedef typename equal< A, B >::type AeqB;
 
-    static const bool eq0 = at< result, 0 >::value;
-    BOOST_CHECK( !eq0 );
-    static const bool eq1 = at< result, 1 >::value;
-    BOOST_CHECK(  eq1 );
-    static const bool eq2 = at< result, 2 >::value;
-    BOOST_CHECK( !eq2 );
+    static const bool AeqB0 = at< AeqB, 0 >::value;
+    BOOST_CHECK( !AeqB0 );
+    static const bool AeqB1 = at< AeqB, 1 >::value;
+    BOOST_CHECK(  AeqB1 );
+    static const bool AeqB2 = at< AeqB, 2 >::value;
+    BOOST_CHECK( !AeqB2 );
+
+    typedef typename equal< A, A >::type AeqA;
+
+    static const bool AeqA0 = at< AeqA, 0 >::value;
+    BOOST_CHECK( AeqA0 );
+    static const bool AeqA1 = at< AeqA, 1 >::value;
+    BOOST_CHECK( AeqA1 );
+    static const bool AeqA2 = at< AeqA, 2 >::value;
+    BOOST_CHECK( AeqA2 );
 
   }
+
+  BOOST_AUTO_TEST_CASE( vector_all )
+  {
+    typedef vector< int, 1,2,3 >  A;
+    typedef vector< int, 3,2,1 >  B;
+    typedef vector< int, 1,2,3 >  C;
+
+    static const bool AeqB = all< typename equal< A, B >::type >::value;
+    BOOST_CHECK( !AeqB );
+
+    static const bool AeqC = all< equal< A, C >::type >::value;
+    BOOST_CHECK( AeqC );
+
+    static const bool AeqA = all< equal< A, A >::type >::value;
+    BOOST_CHECK( AeqA );
+  }
+
 BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE( conditional_remove )

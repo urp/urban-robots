@@ -21,6 +21,7 @@
 # include "utk/math/fixed_size/vector_interface.hpp"
 # include "utk/math/fixed_size/multidim_layout.hpp"
 # include "utk/math/fixed_size/multidim_layout_functions.hpp"
+# include "utk/math/fixed_size/multidim_iterator.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -37,6 +38,8 @@ namespace utk
       struct multidim_interface
       :	public vector_interface< T, Layout::total_size() >
       {
+	typedef multidim_interface< T, Layout > type;
+
 	typedef T value_type;
 
 	typedef Layout layout;
@@ -45,12 +48,93 @@ namespace utk
 
 	static constexpr index_type order = layout::order;
 
+	//:::| constructors
+
 	//---| constructor with storage pointer
 
 	explicit
 	multidim_interface( typename storage_interface::pointer_type pointer ) : storage_interface( pointer )  {	}
 
-	// element access
+	explicit
+	multidim_interface( const storage_interface& storage ) : storage_interface( storage )  {	}
+
+	//---| copy constructor
+	template< typename OtherInterface
+		  // TODO: replace condition by something like check_layout_compatibility< Layout1, Layout2 >
+		, typename  = typename std::enable_if< integral::all< typename integral::equal< typename OtherInterface::layout::sizes
+											      , typename layout::sizes
+											      >::type
+								    >::value
+						     , void
+						     >::type
+		>
+	multidim_interface( const OtherInterface& other ) : storage_interface( other )	{	}
+
+	//:::| derived interfaces
+
+	template< typename OtherLayout >
+	struct changed_layout
+	{
+	  static_assert( integral::all< typename integral::equal< typename OtherLayout::sizes, typename layout::sizes >::type >::value
+		       , "OtherLayouts vector-space dimensions must agree with original layout"
+		       );
+	  typedef multidim_interface<T, OtherLayout > type;
+	};
+
+
+	template< typename OtherLayout >
+	typename changed_layout< OtherLayout >::type change_layout() const
+	{
+	  return typename changed_layout< OtherLayout >::type( *this );
+	}
+
+	//:::| iterator interface
+
+	//:::::| prepare iterator_begin
+
+	template< index_type Index >
+	using iterator_begin_interface = typename changed_layout< typename layout::template fix_index< Index, 0 >::type >::type;
+
+	template< index_type Index >
+	using iterator_begin = multidim_iterator< iterator_begin_interface< Index >, Index >;
+
+	template< index_type Index >
+	using const_iterator_begin = const multidim_iterator< iterator_begin_interface< Index >, Index >;
+
+	//:::::| prepare iterator_end
+
+	template< index_type Index >
+	using iterator_end_interface = typename changed_layout< typename layout::template fix_index< Index
+												   , integral::at< typename layout::sizes, Index >::value
+												   >::type
+							      >::type;
+
+	template< index_type Index >
+	using iterator_end = multidim_iterator< iterator_end_interface< Index >, Index >;
+
+	template< index_type Index >
+	using const_iterator_end = const multidim_iterator< iterator_end_interface< Index >, Index >;
+
+	//---| begin
+
+	template< index_type Index >
+	iterator_begin<Index> begin() { return const_iterator_begin< Index >( *this ); }
+
+	template< index_type Index >
+	const_iterator_begin<Index> begin() const { return const_iterator_begin< Index >( *this ); }
+
+	//---| end
+
+	template< index_type Index >
+	iterator_end<Index> end() { return const_iterator_end< Index >( *this ); }
+
+	template< index_type Index >
+	const_iterator_end<Index> end() const { return const_iterator_end< Index >( *this ); }
+
+
+	//:::| element access
+
+	//---| at
 
 	template< typename...CoordTypes >
 	value_type& at( CoordTypes...coords )

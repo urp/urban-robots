@@ -68,7 +68,7 @@ namespace utk
           vector_interface(const vector_interface<T,D2>& o) : val(o.ptr())
           { static_assert( Size <= D2, "copy" ); }
 
-          // copy interface
+          // copy interface ( which refers to the same piece of memory )
           vector_interface(const vector_interface<T,Size>& o) : val(o.ptr())
           {	}
 

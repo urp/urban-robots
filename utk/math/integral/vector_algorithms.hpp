@@ -32,7 +32,7 @@ namespace utk
 
       //:::| algorithms
 
-      //---| unary transform
+      //---| transform
 
       template< typename, typename > struct transform { /* unspecified */ };
 
@@ -58,7 +58,7 @@ namespace utk
 
       //:::| unary operators
 
-      //---| negate (operator)
+      //---| negate ( scalar -> scalar )
 
       template< typename T >
       struct negate
@@ -71,11 +71,31 @@ namespace utk
 
       };
 
-      //---| negate (vector operator)
+      //---| negate ( vector -> vector )
 
       template< typename T, T...Values >
       struct negate< vector< T, Values... > >
       : public transform< vector< T, Values... >, negate< T > >
+      {	};
+
+      //---| is_true ( scalar -> scalar )
+
+      template< typename T >
+      struct is_true
+      {
+	typedef bool value_type;
+
+	template< T Value >
+	struct apply
+	{ static constexpr value_type value = bool( Value ); };
+
+      };
+
+      //---| negate ( vector -> vector )
+
+      template< typename T, T...Values >
+      struct is_true< vector< T, Values... > >
+      : public transform< vector< T, Values... >, is_true< T > >
       {	};
 
 
@@ -112,20 +132,33 @@ namespace utk
 
       //---| accumulate
 
-      template< typename, typename > struct accumulate { /* unspecified */ };
+      template< typename
+	      , typename BinaryScalarOperator
+	      , typename BinaryScalarOperator::value_type InitialValue = 0
+	      >
+      struct accumulate { /* unspecified */ };
 
-      template< typename T, typename BinaryScalarOperator >
-      struct accumulate< vector< T >, BinaryScalarOperator >
+      // return scalar -> terminate
+      template< typename T
+	      , typename BinaryScalarOperator
+	      , typename BinaryScalarOperator::value_type InitialValue
+	      >
+      struct accumulate< vector< T >, BinaryScalarOperator, InitialValue >
       {
         typedef typename BinaryScalarOperator::value_type value_type;
-	static constexpr value_type value = value_type(0);
+	static constexpr value_type value = value_type( InitialValue );
       };
 
-      template< typename T, T...Input, typename BinaryScalarOperator >
-      class accumulate< vector< T, Input... >, BinaryScalarOperator >
+      // accumulate -> continue
+      template< typename T
+	      , T...Input
+	      , typename BinaryScalarOperator
+	      , typename BinaryScalarOperator::value_type InitialValue
+	      >
+      class accumulate< vector< T, Input... >, BinaryScalarOperator, InitialValue >
       {
 	  typedef pop_front< vector< T, Input... > > input;
-	  typedef accumulate< typename input::tail, BinaryScalarOperator > accum;
+	  typedef accumulate< typename input::tail, BinaryScalarOperator, InitialValue > accum;
 	  static constexpr typename accum::value_type old_value = accum::value;
 
 	public:
@@ -134,11 +167,13 @@ namespace utk
 	  static constexpr value_type value = BinaryScalarOperator::template apply< input::value, old_value >::value;
       };
 
+
       //:::| binary operators
+
 
       //:::::arithmetic
 
-      //---| multiply (scalar operator)
+      //---| multiply ( scalar x scalar -> scalar )
 
       template< typename T1, typename T2 >
       struct multiply
@@ -153,14 +188,14 @@ namespace utk
 
       };
 
-      //---| multiply (vector operator)
+      //---| multiply ( vector x vector -> vector )
 
       template< typename T1, T1...Values1, typename T2, T2...Values2 >
       struct multiply< vector< T1, Values1... >, vector< T2, Values2... > >
       : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, multiply< T1, T2 > >
       {	};
 
-      //---| add (scalar operator)
+      //---| add ( scalar x scalar -> scalar )
 
       template< typename T1, typename T2 >
       struct add
@@ -175,18 +210,41 @@ namespace utk
 
       };
 
-      //---| add (vector operator)
+      //---| add ( vector x vector -> vector )
 
       template< typename T1, T1...Values1, typename T2, T2...Values2 >
       struct add< vector< T1, Values1... >, vector< T2, Values2... > >
       : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, add< T1, T2 > >
       {	};
 
+
+      //:::::| logical operarators
+
+      //---| conjunction ( scalar x scalar -> scalar )
+
+      template< typename T1, typename T2 >
+      struct conjunction
+      {
+	typedef decltype( T1() && T2() ) value_type;
+
+	template< T1 Value1, T2 Value2 >
+	struct apply
+	{
+	  static constexpr value_type value = Value1 && Value2;
+	};
+      };
+
+      //---| conjunction ( vector x vector -> vector )
+
+      template< typename T1, T1...Values1, typename T2, T2...Values2 >
+      struct conjunction< vector< T1, Values1... >, vector< T2, Values2... > >
+      : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, conjunction< T1, T2 > >
+      {	};
+
+
       //:::::| comparison operators
 
-      //---| equal (scalar operator)
-
-      //template< typename, typename > struct equal { /* unspecified */ };
+      //---| equal ( scalar x scalar -> scalar )
 
       template< typename T1, typename T2 >
       struct equal
@@ -201,15 +259,29 @@ namespace utk
 
       };
 
-      //---| equal (vector operator)
+      //---| equal ( vector x vector -> vector )
 
       template< typename T1, T1...Values1, typename T2, T2...Values2 >
       struct equal< vector< T1, Values1... >, vector< T2, Values2... > >
       : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, equal< T1, T2 > >
       {	};
 
-
       //:::| miscellianous
+
+      //---| all ( vector -> scalar )
+
+      template< typename Vector, typename Predicate = is_true< typename Vector::value_type > >
+      struct all { /* unspecified */ };
+
+      template< typename T, T...Values, typename Predicate >
+      struct all< vector< T, Values... >, Predicate >
+      : public accumulate< typename transform< vector< T, Values... >, Predicate >::type
+			 , conjunction< typename Predicate::value_type, typename Predicate::value_type >
+			 , true
+			 >
+      {	};
+
+      //---| TODO: any
 
       //---| reverse
 
@@ -283,8 +355,6 @@ namespace utk
       };
 
       //:::| inner_product
-
-      //---| inner_product
 
       template< typename, typename > struct inner_product { /* unspecified */ };
 
