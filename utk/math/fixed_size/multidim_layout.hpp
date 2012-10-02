@@ -33,7 +33,7 @@ namespace utk
       //---------------------
       //---| tensor layout
       //---------------------
-
+      // TODO: make index fixing invisible to multidim_interface
       template< typename IndexVector
 	      , typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
@@ -90,6 +90,7 @@ namespace utk
 
 	  //---| fix_dimension
 	  //-----returns a new multidim_layout with Index fixed (to Value)
+	  // TODO: tests
 	  template< index_type Index >
 	  struct remove_index
 	  {
@@ -105,6 +106,7 @@ namespace utk
 
 	  //---| unfix_dimension
 	  //-----returns a new multidim_layout with Index released.
+	  // TODO: tests
 	  template< index_type Index >
 	  class release_index
 	  {

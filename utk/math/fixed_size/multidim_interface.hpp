@@ -90,27 +90,18 @@ namespace utk
 	// TODO: !!! these aliases make gcc-4.7 crash
 
 	template< index_type Index >
-	using iterator_begin_interface = typename changed_layout< typename layout::template fix_index< Index, 0 >::type >::type;
+	using iterator_begin = multidim_static_iterator< type, Index, 0 >;
 
 	template< index_type Index >
-	using iterator_begin = multidim_static_iterator< iterator_begin_interface< Index >, Index >;
-
-	template< index_type Index >
-	using const_iterator_begin = const multidim_static_iterator< iterator_begin_interface< Index >, Index >;
+	using const_iterator_begin = const multidim_static_iterator< type, Index, 0 >;
 
 	//:::::| prepare iterator_end
 
 	template< index_type Index >
-	using iterator_end_interface = typename changed_layout< typename layout::template fix_index< Index
-												   , integral::at< typename layout::sizes, Index >::value
-												   >::type
-							      >::type;
+	using iterator_end = multidim_static_iterator< type, Index, integral::at< typename layout::sizes, Index >::value >;
 
 	template< index_type Index >
-	using iterator_end = multidim_static_iterator< iterator_end_interface< Index >, Index >;
-
-	template< index_type Index >
-	using const_iterator_end = const multidim_static_iterator< iterator_end_interface< Index >, Index >;
+	using const_iterator_end = const multidim_static_iterator< type, Index, integral::at< typename layout::sizes, Index >::value >;
 
 	//---| begin
 

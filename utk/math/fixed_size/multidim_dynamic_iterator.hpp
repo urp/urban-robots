@@ -44,30 +44,28 @@ namespace utk
 		       "Index used for dynamic iteration should not be fixed."
 		     );
 
-	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
-	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
-
 	//:::| value interface
 
 	typedef typename parent_layout::template remove_index< Index >::type value_layout;
 	typedef typename parent_interface::template changed_layout< value_layout >::type value_interface;
 	typedef typename value_interface::storage_interface value_storage_interface;
 
-	//:::| iterator typedefs
-	typedef value_interface	value_type;
 
+	//:::| container and value types
+
+	typedef value_interface	value_type;
 	typedef multidim_dynamic_iterator< parent_interface, Index > type;
 
-	// iteration index
-	static constexpr index_type index = Index;
-
-	//:::| non-static members
+	//:::| storage interface
 
 	parent_storage_interface storage;
 
-	// current iteration
+	//:::| iteration information
 
-	mutable index_type index_value;
+	static constexpr index_type index = Index;
+	mutable index_type index_value = 0;
+	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
+	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
 
 	//---| constructor with storage_interface
 
@@ -83,10 +81,10 @@ namespace utk
 	//:::| iterator interface
 
 	//---| dereference operators
-
+	// TODO: ask layout for offset
 	value_interface operator*()
 	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
-
+	// TODO: ask layout for offset
 	const value_interface operator*() const
 	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
 
