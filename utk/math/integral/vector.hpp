@@ -31,7 +31,7 @@ namespace utk
       {
         typedef T value_type;
 
-        static const unsigned size = sizeof...(Content);
+        static const size_t size = sizeof...(Content);
 
         typedef boost::mpl::vector_c< T, Content... > mpl_vector_c;
 

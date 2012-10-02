@@ -32,7 +32,7 @@ namespace utk
     {
 
       // TODO: bad
-      typedef unsigned index_type;
+      typedef size_t index_type;
 
       //:::| data access
 

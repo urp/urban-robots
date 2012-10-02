@@ -85,9 +85,9 @@ BOOST_AUTO_TEST_CASE( multidim_at_with_fixed_dimensions )
   typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
   typedef multidim_interface< double, layout > multidim_type;
   double  data[ layout::total_size ] = {  0., 1., 2., 3., 4., 5.
-                                              ,  6.,  7., 8., 9.,10.,11.
-                                              , 12., 13.,14.,15.,16.,17. };
-  multidim_type   multidim( data );
+                                       ,  6.,  7., 8., 9.,10.,11.
+                                       , 12., 13.,14.,15.,16.,17. };
+  multidim_type multidim( data );
 
   //right
   BOOST_CHECK_EQUAL( multidim.at( 0,0 ) , 2. );

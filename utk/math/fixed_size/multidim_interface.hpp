@@ -55,17 +55,14 @@ namespace utk
 	explicit
 	multidim_interface( const storage_interface& storage ) : storage_interface( storage )  {	}
 
-	//---| copy constructor
-	template< typename OtherInterface
-		  // TODO: replace condition by something like check_layout_compatibility< Layout1, Layout2 >
-		, typename  = typename std::enable_if< integral::all< typename integral::equal< typename OtherInterface::layout::sizes
-											      , typename layout::sizes
-											      >::type
-								    >::value
-						     , void
-						     >::type
-		>
-	multidim_interface( const OtherInterface& other ) : storage_interface( other )	{	}
+	/*---| copy constructor
+	template< typename OtherInterface >
+	multidim_interface( const OtherInterface& other ) : storage_interface( other )
+	{
+	  static_assert( integral::all< typename integral::equal< typename OtherInterface::layout::sizes, typename layout::sizes >::type >::value
+		       , "incompatible layouts!"
+		       );
+	}*/
 
 	//:::| derived interfaces
 
@@ -151,6 +148,8 @@ namespace utk
 	  const size_t storage_index = layout::free_indices_offset( coords... ) + layout::fixed_indices_offset();
 	  return fixed_size::at( static_cast< const storage_interface& >(*this), storage_index );
 	}
+
+
 
       };
 

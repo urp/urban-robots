@@ -34,7 +34,9 @@ namespace utk
       template < typename ProvidedInteface, index_type Index >
       struct multidim_static_iterator
       {
+
 	// check if Index is fixed, othwise fix it.
+	// this is for convenience
 	typedef typename std::conditional< is_index_fixed< typename ProvidedInteface::layout, Index >::value
 					 , ProvidedInteface
 					 , typename ProvidedInteface::template changed_layout< typename ProvidedInteface::layout::template fix_index< Index, 0 >::type >::type
@@ -42,11 +44,27 @@ namespace utk
 
 	typedef typename interface::value_type 	value_type;
 	typedef typename interface::layout 	layout;
-	static constexpr index_type		index = Index;
 
-	static const index_type index_value = integral::at< typename layout::indices, Index >::value;
+	//:::| iteration index information
+
+	static constexpr index_type index = Index;
+	static constexpr index_type index_value = integral::at< typename layout::indices, Index >::value;
+
+	static_assert( is_index_fixed< layout, Index >::value, "Iteration Index must be fixed." );
+
+	//:::| prepare increment iterator
+
 	typedef typename layout::template fix_index< Index, index_value+1 >::type increment_layout;
-	typedef multidim_static_iterator< typename interface::template changed_layout< increment_layout >::type , Index > increment_iterator;
+	typedef typename interface::template changed_layout< increment_layout >::type increment_interface;
+	typedef multidim_static_iterator< increment_interface , Index > increment_iterator;
+
+	//:::| prepare decrement iterator
+
+	typedef typename layout::template fix_index< Index, index_value-1 >::type decrement_layout;
+	typedef typename interface::template changed_layout< decrement_layout >::type decrement_interface;
+	typedef multidim_static_iterator< decrement_interface , Index > decrement_iterator;
+
+	//:::| memory interface
 
 	typename interface::storage_interface storage;
 
@@ -57,8 +75,7 @@ namespace utk
 
 	//---| copy constuctor
 
-	multidim_static_iterator( const multidim_static_iterator< interface, Index >& other_iterator )
-	: storage( other_iterator.storage )  {	}
+	multidim_static_iterator( const multidim_static_iterator< interface, Index >& other ) : storage( other.storage )  {	}
 
 	//:::| iterator interface
 
@@ -66,14 +83,17 @@ namespace utk
 
 	increment_iterator increment() const { return increment_iterator( storage ); }
 
+	// TODO: CHECK for underrun ( mark rend() )
+	decrement_iterator decrement() const { return decrement_iterator( storage ); }
+
 	template< typename OtherInterface >
-	bool operator==( const multidim_static_iterator< OtherInterface, OtherInterface::index >& other ) const
+	bool operator==( const multidim_static_iterator< OtherInterface, Index >& other ) const
 	{ return integral::all< typename integral::equal< typename layout::indices, typename OtherInterface::layout::indices >::type >::value
-		 && storage.ptr() == other.ptr();
+		 && storage.ptr() == other.storage.ptr();
 	}
 
 	template< typename OtherInterface >
-	bool operator!=( const multidim_static_iterator< OtherInterface, OtherInterface::index >& other ) const
+	bool operator!=( const multidim_static_iterator< OtherInterface, Index >& other ) const
 	{ return ! operator==( other ); }
 
       };

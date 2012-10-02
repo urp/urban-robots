@@ -24,7 +24,7 @@
 using namespace utk::math;
 using namespace utk::math::fixed_size;
 
-BOOST_AUTO_TEST_CASE( multidim_iterator_with_storage )
+BOOST_AUTO_TEST_CASE( multidim_1d_iterator_with_storage )
 {
   typedef initial_layout< 3 > layout;
   typedef multidim_interface< double, layout > multidim_type;
@@ -39,8 +39,53 @@ BOOST_AUTO_TEST_CASE( multidim_iterator_with_storage )
   it1_type it1 = it0.increment();
   BOOST_CHECK_EQUAL( (*it1).at() , 1. );
 
-  typedef typename it1_type::increment_iterator it2_type;
-  it2_type it2 = it1.increment();
+  auto it2 = it1.increment();
   BOOST_CHECK_EQUAL( (*it2).at() , 2. );
+}
+
+BOOST_AUTO_TEST_CASE( multidim_2d_iterator_with_storage )
+{
+  typedef initial_layout< 2,3 > layout;
+  typedef multidim_interface< double, layout > multidim_type;
+  double  data[ layout::total_size ] = { 0.,1.,2., 3., 4., 5. };
+  multidim_type multidim( data );
+
+  typedef multidim_static_iterator< multidim_type, 1 > it0_type;
+  it0_type it0( multidim );
+  BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
+  BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
+
+  auto it1 = it0.increment();
+  BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
+  BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
+
+  auto it2 = it1.increment();
+  BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
+  BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
+}
+
+BOOST_AUTO_TEST_CASE( multidim_2d_compare_iterators )
+{
+  typedef initial_layout< 2,3 > layout;
+  typedef multidim_interface< double, layout > multidim_type;
+  double  data[ layout::total_size ] = { 0.,1.,2., 3., 4., 5. };
+  multidim_type multidim( data );
+
+  typedef multidim_static_iterator< multidim_type, 1 > it0_type;
+  it0_type it0( multidim );
+  BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
+  BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
+
+  auto it1 = it0.increment();
+  BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
+  BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
+
+  auto it2 = it1.increment();
+  BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
+  BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
+
+  auto it1_id = it2.decrement();
+  BOOST_CHECK_EQUAL( it1_id == it1, true );
+  BOOST_CHECK_EQUAL( it0 != it1, true );
 
 }

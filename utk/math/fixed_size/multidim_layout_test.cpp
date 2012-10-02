@@ -88,20 +88,6 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   }
 
-  BOOST_AUTO_TEST_CASE( strides_vector )
-  {
-    typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
-
-    static const stride_type s0 = integral::at< strides, 0 >::value;
-    BOOST_CHECK_EQUAL( s0, 60 );
-    static const stride_type s1 = integral::at< strides, 1 >::value;
-    BOOST_CHECK_EQUAL( s1, 20 );
-    static const stride_type s2 = integral::at< strides, 2 >::value;
-    BOOST_CHECK_EQUAL( s2, 5 );
-    static const stride_type s3 = integral::at< strides, 3 >::value;
-    BOOST_CHECK_EQUAL( s3, 1 );
-
-  }
   // used by free_indices_offset & fixed_coord_offset
   BOOST_AUTO_TEST_CASE( strides_stripping_and_reversal )
   {

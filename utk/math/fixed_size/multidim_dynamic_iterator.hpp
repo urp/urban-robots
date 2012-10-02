@@ -72,7 +72,8 @@ namespace utk
 	//---| constructor with storage_interface
 
 	explicit
-	multidim_dynamic_iterator( const parent_storage_interface& storage ) : storage( storage )  { }
+	multidim_dynamic_iterator( const parent_storage_interface& storage, index_type index_value = 0 )
+	: storage( storage ), index_value( index_value )  { }
 
 	//---| copy constuctor
 
@@ -87,7 +88,7 @@ namespace utk
 	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
 
 	const value_interface operator*() const
-	{ return value_interface( value_storage_interface( storage + index_stride * index_value ) ); }
+	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
 
 	//---| increment iterators
 
@@ -134,9 +135,10 @@ namespace utk
 	}
 
 
-	bool operator==( const type& other ) const { return storage.ptr() == other.ptr(); }
+	bool operator==( const type& other ) const
+	{ return index_value == other.index_value and storage.ptr() == other.storage.ptr(); }
 
-	bool operator!=( const type& other ) const { return ! operator==( other ); }
+	bool operator!=( const type& other ) const { return not operator==( other ); }
 
       };
 

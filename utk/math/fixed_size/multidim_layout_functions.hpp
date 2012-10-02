@@ -30,6 +30,9 @@ namespace utk
         static constexpr index_type value = integral::at< typename Layout::sizes  , Index >::value
                                             != integral::at< typename Layout::indices, Index >::value;
       };
+
+      //---| product_layout
+
       // TODO: specify for vector x vector, vector x tensor and tensor x vector
       template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
