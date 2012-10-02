@@ -32,24 +32,25 @@ BOOST_AUTO_TEST_CASE( constructors )
   BOOST_CHECK( i1.is_valid() );
   BOOST_CHECK_EQUAL( &i1[0]    , data_i1 );
   BOOST_CHECK_EQUAL(  i1.ptr() , data_i1 );
-  BOOST_CHECK_EQUAL(  i1.size(), 1 );
+  BOOST_CHECK_EQUAL(  i1.size, 1 );
   BOOST_CHECK_EQUAL(  i1[0]    , 1 );
 
   double data_d4[] { 1., 2., 3., 4. };
   const vector_interface<double,4> d4( data_d4 );
-  BOOST_CHECK_EQUAL( d4.size(), 4 );
+  BOOST_CHECK_EQUAL( d4.size, 4 );
   BOOST_CHECK_EQUAL( d4[0]    , 1. );
   BOOST_CHECK_EQUAL( d4[1]    , 2. );
-  BOOST_CHECK_EQUAL( d4[2]    , 3. );  
-  BOOST_CHECK_EQUAL( d4[3]    , 4. );    
+  BOOST_CHECK_EQUAL( d4[2]    , 3. );
+  BOOST_CHECK_EQUAL( d4[3]    , 4. );
 
   const vector_interface<double,4> copy( d4 );
-  BOOST_CHECK_EQUAL( copy.size(), d4.size() );
+  BOOST_CHECK_EQUAL( copy.size, d4.size );
   BOOST_CHECK_EQUAL( copy.ptr() , d4.ptr() );
   BOOST_CHECK_EQUAL( copy[0]    , 1 );
-    
+
   const vector_interface<double,3> shrink_copy( d4 );
-  BOOST_CHECK_EQUAL( shrink_copy.size(), copy.size()-1 );
+  size_t shrink_copy_size = shrink_copy.size;
+  BOOST_CHECK_EQUAL( shrink_copy_size, copy.size-1 );
   BOOST_CHECK_EQUAL( shrink_copy.ptr() , d4.ptr() );
   BOOST_CHECK_EQUAL( shrink_copy[0]    , 1. );
   BOOST_CHECK_EQUAL( shrink_copy[1]    , 2. );
@@ -91,7 +92,6 @@ BOOST_AUTO_TEST_CASE( pointer_interface )
   d2.ref( data );
   BOOST_CHECK_EQUAL( &d2[0], data );
 
-
 }
 
 BOOST_AUTO_TEST_CASE( shift )
@@ -109,41 +109,6 @@ BOOST_AUTO_TEST_CASE( shift )
 
 }
 
-/*
-BOOST_AUTO_TEST_CASE( iteration_operators )
-{
-  double data[] { 1., 2., 3., 4., 5., 6., 7. };
-  // increment
-  vector_interface<double,3> d3( data );
-  BOOST_CHECK_EQUAL( (++d3).ptr(), data+3 );
-
-  d3.ref( data );
-  BOOST_CHECK_EQUAL( (d3++).ptr(), data );
-  BOOST_CHECK_EQUAL( d3.ptr(), data+3 );
-
-  // decrement
-  d3.ref( data + 3 );
-  BOOST_CHECK_EQUAL( (--d3).ptr(), data );
-
-  d3.ref( data + 3 );
-  BOOST_CHECK_EQUAL( (d3--).ptr(), data+3 );
-  BOOST_CHECK_EQUAL( d3.ptr(), data );
-
-  // operator*()
-  d2.ref( data );
-  BOOST_CHECK_EQUAL( d2.ptr(), &(*d2) );
-
-  // operator->()
-  std::complex<float> complex_data(1.,2.);
-  vector_interface<std::complex<float>,1> c1(&complex_data);
-  BOOST_CHECK_EQUAL( c1.ptr(), &(*c1) );
-  BOOST_CHECK_EQUAL( (*c1).real(), c1->real() );
-
-  // operator&()
-  BOOST_CHECK_EQUAL( &c1, &complex_data );
-
-}*/
-
 BOOST_AUTO_TEST_CASE( data_access )
 {
   double data_d3[] { 1., 2., 3. };
@@ -151,19 +116,14 @@ BOOST_AUTO_TEST_CASE( data_access )
 
   // iterators
   BOOST_CHECK_EQUAL( *d3.begin(), 1. );
-  BOOST_CHECK_EQUAL( *(d3.end()-1), 3. );  
+  BOOST_CHECK_EQUAL( *(d3.end()-1), 3. );
 
-  // at()
-  BOOST_CHECK_EQUAL( d3.at(0), 1. );
-  BOOST_CHECK_EQUAL( d3.at(2), 3. );
-  BOOST_CHECK_THROW( d3.at(3), std::out_of_range );
-  
   // operator()
   BOOST_CHECK_EQUAL( d3(0), 1. );
-  BOOST_CHECK_EQUAL( d3(2), 3. );  
+  BOOST_CHECK_EQUAL( d3(2), 3. );
 
   // operator[]
-  d3.at(0) = 1.1;
+  d3(0) = 1.1;
   BOOST_CHECK_EQUAL( data_d3[0], 1.1 );
 
   d3[1] = 2.2;
@@ -179,7 +139,7 @@ BOOST_AUTO_TEST_CASE( conversion_operators )
   //BOOST_CHECK_EQUAL( many , true );
   many.shift(1);
   BOOST_CHECK_EQUAL( bool(many), false );
-  
+
   vector_interface<bool,1> one( data_bool+2 );
   BOOST_CHECK_EQUAL( bool(one) , true );
   one.shift(1);
@@ -190,5 +150,5 @@ BOOST_AUTO_TEST_CASE( conversion_operators )
   vector_interface<int,1> b( data_int+1 );
   BOOST_CHECK_EQUAL( b , 2 );
   BOOST_CHECK_EQUAL( int(b) , 2 );
-  
+
 }

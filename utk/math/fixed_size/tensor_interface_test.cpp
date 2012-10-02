@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
   typedef initial_layout< 1,2,3 > layout;
   typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor_type;
-  double  data[ layout::total_size() ] = { 0.,1.,2.,3.,4.,5. };
+  double  data[ layout::total_size ] = { 0.,1.,2.,3.,4.,5. };
   tensor_type tensor( data );
 
   //right
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_fixed_dimensions )
   typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
   typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor_type;
-  double  data[ layout::total_size() ] = {  0., 1., 2., 3., 4., 5.
+  double  data[ layout::total_size ] = {  0., 1., 2., 3., 4., 5.
                                            ,  6.,  7., 8., 9.,10.,11.
                                            , 12., 13.,14.,15.,16.,17. };
   tensor_type   tensor( data );

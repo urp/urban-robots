@@ -32,9 +32,8 @@ namespace utk
 
       // TODO: move to common header?
 
-      typedef unsigned size_type;
-      typedef unsigned param_type;
-      typedef unsigned stride_type;
+      typedef size_t size_type;
+      typedef size_t stride_type;
 
       //-----| bool_vector
 
@@ -90,14 +89,26 @@ namespace utk
 	{
 	  private:
 	    typedef typename integral::reverse< integral::vector< size_type, Sizes... > >::type reverse_sizes;
+
 	    typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
 						      ,  reverse_sizes >::type reverse_result;
 
+	    // strip last stride
+	    typedef typename integral::pop_back< reverse_result >::tail reverse_stripped_result;
 	  public:
-	    typedef typename integral::reverse< reverse_result >::type type;
+	    typedef typename integral::reverse< reverse_stripped_result >::type type;
 	};
 
+	//---| total_size
+	// TODO: tests
+	template< typename SizeVector, typename StrideVector > struct total_size
+	{ static constexpr size_type value = integral::pop_front< SizeVector >::value * integral::at< StrideVector, 0 >::value; };
+
+	// scalar
+	template< > struct total_size< size_vector< >, stride_vector< > > { static constexpr size_type value = 1; };
+
       } // of helpers::
+
 
     }
   }

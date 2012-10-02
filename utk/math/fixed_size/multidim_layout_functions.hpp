@@ -24,18 +24,23 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      template< typename LayoutA, typename LayoutB >
-      struct product_layout { /* unspecified */ };
+      template< typename Layout, index_type Index >
+      struct is_index_fixed
+      {
+        static constexpr index_type value = integral::at< typename Layout::sizes  , Index >::value
+                                            != integral::at< typename Layout::indices, Index >::value;
+      };
+      // TODO: specify for vector x vector, vector x tensor and tensor x vector
+      template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
       template< index_type...IndicesA, size_type...SizesA, index_type...IndicesB, size_type...SizesB >
       struct product_layout< multidim_layout< integral::vector< index_type, IndicesA... >, integral::vector< size_type, SizesA... > >
-			   , multidim_layout< integral::vector< index_type, IndicesB... >, integral::vector< size_type, SizesB... > >
-			   >
+                           , multidim_layout< integral::vector< index_type, IndicesB... >, integral::vector< size_type, SizesB... > >
+                           >
       {
-	typedef multidim_layout< index_vector< IndicesA..., IndicesB... >
-			       , size_vector< SizesA..., SizesB... >
-			       > type;
+        typedef multidim_layout< index_vector< IndicesA..., IndicesB... >
+                               , size_vector< SizesA..., SizesB... >
+                               > type;
       };
     }
   }

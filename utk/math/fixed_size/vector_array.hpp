@@ -32,36 +32,37 @@ namespace utk
     namespace fixed_size
     {
       // array (in stack memory) with vector_interface interface
+      // TODO: !!! generate all fixed_size::*_array templates by MACROS
       template<typename T,size_t Cnt>
       class vector_array : public vector_interface<T,Cnt>
       {
 	private:
-	    
+
           T	arr[Cnt];
-          
+
         public:
-        
+
           typedef T*  iterator;
           typedef T*  const_iterator;
-  
+
 	  // construct with unitialized stack-memory
 	  vector_array() : vector_interface<T,Cnt>(arr)	{ 	}
-  
+
 	  // initialize with scalar
           explicit
      	  vector_array( const T& scalar ) : vector_interface<T,Cnt>( arr )
           { std::fill( vector_interface<T,Cnt>::begin(), vector_interface<T,Cnt>::end(), scalar); }
-  
+
 	  // copy sequence
 	  template< typename Iterator >
 	  vector_array( Iterator begin_it ,Iterator end_it ) : vector_interface<T,Cnt>( arr )
-          { 
+          {
 	    std::copy( begin_it, end_it, vector_interface<T,Cnt>::begin() );
 	  }
-  
+
 	  // copy vector_interface
           vector_array( const vector_interface<T,Cnt>& o )
-          : vector_interface<T,Cnt>(arr)				
+          : vector_interface<T,Cnt>(arr)
           { std::copy( o.begin(), o.end(), vector_interface<T,Cnt>::begin() ); }
 
 	  // TODO: needs LOVE (combine with variadic/init_list? conditional?)
@@ -69,27 +70,27 @@ namespace utk
           template<size_t Cnt2>
 	  vector_array(const vector_interface<T,Cnt2>& o) : vector_interface<T,Cnt>(arr)
 	  { std::copy( o.ptr(), o.ptr()+std::min(Cnt,Cnt2), vector_interface<T,Cnt>::begin() ); }
-  
-  
+
+
           // initializer_list
           vector_array( std::initializer_list<T> seq ) : vector_interface<T,Cnt>(arr)
           {
             assert( seq.size() == Cnt );
-            std::copy(seq.begin(), seq.end(), arr); 
+            std::copy(seq.begin(), seq.end(), arr);
           }
-  
+
 #	  ifdef UTK_MATH_FIXED_SIZE_VECTORS__VALARRAY_SUPPORT
-	  // copy valarray			
+	  // copy valarray
           explicit
 	  vector_array( const std::valarray<T>& o ) : vector_interface<T,Cnt>(arr)
-          { 
-            assert(o.size()>=Cnt); 
+          {
+            assert(o.size()>=Cnt);
 	    for(size_t i=0;i<Cnt;++i)
 	      arr[i]=o[i];
 	  }
 # 	  endif
 
-          virtual				
+          virtual
           ~vector_array()
     	  {	}
       };

@@ -14,16 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-
-
 # pragma once
 
 # include "utk/math/fixed_size/vector_interface.hpp"
+# include "utk/math/fixed_size/vector_functions.hpp" //required for fixed_size::at
 # include "utk/math/fixed_size/multidim_layout.hpp"
 # include "utk/math/fixed_size/multidim_layout_functions.hpp"
-# include "utk/math/fixed_size/multidim_iterator.hpp"
-
-# pragma GCC visibility push(default)
+# include "utk/math/fixed_size/multidim_static_iterator.hpp"
 
 namespace utk
 {
@@ -36,7 +33,7 @@ namespace utk
 
       template < typename T, typename Layout >
       struct multidim_interface
-      :	public vector_interface< T, Layout::total_size() >
+      :	public vector_interface< T, Layout::total_size >
       {
 	typedef multidim_interface< T, Layout > type;
 
@@ -44,7 +41,7 @@ namespace utk
 
 	typedef Layout layout;
 
-	typedef vector_interface< value_type, layout::total_size() > storage_interface;
+	typedef vector_interface< value_type, layout::total_size > storage_interface;
 
 	static constexpr index_type order = layout::order;
 
@@ -75,9 +72,6 @@ namespace utk
 	template< typename OtherLayout >
 	struct changed_layout
 	{
-	  static_assert( integral::all< typename integral::equal< typename OtherLayout::sizes, typename layout::sizes >::type >::value
-		       , "OtherLayouts vector-space dimensions must agree with original layout"
-		       );
 	  typedef multidim_interface<T, OtherLayout > type;
 	};
 
@@ -85,6 +79,10 @@ namespace utk
 	template< typename OtherLayout >
 	typename changed_layout< OtherLayout >::type change_layout() const
 	{
+	  static_assert( integral::all< typename integral::equal< typename OtherLayout::sizes, typename layout::sizes >::type >::value
+		       , "OtherLayouts vector-space dimensions must agree with original layout"
+		       );
+
 	  return typename changed_layout< OtherLayout >::type( *this );
 	}
 
@@ -92,14 +90,16 @@ namespace utk
 
 	//:::::| prepare iterator_begin
 
+	// TODO: !!! these aliases make gcc-4.7 crash
+
 	template< index_type Index >
 	using iterator_begin_interface = typename changed_layout< typename layout::template fix_index< Index, 0 >::type >::type;
 
 	template< index_type Index >
-	using iterator_begin = multidim_iterator< iterator_begin_interface< Index >, Index >;
+	using iterator_begin = multidim_static_iterator< iterator_begin_interface< Index >, Index >;
 
 	template< index_type Index >
-	using const_iterator_begin = const multidim_iterator< iterator_begin_interface< Index >, Index >;
+	using const_iterator_begin = const multidim_static_iterator< iterator_begin_interface< Index >, Index >;
 
 	//:::::| prepare iterator_end
 
@@ -110,10 +110,10 @@ namespace utk
 							      >::type;
 
 	template< index_type Index >
-	using iterator_end = multidim_iterator< iterator_end_interface< Index >, Index >;
+	using iterator_end = multidim_static_iterator< iterator_end_interface< Index >, Index >;
 
 	template< index_type Index >
-	using const_iterator_end = const multidim_iterator< iterator_end_interface< Index >, Index >;
+	using const_iterator_end = const multidim_static_iterator< iterator_end_interface< Index >, Index >;
 
 	//---| begin
 
@@ -137,24 +137,25 @@ namespace utk
 	//---| at
 
 	template< typename...CoordTypes >
-	value_type& at( CoordTypes...coords )
+	value_type& at( CoordTypes...coords ) throw( std::out_of_range )
 	{
 	  //TODO: checks
-	  return storage_interface::at( layout::free_indices_offset( coords... )
-				    + layout::fixed_indices_offset()
-				    );
+	  const size_t storage_index = layout::free_indices_offset( coords... ) + layout::fixed_indices_offset();
+	  return fixed_size::at( static_cast< storage_interface& >(*this), storage_index );
 	}
 
 	template< typename...CoordTypes >
-	const value_type& at( CoordTypes...coords ) const
+	const value_type& at( CoordTypes...coords ) const throw( std::out_of_range )
 	{
 	  //TODO: checks
-	  return storage_interface::at( layout::free_indices_offset( coords... )
-				      + layout::fixed_indices_offset()
-				      );
+	  const size_t storage_index = layout::free_indices_offset( coords... ) + layout::fixed_indices_offset();
+	  return fixed_size::at( static_cast< const storage_interface& >(*this), storage_index );
 	}
 
       };
+
+      template< typename T, typename Layout >
+      constexpr index_type multidim_interface< T, Layout >::order;
 
     } // of fixed_size::
   } // of math::

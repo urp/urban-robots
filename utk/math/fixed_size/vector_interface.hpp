@@ -34,184 +34,123 @@ namespace utk
     {
 
       // stl-compliant fixed size numeric vector with unmanaged pointer access to its components
-      template<typename T,size_t Size>
-      class	vector_interface
+      template< typename T, size_t Size >
+      class vector_interface
       {
           T*	val;
 
-          // leave memory uninitialized (use vector_interface<T,Size>::invalid you need it)
-	  vector_interface() : val(nullptr)	{	}
+          // leave memory unassigned (use vector_interface<T,Size>::invalid you need it)
+	  vector_interface() : val( nullptr ) { }
 
         public:
 
-	  typedef T*	pointer_type;
+	  typedef T* pointer_type;
 
 	  // stl iterator interface
-          typedef T  			value_type;
+          typedef T value_type;
           typedef pointer_type	iterator;
           typedef pointer_type	const_iterator;
 
-          static const vector_interface<T,Size>	invalid;
 
           // number of elements stored in the vector
-          constexpr static const size_t size()	{ return Size; }
+          static constexpr size_t size = Size;
+
+	  typedef vector_interface< value_type, size > type;
+
+	  // invalid vector
+          static const type invalid;
 
           // constructs s vector_interface interface for an array.
           // the memory is NOT deleted by the destructor
           explicit
-          vector_interface( pointer_type pointer ) : val( pointer )
-          {	}
+          vector_interface( pointer_type pointer ) : val( pointer ) { }
 
 	  // TODO: needs LOVE (conditional?)
           // constructs the interface from s second vector_interface with larger or equal size
-          template<size_t D2>
-          vector_interface(const vector_interface<T,D2>& o) : val(o.ptr())
-          { static_assert( Size <= D2, "copy" ); }
+          template< size_t Size2 >
+          vector_interface( const vector_interface< value_type, Size2 >& o ) : val( o.ptr() )
+          { static_assert( size <= Size2, "copy constructor (vector to short to initialize with)." ); }
 
           // copy interface ( which refers to the same piece of memory )
-          vector_interface(const vector_interface<T,Size>& o) : val(o.ptr())
-          {	}
+          vector_interface( const type& o ) : val( o.ptr() ) { }
 
           // destructor
-          // the memory is NOT deleted on destruction
-          virtual
-          ~vector_interface()
-          {  	}
+          // note:the memory is NOT deleted on destruction
+          virtual ~vector_interface() { }
 
-          template<size_t D2>
-          vector_interface<T,Size>&		operator= (const vector_interface<T,D2>& o)
+          template< size_t OtherSize >
+          type& operator= ( const vector_interface< value_type, OtherSize >& other )
 	  {
-	    std::copy( o.ptr(), o.ptr()+std::min(Size,D2), begin() );
+	    std::copy( other.ptr(), other.ptr() + std::min( size, OtherSize ), begin() );
 	    return *this;
 	  }
 
-          vector_interface<T,Size>&		operator= (const vector_interface<T,Size>& o)
+          type& operator= ( const type& other)
           {
-            std::copy( o.begin(), o.end(), begin() );
+            std::copy( other.begin(), other.end(), begin() );
 	    return *this;
 	  }
 
-          vector_interface<T,Size>&		operator= (const T& v)
+          type& operator= ( const T& scalar )
           {
-            std::fill( begin(), end(), v );
+            std::fill( begin(), end(), scalar );
 	    return *this;
 	  }
 
 	  //---| pointer interface
 
           // use data from pointer location
-          void	ref(T* ptr) { val = ptr; }
+          void	ref( pointer_type pointer ) { val = pointer; }
 
           // invalidate interface
-          void	unref()		{ val = 0; }
+          void	unref()	{ val = 0; }
 
 	  // indicates if a storage is attached
 	  const bool is_valid() const { return bool(val); }
 
 	  // returns storage pointer
-          T*	ptr() const	{ return val; }
+          pointer_type	ptr() const { return val; }
 
 	  //---| iterator interface
 
           //-----| shift operators
           //-------add offset to the storage pointer
 	  // TODO: make non-member, maybe?
-          vector_interface<T,Size>&	shift( ptrdiff_t elements)
+          type& shift( ptrdiff_t elements)
           {
 	    val += elements;
 	    return *this;
 	  }
 
-		  /*
-          vector_interface<T,Size>&	operator++()
-          {
-		    val += Size;
-		    return *this;
-		  }
-
-          vector_interface<T,Size>&	operator--()
-          {
-		    val -= Size;
-		    return *this;
-		  }
-
-          vector_interface<T,Size>		operator++(int)
-          {
-		    val += Size;
-		    return vector_interface<T,Size>(val-Size);
-		  }
-
-          vector_interface<T,Size>		operator--(int)
-          {
-		    val -= Size;
-		    return vector_interface<T,Size>(val+Size);
-		  }
-
-		  //-----| dereference operator
-
-          // enable only for Size==1 ? with template< size_t C = Size, typename = typename std::enable_if< C==1  >::type >
-
-		  T&			operator*()		{ return *ptr(); }
-
-		  const T& 	operator*() const	{ return *ptr(); }
-
-		  T*			operator&() const { return ptr(); }
-
-		  T* 			operator->()		{ return ptr(); }
-		  */
-
           //---| data access
 
-          iterator			begin()			{ return val; }
-          const_iterator	begin()	const	{ return val; }
-          iterator			end()			{ return val+Size; }
-          const_iterator	end() 	const	{ return val+Size; }
+          iterator	 begin() 	{ return val; }
+          const_iterator begin() const 	{ return val; }
+          iterator	 end() 		{ return val + size; }
+          const_iterator end() const 	{ return val + size; }
 
-	  // TODO: make non-member
-          T& at(const size_t i) throw( std::out_of_range )
-	  {
-            if(i>=Size)
-              throw std::out_of_range( "index "
-				      + boost::lexical_cast<std::string>(i)
-				      + " exceeds vector dimension"
-				      + boost::lexical_cast<std::string>(Size)
-				      );
-            return val[i];
-          }
-
-          const T&	at(const size_t i) const throw( std::out_of_range )
-          {
-            if(i>=Size)
-              throw std::out_of_range( "index "
-				      + boost::lexical_cast<std::string>(i)
-				      + " exceeds vector dimension"
-				      + boost::lexical_cast<std::string>(Size)
-				      );
-            return val[i];
-    	  }
-
-          T& operator() (const size_t i)
+          value_type& operator() ( const size_t i )
 	  {
             assert(i<Size);
             return val[i];
           }
 
-          const T& operator() (const size_t i) const
+          const value_type& operator() ( const size_t i ) const
           {
             assert(i<Size);
             return val[i];
     	  }
 
 
-          T& operator[] (const size_t i)
+          value_type& operator[] ( const size_t i )
 	  {
-            assert(i<Size);
+            assert( i < size );
             return val[i];
           }
 
-          const T& operator[] (const size_t i) const
+          const value_type& operator[] ( const size_t i ) const
           {
-            assert(i<Size);
+            assert( i < size );
             return val[i];
     	  }
 
@@ -219,16 +158,18 @@ namespace utk
 
 	  //-----| T
 	  //-------enabled only if Size==1.
-	  //-------crazy trick from http://stackoverflow.com/questions/7693703/can-i-use-something-like-enable-if-with-an-implicit-conversion-operator
+	  //-------nice trick from http://stackoverflow.com/questions/7693703/can-i-use-something-like-enable-if-with-an-implicit-conversion-operator
 
           // we need to 'duplicate' the template parameters
           // because SFINAE will only work for deduced parameters
           // and defaulted parameters count as deduced
-          template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >// C++11 allows the use of SFINAE right here!
-	  operator T&() { return val[0]; }
+          template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >
+	  operator value_type&() { return val[0]; }
 
-          template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >// C++11 allows the use of SFINAE right here!
-	  operator const T&() const { return val[0]; }
+	  template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >
+	  operator const value_type&() const { return val[0]; }
+          //template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >
+	  //operator const value_type&() const { return val[0]; }
 
 	  //-----| bool
 	  //-------enabled only if Size > 1 AND value_type == bool.
@@ -244,8 +185,13 @@ namespace utk
 
       //---| invalid vector
 
-      template<typename T,size_t Size>
-      const vector_interface<T,Size> vector_interface<T,Size>::invalid = vector_interface<T,Size>( nullptr );
+      template< typename T, size_t Size >
+      const typename vector_interface< T, Size >::type vector_interface< T, Size >::invalid = vector_interface< T, Size >( nullptr );
+
+      //---| size
+
+      template< typename T, size_t Size >
+      constexpr size_t vector_interface< T, Size >::size;
 
     } // of fixed_size::
   } // end of math::

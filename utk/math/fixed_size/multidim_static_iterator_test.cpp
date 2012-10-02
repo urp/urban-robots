@@ -15,10 +15,10 @@
 */
 
 # include "utk/math/fixed_size/multidim_interface.hpp"
-# include "utk/math/fixed_size/multidim_iterator.hpp"
+# include "utk/math/fixed_size/multidim_static_iterator.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim iterator
+#define BOOST_TEST_MODULE multidim static iterator
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math;
@@ -26,19 +26,21 @@ using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( multidim_iterator_with_storage )
 {
-  typedef initial_layout< 6 > layout;
+  typedef initial_layout< 3 > layout;
   typedef multidim_interface< double, layout > multidim_type;
-  double  data[ layout::total_size() ] = { 0.,1.,2.,3.,4.,5. };
+  double  data[ layout::total_size ] = { 0.,1.,2. };
   multidim_type multidim( data );
 
-  multidim_iterator< multidim_type, 0 > it( multidim );
+  typedef multidim_static_iterator< multidim_type, 0 > it0_type;
+  it0_type it0( multidim );
+  BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
 
-  auto it0 = (it++).at();
+  typedef typename it0_type::increment_iterator it1_type;
+  it1_type it1 = it0.increment();
+  BOOST_CHECK_EQUAL( (*it1).at() , 1. );
 
-  BOOST_CHECK_EQUAL(  it0, 0. );
-  BOOST_CHECK_EQUAL( it++.at( 0,0,1 ) , 1. );
-  BOOST_CHECK_EQUAL( it++.at( 0,0,2 ) , 2. );
-  BOOST_CHECK_EQUAL( it++.at( 0,1,0 ) , 3. );
-  BOOST_CHECK_EQUAL( it++.at( 0,1,1 ) , 4. );
-  BOOST_CHECK_EQUAL( it++.at( 0,1,2 ) , 5. );
+  typedef typename it1_type::increment_iterator it2_type;
+  it2_type it2 = it1.increment();
+  BOOST_CHECK_EQUAL( (*it2).at() , 2. );
+
 }

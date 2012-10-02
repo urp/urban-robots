@@ -22,16 +22,29 @@
 
 using namespace utk::math::fixed_size;
 
+BOOST_AUTO_TEST_CASE( vecn_at )
+{
+  double data_d4[] { 1., 2., 3., 4. };
+  const vector_interface<double,4> d4( data_d4 );
+
+  // at()
+  BOOST_CHECK_EQUAL( at(d4,0), 1. );
+  BOOST_CHECK_EQUAL( at(d4,1), 2. );
+  BOOST_CHECK_EQUAL( at(d4,2), 3. );
+  BOOST_CHECK_EQUAL( at(d4,3), 4. );
+  BOOST_CHECK_THROW( at(d4,4), std::out_of_range );
+}
 
 BOOST_AUTO_TEST_CASE( vecn_named_element_access )
 {
   double data_d4[] { 1., 2., 3., 4. };
   const vector_interface<double,4> d4( data_d4 );
+
   BOOST_CHECK_EQUAL( x(d4), 1. );
   BOOST_CHECK_EQUAL( y(d4), 2. );
   BOOST_CHECK_EQUAL( z(d4), 3. );
   BOOST_CHECK_EQUAL( w(d4), 4. );
-  
+
   const vector_interface<double,2> d2( xy(d4) );
   BOOST_CHECK_EQUAL( x(d2), 1. );
   BOOST_CHECK_EQUAL( y(d2), 2. );
@@ -58,10 +71,10 @@ BOOST_AUTO_TEST_CASE( vecn_normal )
   vector_array<double,3> d3_copy( normal(d3) );
   normalize(d3);
 
-  BOOST_CHECK_EQUAL( d3, d3_copy );  
-  BOOST_CHECK_EQUAL( d3.at(0), 1./len );
-  BOOST_CHECK_EQUAL( d3.at(1), 2./len );
-  BOOST_CHECK_EQUAL( d3.at(2), 3./len );
+  BOOST_CHECK_EQUAL( d3, d3_copy );
+  BOOST_CHECK_EQUAL( at(d3,0), 1./len );
+  BOOST_CHECK_EQUAL( at(d3,1), 2./len );
+  BOOST_CHECK_EQUAL( at(d3,2), 3./len );
 }
 
 BOOST_AUTO_TEST_CASE( vecn_clamp )
@@ -73,29 +86,29 @@ BOOST_AUTO_TEST_CASE( vecn_clamp )
 
   vector_array<double,3> min_s(d3);
   clamp_min(min_s,1.5);
-  BOOST_CHECK_EQUAL( min_s.at(0), 1.5 );  
-  BOOST_CHECK_EQUAL( min_s.at(1), 2. );  
-  BOOST_CHECK_EQUAL( min_s.at(2), 3. );
+  BOOST_CHECK_EQUAL( at( min_s, 0 ), 1.5 );
+  BOOST_CHECK_EQUAL( at( min_s, 1 ), 2. );
+  BOOST_CHECK_EQUAL( at( min_s, 2 ), 3. );
 
   vector_array<double,3> max_s(d3);
   clamp_max(max_s,1.5);
-  BOOST_CHECK_EQUAL( max_s.at(0), 1. );  
-  BOOST_CHECK_EQUAL( max_s.at(1), 1.5 );  
-  BOOST_CHECK_EQUAL( max_s.at(2), 1.5 );
+  BOOST_CHECK_EQUAL( at( max_s, 0 ), 1. );
+  BOOST_CHECK_EQUAL( at( max_s, 1 ), 1.5 );
+  BOOST_CHECK_EQUAL( at( max_s, 2 ), 1.5 );
 
   //---| clamp to vector
 
   vector_array<double,3> min_v(d3);
   clamp_min(min_v, vector_array<double,3>{ 0.9, 2.1, 1.} );
-  BOOST_CHECK_EQUAL( min_v.at(0), 1. );  
-  BOOST_CHECK_EQUAL( min_v.at(1), 2.1 );  
-  BOOST_CHECK_EQUAL( min_v.at(2), 3. );
+  BOOST_CHECK_EQUAL( at( min_v, 0 ), 1. );
+  BOOST_CHECK_EQUAL( at( min_v, 1 ), 2.1 );
+  BOOST_CHECK_EQUAL( at( min_v, 2 ), 3. );
 
   vector_array<double,3> max_v(d3);
   clamp_max(max_v, vector_array<double,3>{ 0.9, 2.1, 1.} );
-  BOOST_CHECK_EQUAL( max_v.at(0), 0.9 );  
-  BOOST_CHECK_EQUAL( max_v.at(1), 2. );  
-  BOOST_CHECK_EQUAL( max_v.at(2), 1. );
+  BOOST_CHECK_EQUAL( at( max_v, 0 ), 0.9 );
+  BOOST_CHECK_EQUAL( at( max_v, 1 ), 2. );
+  BOOST_CHECK_EQUAL( at( max_v, 2 ), 1. );
 }
 
 BOOST_AUTO_TEST_CASE( vecn_abs )
@@ -103,9 +116,9 @@ BOOST_AUTO_TEST_CASE( vecn_abs )
   double data_d3[] { -1., 2., -3. };
   const vector_interface<double,3> d3( data_d3 );
   vector_array<double,3> d3_abs = abs(d3);
-  BOOST_CHECK_EQUAL( d3_abs.at(0), 1. );  
-  BOOST_CHECK_EQUAL( d3_abs.at(1), 2. );  
-  BOOST_CHECK_EQUAL( d3_abs.at(2), 3. );
+  BOOST_CHECK_EQUAL( at( d3_abs, 0 ), 1. );
+  BOOST_CHECK_EQUAL( at( d3_abs, 1 ), 2. );
+  BOOST_CHECK_EQUAL( at( d3_abs, 2 ), 3. );
 }
 
 //-----| abs
@@ -114,9 +127,9 @@ BOOST_AUTO_TEST_CASE( vecn_sgn )
   double data_d3[] { -1., 0., 3. };
   const vector_interface<double,3> d3( data_d3 );
   vector_array<double,3> d3_sgn = sgn(d3);
-  BOOST_CHECK_EQUAL( d3_sgn.at(0), -1. );  
-  BOOST_CHECK_EQUAL( d3_sgn.at(1),  0. );  
-  BOOST_CHECK_EQUAL( d3_sgn.at(2),  1. );
+  BOOST_CHECK_EQUAL( at( d3_sgn, 0 ), -1. );
+  BOOST_CHECK_EQUAL( at( d3_sgn, 1 ),  0. );
+  BOOST_CHECK_EQUAL( at( d3_sgn, 2 ),  1. );
 }
 
 //-----| floor
@@ -125,9 +138,9 @@ BOOST_AUTO_TEST_CASE( vecn_floor )
   double data_d3[] { -1., 2.8, -3.4 };
   const vector_interface<double,3> d3( data_d3 );
   vector_array<double,3> d3_floor = floor(d3);
-  BOOST_CHECK_EQUAL( d3_floor.at(0), -1. );  
-  BOOST_CHECK_EQUAL( d3_floor.at(1),  2. );  
-  BOOST_CHECK_EQUAL( d3_floor.at(2), -4. );
+  BOOST_CHECK_EQUAL( at( d3_floor, 0 ), -1. );
+  BOOST_CHECK_EQUAL( at( d3_floor, 1 ),  2. );
+  BOOST_CHECK_EQUAL( at( d3_floor, 2 ), -4. );
 }
 
 //-----| ceil
@@ -136,17 +149,17 @@ BOOST_AUTO_TEST_CASE( vecn_ceil )
   double data_d3[] { -1.4, 2.5, -3.6 };
   const vector_interface<double,3> d3( data_d3 );
   vector_array<double,3> d3_ceil = ceil(d3);
-  BOOST_CHECK_EQUAL( d3_ceil.at(0), -1. );  
-  BOOST_CHECK_EQUAL( d3_ceil.at(1),  3. );  
-  BOOST_CHECK_EQUAL( d3_ceil.at(2), -3. );
+  BOOST_CHECK_EQUAL( at( d3_ceil, 0 ), -1. );
+  BOOST_CHECK_EQUAL( at( d3_ceil, 1 ),  3. );
+  BOOST_CHECK_EQUAL( at( d3_ceil, 2 ), -3. );
 }
-  
+
 //-----| sum
 BOOST_AUTO_TEST_CASE( vecn_sum )
 {
   double data_d3[] { 4. , -2., -3. };
   const vector_interface<double,3> d3( data_d3 );
-  BOOST_CHECK_EQUAL( sum(d3), 4.-2.-3. );  
+  BOOST_CHECK_EQUAL( sum(d3), 4.-2.-3. );
 }
 
 BOOST_AUTO_TEST_CASE( vecn_shifted )
@@ -154,8 +167,9 @@ BOOST_AUTO_TEST_CASE( vecn_shifted )
   double data[] { 1., 2., 3., 4., 5., 6., 7. };
   vector_interface<double,3> d3( data+2 );
   const vector_interface<double,3> shifted_plus_2 = shifted<2,3>(d3);
+  auto shifted_plus_2_size = shifted_plus_2.size;
+  BOOST_CHECK_EQUAL(  shifted_plus_2_size, 3 );
   BOOST_CHECK_EQUAL(  shifted_plus_2.ptr(), data+4 );
-  BOOST_CHECK_EQUAL(  shifted_plus_2.size(), 3 );
 
   const vector_interface<double,3> shifted_minus_2 = shifted<-2,3>(d3);
   BOOST_CHECK_EQUAL( shifted_minus_2.ptr(), data+0 );
@@ -167,9 +181,9 @@ BOOST_AUTO_TEST_CASE( vecn_flipped )
   double data_d3[] { 1., 2., 3. };
   const vector_interface<double,3> d3( data_d3 );
   vector_array<double,3> d3_flipped = flipped(d3);
-  BOOST_CHECK_EQUAL( d3_flipped.at(0), 3. );  
-  BOOST_CHECK_EQUAL( d3_flipped.at(1), 2. );  
-  BOOST_CHECK_EQUAL( d3_flipped.at(2), 1. );
+  BOOST_CHECK_EQUAL( at( d3_flipped, 0 ), 3. );
+  BOOST_CHECK_EQUAL( at( d3_flipped, 1 ), 2. );
+  BOOST_CHECK_EQUAL( at( d3_flipped, 2 ), 1. );
 }
 
 //-----| dot
@@ -228,15 +242,15 @@ BOOST_AUTO_TEST_CASE( vecn_length )
 
   const double len_d3 = std::hypot( data_d3[0], std::hypot( data_d3[1], data_d3[2] ) );
   vector_interface<double,3> d3( data_d3 );
-  BOOST_CHECK_EQUAL( length(d3), len_d3 );  
+  BOOST_CHECK_EQUAL( length(d3), len_d3 );
 
   const double len_d2 = std::hypot( data_d3[0], data_d3[1] );
   vector_interface<double,2> d2( data_d3 );
-  BOOST_CHECK_EQUAL( length(d2), len_d2 );  
+  BOOST_CHECK_EQUAL( length(d2), len_d2 );
 
   const size_t N = 100;
   vector_array<double,N> dN( 2. );
-  BOOST_CHECK_EQUAL( length(dN), sqrt( 2.*2.*N ) );  
+  BOOST_CHECK_EQUAL( length(dN), sqrt( 2.*2.*N ) );
 }
 
 //-----| distance
@@ -250,5 +264,5 @@ BOOST_AUTO_TEST_CASE( vecn_distance )
 
   const double dist = std::hypot( b[0]-a[0], std::hypot( b[1]-a[1], b[2]-a[2] ) );
 
-  BOOST_CHECK_EQUAL( distance(a,b), dist );  
+  BOOST_CHECK_EQUAL( distance(a,b), dist );
 }

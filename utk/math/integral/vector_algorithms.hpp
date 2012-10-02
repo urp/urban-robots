@@ -99,7 +99,9 @@ namespace utk
       {	};
 
 
-      //---| binary apply
+      //:::| binary algorithms
+
+      //---| binary apply (vector x vector -> vector)
 
       template< typename, typename, typename > struct binary_apply { /* unspecified */ };
 
@@ -130,7 +132,36 @@ namespace utk
 				       >::type type;
       };
 
-      //---| accumulate
+      //---| binary apply (vector x scalar -> vector)
+
+      template< typename T1, typename T2, T2 Scalar, typename BinaryScalarOperator >
+      struct binary_apply< vector< T1 >, constant< T2, Scalar >, BinaryScalarOperator >
+      {
+	typedef vector< typename BinaryScalarOperator::value_type > type;
+      };
+
+      template< typename T1, T1...Values1, typename T2, T2 Scalar , typename BinaryScalarOperator >
+      class binary_apply< vector< T1, Values1... >, constant< T2, Scalar >, BinaryScalarOperator >
+      {
+	  typedef pop_front< vector< T1, Values1... > > input1;
+	  typedef constant< T2, Scalar > input2;
+
+	  typedef typename binary_apply< typename input1::tail
+					   , input2
+					   , BinaryScalarOperator
+					   >::type results;
+
+	public:
+	  typedef typename push_front< results
+				       , constant< typename BinaryScalarOperator::value_type
+						  , BinaryScalarOperator::template apply< input1::value
+											, input2::value
+											>::value
+						  >
+				       >::type type;
+      };
+
+      //---| accumulate ( vector -> scalar )
 
       template< typename
 	      , typename BinaryScalarOperator
@@ -190,9 +221,9 @@ namespace utk
 
       //---| multiply ( vector x vector -> vector )
 
-      template< typename T1, T1...Values1, typename T2, T2...Values2 >
-      struct multiply< vector< T1, Values1... >, vector< T2, Values2... > >
-      : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, multiply< T1, T2 > >
+      template< typename T1, T1...Values1, typename Object2 >
+      struct multiply< vector< T1, Values1... >, Object2 >
+      : public binary_apply< vector< T1, Values1... >, Object2, multiply< T1, typename Object2::value_type > >
       {	};
 
       //---| add ( scalar x scalar -> scalar )
@@ -212,9 +243,9 @@ namespace utk
 
       //---| add ( vector x vector -> vector )
 
-      template< typename T1, T1...Values1, typename T2, T2...Values2 >
-      struct add< vector< T1, Values1... >, vector< T2, Values2... > >
-      : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, add< T1, T2 > >
+      template< typename T1, T1...Values1, typename Object2 >
+      struct add< vector< T1, Values1... >, Object2 >
+      : public binary_apply< vector< T1, Values1... >, Object2, add< T1, typename Object2::value_type > >
       {	};
 
 
@@ -236,9 +267,30 @@ namespace utk
 
       //---| conjunction ( vector x vector -> vector )
 
-      template< typename T1, T1...Values1, typename T2, T2...Values2 >
-      struct conjunction< vector< T1, Values1... >, vector< T2, Values2... > >
-      : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, conjunction< T1, T2 > >
+      template< typename T1, T1...Values1, typename Object2 >
+      struct conjunction< vector< T1, Values1... >, Object2 >
+      : public binary_apply< vector< T1, Values1... >, Object2, conjunction< T1, typename Object2::value_type > >
+      {	};
+
+      //---| inclusive_disjunction ( scalar x scalar -> scalar )
+      // TODO: tests
+      template< typename T1, typename T2 >
+      struct inclusive_disjunction
+      {
+	typedef decltype( T1() && T2() ) value_type;
+
+	template< T1 Value1, T2 Value2 >
+	struct apply
+	{
+	  static constexpr value_type value = Value1 && Value2;
+	};
+      };
+
+      //---| inclusive_disjunction ( vector x vector -> vector )
+
+      template< typename T1, T1...Values1, typename Object2 >
+      struct inclusive_disjunction< vector< T1, Values1... >, Object2 >
+      : public binary_apply< vector< T1, Values1... >, Object2, inclusive_disjunction< T1, typename Object2::value_type > >
       {	};
 
 
@@ -259,14 +311,16 @@ namespace utk
 
       };
 
-      //---| equal ( vector x vector -> vector )
-
-      template< typename T1, T1...Values1, typename T2, T2...Values2 >
-      struct equal< vector< T1, Values1... >, vector< T2, Values2... > >
-      : public binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, equal< T1, T2 > >
+      //---| equal ( vector x Unknown -> vector )
+      // TODO: [scalar,vector,tensor] tests
+      template< typename T1, T1...Values1, typename Object2 >
+      struct equal< vector< T1, Values1... >, Object2 >
+      : public binary_apply< vector< T1, Values1... >, Object2, equal< T1, typename Object2::value_type > >
       {	};
 
+
       //:::| miscellianous
+
 
       //---| all ( vector -> scalar )
 
@@ -281,7 +335,19 @@ namespace utk
 			 >
       {	};
 
-      //---| TODO: any
+      //---| any ( vector -> scalar
+      // TODO: tests
+      template< typename Vector, typename Predicate = is_true< typename Vector::value_type > >
+      struct any { /* unspecified */ };
+
+      template< typename T, T...Values, typename Predicate >
+      struct any< vector< T, Values... >, Predicate >
+      : public accumulate< typename transform< vector< T, Values... >, Predicate >::type
+			 , inclusive_disjunction< typename Predicate::value_type, typename Predicate::value_type >
+			 , false
+			 >
+      {	};
+
 
       //---| reverse
 
@@ -320,8 +386,7 @@ namespace utk
 	    typedef vector< T, NewValues... > type;
 	};
 
-	// remove if UnpackedIndex!=UnpackedSize -> continue
-	// TODO: replace UnpackedIndex/Size by helpers::pop_front
+	// remove if predicate is false -> continue
 	template< bool...Predicates, typename T, T... NewValues, T...OldValues >
 	class remove_false_recursion< vector< bool, Predicates... >
 				     , vector< T, NewValues... >
@@ -352,6 +417,21 @@ namespace utk
       {
 	static_assert( sizeof...(Predicates) == sizeof...(Values), "Size of packs Predicates and Values must agree." );
 	typedef typename remove_false_recursion< vector< bool, Predicates... >, vector< T >, vector< T, Values... > >::type type;
+      };
+
+
+      // remove_at<
+
+      template< typename Container, index_type Index >  struct remove_at { /* unspecified */ };
+
+      template< typename T, T...Values, index_type Index >
+      class remove_at< vector< T, Values... >, Index >
+      {
+	  static_assert( Index < sizeof...(Values), "Size of packs Predicates and Values must agree." );
+	  typedef typename make_uniform_vector< bool, sizeof...(Values), true >::type false_vector;
+	  typedef typename assign< false_vector, Index, integral::constant< bool, false > >::type mask_predicate;
+	public:
+	  typedef typename remove_false< vector< T, Values... >, mask_predicate >::type type;
       };
 
       //:::| inner_product

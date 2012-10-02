@@ -36,7 +36,7 @@ namespace utk
       {
 	typedef multidim_interface < T, Layout > interface;
 
-	typedef vector_array< T, interface::layout::total_size() > storage_array;
+	typedef vector_array< T, interface::layout::total_size > storage_array;
 
 	//---| data storage
 

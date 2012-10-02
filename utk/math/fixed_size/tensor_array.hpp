@@ -36,7 +36,7 @@ namespace utk
       {
 	typedef tensor_interface < T, Layout, VarianceVector > interface;
 
-	typedef vector_array< T, interface::layout::total_size() > storage_array;
+	typedef vector_array< T, interface::layout::total_size > storage_array;
 
 	//---| data storage
 

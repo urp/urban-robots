@@ -30,23 +30,17 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     typedef multidim_layout< index_vector<2,3,4>, size_vector<2,3,4> > layout;
 
     // number of elements in the whole tensor
-    size_type size0 =  multidim_layout< index_vector<2,3,4>, size_vector<2,3,4> >::stride<0>::value;
-    BOOST_CHECK_EQUAL( size0, 24 );
-    // size of the first two sub dimensions - in elements
-
-    size_type stride1 = layout::stride<1>::value;
-    BOOST_CHECK_EQUAL( stride1, 12 );
+    size_type stride0 =  layout::stride<0>::value;
+    BOOST_CHECK_EQUAL( stride0, 12 );
 
     // size of the first three sub dimensions
-    size_type stride2 = layout::stride<2>::value;
-    BOOST_CHECK_EQUAL( stride2, 4 );
+    size_type stride1 = layout::stride<1>::value;
+    BOOST_CHECK_EQUAL( stride1, 4 );
 
     // scalar
-    size_type total_size = layout::stride<3>::value;
-    BOOST_CHECK_EQUAL( total_size, 1 );
+    size_type stride2 = layout::stride<2>::value;
+    BOOST_CHECK_EQUAL( stride2, 1 );
 
-    // higher (non existing) dimensions should produce a compile time error
-    //size_type total_size2 = tensor::stride<5>();
   }
 
   BOOST_AUTO_TEST_CASE( size )
@@ -56,7 +50,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     const index_type order = layout::order;
     BOOST_CHECK_EQUAL( order, 3 );
 
-    BOOST_CHECK_EQUAL( layout::total_size(), 24 );
+    BOOST_CHECK_EQUAL( layout::total_size, 24 );
 
 
     std::array< size_type, 3 > size_array = utk::math::integral::make_array< layout::sizes >::value;
@@ -81,14 +75,14 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     index_type removed1 = integral::at< typename removed::indices, 1 >::value;
     BOOST_CHECK_EQUAL( removed1, 4 );
 
-    BOOST_CHECK_EQUAL( removed::total_size(), 12 );
+    BOOST_CHECK_EQUAL( removed::total_size, 12 );
 
     const index_type order = removed::order;
     BOOST_CHECK_EQUAL( order, 2 );
 
     // unfix
     typedef typename layout::release_index< 0 >::type unfixed;
-    BOOST_CHECK_EQUAL( unfixed::total_size(), 24 );
+    BOOST_CHECK_EQUAL( unfixed::total_size, 24 );
     index_type unfixed0 = integral::at< unfixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( unfixed0, 2 );
 
@@ -99,15 +93,13 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
 
     static const stride_type s0 = integral::at< strides, 0 >::value;
-    BOOST_CHECK_EQUAL( s0, 120 );
+    BOOST_CHECK_EQUAL( s0, 60 );
     static const stride_type s1 = integral::at< strides, 1 >::value;
-    BOOST_CHECK_EQUAL( s1, 60 );
+    BOOST_CHECK_EQUAL( s1, 20 );
     static const stride_type s2 = integral::at< strides, 2 >::value;
-    BOOST_CHECK_EQUAL( s2, 20 );
+    BOOST_CHECK_EQUAL( s2, 5 );
     static const stride_type s3 = integral::at< strides, 3 >::value;
-    BOOST_CHECK_EQUAL( s3, 5 );
-    static const stride_type s4 = integral::at< strides, 4 >::value;
-    BOOST_CHECK_EQUAL( s4, 1 );
+    BOOST_CHECK_EQUAL( s3, 1 );
 
   }
   // used by free_indices_offset & fixed_coord_offset
