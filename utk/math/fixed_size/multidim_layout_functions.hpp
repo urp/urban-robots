@@ -24,6 +24,9 @@ namespace utk
   {
     namespace fixed_size
     {
+
+      //---| is_index_fixed
+
       template< typename Layout, index_type Index >
       struct is_index_fixed
       {

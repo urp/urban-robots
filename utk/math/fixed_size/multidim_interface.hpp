@@ -128,7 +128,7 @@ namespace utk
 	value_type& at( CoordTypes...coords ) throw( std::out_of_range )
 	{
 	  //TODO: checks
-	  const size_t storage_index = layout::free_indices_offset( coords... ) + layout::fixed_indices_offset();
+	  const size_t storage_index = layout::index_offset( coords... ) + layout::static_offset();
 	  return fixed_size::at( static_cast< storage_interface& >(*this), storage_index );
 	}
 
@@ -136,7 +136,7 @@ namespace utk
 	const value_type& at( CoordTypes...coords ) const throw( std::out_of_range )
 	{
 	  //TODO: checks
-	  const size_t storage_index = layout::free_indices_offset( coords... ) + layout::fixed_indices_offset();
+	  const size_t storage_index = layout::index_offset( coords... ) + layout::static_offset();
 	  return fixed_size::at( static_cast< const storage_interface& >(*this), storage_index );
 	}
 

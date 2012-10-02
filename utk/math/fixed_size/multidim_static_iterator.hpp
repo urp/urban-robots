@@ -41,10 +41,6 @@ namespace utk
 	typedef typename parent_interface::layout parent_layout;
 	typedef typename parent_interface::storage_interface parent_storage_interface;
 
-	static_assert( not is_index_fixed< parent_layout, Index >::value,
-		       "Index used for dynamic iteration should not be fixed."
-		     );
-
 	//:::| value interface
 
 	typedef typename parent_layout::template remove_index< Index >::type value_layout;

@@ -88,7 +88,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
 
   }
 
-  // used by free_indices_offset & fixed_coord_offset
+  // used by index_offset & fixed_coord_offset
   BOOST_AUTO_TEST_CASE( strides_stripping_and_reversal )
   {
 
@@ -105,17 +105,17 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_TEST_MESSAGE( strides_instance << " -> " << strides_reverse_instance );
   }
 
-  BOOST_AUTO_TEST_CASE( free_indices_offset )
+  BOOST_AUTO_TEST_CASE( index_offset )
   {
     typedef multidim_layout< index_vector<1,2,3,4>, size_vector<1,2,3,4> > layout;
 
-    const stride_type offset_111 = layout::free_indices_offset( 0,1,1,1 );
+    const stride_type offset_111 = layout::index_offset( 0,1,1,1 );
     BOOST_CHECK_EQUAL( offset_111, 17 );
 
     // fix
     typedef typename layout::fix_index< 3, 0 >::type fixed;
 
-    const stride_type fixed_11 = fixed::free_indices_offset( 0,1,1 );
+    const stride_type fixed_11 = fixed::index_offset( 0,1,1 );
     BOOST_CHECK_EQUAL( fixed_11, 16 );
   }
 
@@ -123,19 +123,19 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
   {
     typedef multidim_layout< index_vector<2,3,4,5>, size_vector<2,3,4,5> > layout;
 
-    const stride_type offset = layout::fixed_indices_offset();
+    const stride_type offset = layout::static_offset();
     BOOST_CHECK_EQUAL( offset, 0 );
 
     // fix 1
     typedef typename layout::fix_index< 1, 1 >::type fixed0100;
 
-    const stride_type fixed1 = fixed0100::fixed_indices_offset();
+    const stride_type fixed1 = fixed0100::static_offset();
     BOOST_CHECK_EQUAL( fixed1, 20 );
 
     // fix 1
     typedef typename fixed0100::fix_index< 2, 2 >::type fixed0120;
 
-    const stride_type fixed2 = fixed0120::fixed_indices_offset();
+    const stride_type fixed2 = fixed0120::static_offset();
     BOOST_CHECK_EQUAL( fixed2, 30 );
 
 

@@ -100,6 +100,7 @@ namespace utk
 	};
 
 	//---| total_size
+	// TODO: tests
 	template< typename SizeVector, typename StrideVector > struct total_size
 	{ static constexpr size_type value = integral::pop_front< SizeVector >::value * integral::at< StrideVector, 0 >::value; };
 

@@ -33,7 +33,9 @@ namespace utk
       //---------------------
       //---| tensor layout
       //---------------------
-      // TODO: make index fixing invisible to multidim_interface
+      // TODO: make index fixing invisible to outside multidim_layout
+      // e.g indices & sizes & strides contains only 'free indices'
+      // in the manner of order vs. full_order
       template< typename IndexVector
 	      , typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
@@ -49,8 +51,9 @@ namespace utk
 	  static_assert( not integral::any< typename integral::equal< SizeVector, integral::constant< size_type, 0 > >::type >::value
 		       , "Index with empty range (Size=0) are nor allowed"
 		       );
-	public:
 
+	public:
+	  // TODO: make indices private
 	  typedef  IndexVector indices;
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
@@ -132,12 +135,12 @@ namespace utk
 	  static constexpr index_type order = remove_fixed::type::sizes::size;
 
 	  //:::| memory model
-	  // TODO: free_indices_offset< Coords >
-	  // TODO: use free_indices_offset and fixed_dimension_offset in specializations of 'at< Coords >( dyn_coords )'
-	  //---| free_indices_offset
+	  // TODO: index_offset< Coords >
+	  // TODO: use index_offset and fixed_dimension_offset in specializations of 'at< Coords >( dyn_coords )'
+	  //---| index_offset
   	  //-----return offset for the specified coordinates
 	  template< typename...FreeIndexTypes >
-	  static const stride_type free_indices_offset( FreeIndexTypes... free_indices )
+	  static const stride_type index_offset( FreeIndexTypes... free_indices )
 	  {
 	    static_assert( sizeof...(FreeIndexTypes) <= remove_fixed::type::order
 			   , "number of coordinates must be smaller than number of 'free' indices." );
@@ -152,7 +155,7 @@ namespace utk
 
 	  //---| fixed_dimension_offset
 
-	  static constexpr stride_type fixed_indices_offset()
+	  static constexpr stride_type static_offset()
 	  {
 	    typedef typename integral::equal< indices, sizes >::type free_indices_mask;
 	    typedef typename integral::transform< free_indices_mask , integral::negate<bool> >::type fixed_indices_mask;
