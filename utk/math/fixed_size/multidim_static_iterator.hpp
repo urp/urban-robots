@@ -65,8 +65,6 @@ namespace utk
 	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
 	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
 
-	static_assert( not is_index_fixed< parent_layout, Index >::value, "Iteration Index must not be fixed." );
-
 	//---| constructor with storage_interface
 
 	explicit

@@ -25,7 +25,7 @@ using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )
 {
-  typedef initial_layout< 1,2,3 > layout;
+  typedef multidim_layout< size_vector<1,2,3> > layout;
   typedef variance_vector< covariant, covariant, covariant > variances;
   typedef tensor_array< double, layout, variances > tensor;
   tensor test_tensor;

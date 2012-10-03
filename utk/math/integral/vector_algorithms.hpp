@@ -178,9 +178,11 @@ namespace utk
       {
         typedef typename BinaryScalarOperator::value_type value_type;
 	static constexpr value_type value = value_type( InitialValue );
+	typedef vector< value_type, value > type;
       };
 
       // accumulate -> continue
+      // TODO: test vector result
       template< typename T
 	      , T...Input
 	      , typename BinaryScalarOperator
@@ -188,7 +190,7 @@ namespace utk
 	      >
       class accumulate< vector< T, Input... >, BinaryScalarOperator, InitialValue >
       {
-	  typedef pop_front< vector< T, Input... > > input;
+	  typedef pop_back< vector< T, Input... > > input;
 	  typedef accumulate< typename input::tail, BinaryScalarOperator, InitialValue > accum;
 	  static constexpr typename accum::value_type old_value = accum::value;
 
@@ -196,6 +198,7 @@ namespace utk
 
 	  typedef typename BinaryScalarOperator::value_type value_type;
 	  static constexpr value_type value = BinaryScalarOperator::template apply< input::value, old_value >::value;
+	  typedef typename push_back< typename accum::type, constant< value_type, value > >::type type;
       };
 
 
@@ -412,7 +415,7 @@ namespace utk
 
       template< typename, typename >  struct remove_false { /* unspecified */ };
 
-      template< bool...Predicates, typename T, T...Values >
+      template< typename T, T...Values, bool...Predicates >
       struct remove_false< vector< T, Values... >, vector< bool, Predicates... > >
       {
 	static_assert( sizeof...(Predicates) == sizeof...(Values), "Size of packs Predicates and Values must agree." );

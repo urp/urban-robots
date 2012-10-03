@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE( make_tensor_interface )
 
 BOOST_AUTO_TEST_CASE( make_non_mixed_tensor_interface_test )
 {
-  typedef initial_layout< 1,2,3 > layout;
+  typedef multidim_layout< size_vector<1,2,3> > layout;
 
   // contravariant
 
@@ -56,7 +56,7 @@ BOOST_AUTO_TEST_CASE( make_non_mixed_tensor_interface_test )
 
 BOOST_AUTO_TEST_CASE( make_mixed_tensor_interface_test )
 {
-  typedef initial_layout< 1,2,3 > layout;
+  typedef multidim_layout< size_vector<1,2,3> > layout;
 
   typedef typename make_mixed_tensor_interface< double, layout, 2 >::type mixed_tensor;
   mixed_tensor mixed_test_tensor( nullptr );
@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_SUITE( tensor_product_test )
 
 BOOST_AUTO_TEST_CASE( product_tensor_array_test )
 {
-  typedef initial_layout< 3 > layout;
+  typedef multidim_layout< size_vector<3> > layout;
   typedef typename make_non_mixed_tensor_interface< double, layout, contravariant >::type tensor_a;
   typedef typename make_non_mixed_tensor_interface< double, layout, covariant >::type tensor_b;
 
@@ -97,7 +97,7 @@ BOOST_AUTO_TEST_CASE( product_tensor_array_test )
 
 BOOST_AUTO_TEST_CASE( tensor_product_test )
 {
-  typedef initial_layout< 2 > layout;
+  typedef multidim_layout< size_vector<2> > layout;
   double data[] = { 1.,2.,3.,4. };
   typedef typename make_non_mixed_tensor_interface< double, layout, contravariant >::type tensor_a_type;
   typedef typename make_non_mixed_tensor_interface< double, layout, covariant >::type tensor_b_type;

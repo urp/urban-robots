@@ -18,6 +18,7 @@
 
 # include "utk/math/fixed_size/tensor_interface.hpp"
 # include "utk/math/fixed_size/tensor_array.hpp"
+# include "utk/math/fixed_size/multidim_layout_functions.hpp"
 
 # pragma GCC visibility push(default)
 

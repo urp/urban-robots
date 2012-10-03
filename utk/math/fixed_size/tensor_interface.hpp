@@ -41,12 +41,16 @@ namespace utk
 
 	typedef VarianceVector variances;
 
-	static_assert( variances::size == multidim::layout::full_order, "size of variances must agree with tensor order." );
+	static_assert( variances::size == multidim::layout::order, "size of variances must agree with tensor order." );
 
 	//---| constructor with storage pointer
 
 	explicit
 	tensor_interface( const typename multidim::storage_interface::pointer_type pointer ) : multidim( pointer )  {	}
+
+	//TODO: !!!
+	//template<  dsd > remove_index
+
 
 	/*template< index_type Index >
 	change_basis( const tensor_interface< T

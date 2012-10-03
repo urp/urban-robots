@@ -18,8 +18,7 @@
 
 # include "utk/math/fixed_size/vector_interface.hpp"
 # include "utk/math/fixed_size/vector_functions.hpp" //required for fixed_size::at
-# include "utk/math/fixed_size/multidim_layout.hpp"
-# include "utk/math/fixed_size/multidim_layout_functions.hpp"
+
 # include "utk/math/fixed_size/multidim_static_iterator.hpp"
 
 namespace utk
@@ -104,7 +103,7 @@ namespace utk
 	using const_iterator_end = const multidim_static_iterator< type, Index, integral::at< typename layout::sizes, Index >::value >;
 
 	//---| begin
-
+	//---| TODO: test iterator interface
 	template< index_type Index >
 	iterator_begin<Index> begin() { return const_iterator_begin< Index >( *this ); }
 

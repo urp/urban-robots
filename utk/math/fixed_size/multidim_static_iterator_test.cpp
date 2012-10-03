@@ -26,7 +26,7 @@ using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( multidim_1d_iterator_with_storage )
 {
-  typedef initial_layout< 3 > layout;
+  typedef multidim_layout< size_vector<3> > layout;
   typedef multidim_interface< double, layout > multidim_type;
   double  data[ layout::total_size ] = { 0.,1.,2. };
   multidim_type multidim( data );
@@ -45,7 +45,7 @@ BOOST_AUTO_TEST_CASE( multidim_1d_iterator_with_storage )
 
 BOOST_AUTO_TEST_CASE( multidim_2d_iterator_with_storage )
 {
-  typedef initial_layout< 2,3 > layout;
+  typedef multidim_layout< size_vector<2,3> > layout;
   typedef multidim_interface< double, layout > multidim_type;
   double  data[ layout::total_size ] = { 0.,1.,2., 3., 4., 5. };
   multidim_type multidim( data );
@@ -66,7 +66,7 @@ BOOST_AUTO_TEST_CASE( multidim_2d_iterator_with_storage )
 
 BOOST_AUTO_TEST_CASE( multidim_2d_compare_iterators )
 {
-  typedef initial_layout< 2,3 > layout;
+  typedef multidim_layout< size_vector<2,3> > layout;
   typedef multidim_interface< double, layout > multidim_type;
   double  data[ layout::total_size ] = { 0.,1.,2., 3., 4., 5. };
   multidim_type multidim( data );
