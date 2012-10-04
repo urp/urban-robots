@@ -70,8 +70,8 @@ namespace utk
 
 	  typedef FullIndexMask  full_index_mask;
 	  typedef FullLayout full_layout;
-	  typedef typename full_layout::sizes   full_sizes;
-	  typedef typename full_layout::strides full_strides;
+	  //typedef typename full_layout::sizes   full_sizes;
+	  //typedef typename full_layout::strides full_strides;
 
 
 	  //---| total_size
@@ -86,10 +86,9 @@ namespace utk
 	  template< index_type MaskedIndex >
 	  struct remove_index
 	  {
-	      static_assert( MaskedIndex < full_layout::order, "Index greater or equal than multidim order");
+	      static_assert( MaskedIndex < slice_layout::order, "Index greater or equal than multidim order");
 
-	      //:::| find index in full_layout corresponding to MaskedIndex
-
+	      // find index in full_layout corresponding to MaskedIndex
 	      typedef typename integral::make_uniform_vector< index_type, full_layout::order, 1 >::type ones;
 	      typedef typename integral::accumulate< ones, integral::add< index_type, index_type >, 0 >::type index_positions;
 	      typedef typename integral::remove_false< index_positions, visibility_mask >::type visible_index_positions;
@@ -138,8 +137,8 @@ namespace utk
 	  {
 	    typedef typename integral::transform< visibility_mask , integral::negate<bool> >::type hidden_mask;
 	    // remove free indices from the dope vectors
-	    typedef typename integral::remove_false< full_strides, hidden_mask >::type hidden_strides;
-	    typedef typename integral::remove_false< full_index_mask, hidden_mask >::type hidden_indices;
+	    typedef typename integral::remove_false< typename full_layout::strides, hidden_mask >::type hidden_strides;
+	    typedef typename integral::remove_false< FullIndexMask, hidden_mask >::type hidden_indices;
 
 	    return integral::inner_product< hidden_strides, hidden_indices >::value + full_layout::static_offset();
 	  }

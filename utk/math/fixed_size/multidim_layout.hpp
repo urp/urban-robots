@@ -33,9 +33,7 @@ namespace utk
       //---------------------
       //---| tensor layout
       //---------------------
-      // TODO: make index fixing invisible to outside multidim_layout
-      // e.g indices & sizes & strides contains only 'free indices'
-      // in the manner of order vs. full_order
+
       template< typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
 	      >
@@ -54,7 +52,7 @@ namespace utk
 
 	  //---| order
 	  //-----number of dimensions
-	  static constexpr index_type order = sizes::size;
+	  static constexpr size_type order = sizes::size;
 
 	  //---| stride
 	  //-----extract stride
@@ -74,7 +72,6 @@ namespace utk
 
 	  //---| index_offset
   	  //-----return offset for the specified coordinates
-
 	  template< typename...CoordinateTypes >
 	  static const stride_type index_offset( CoordinateTypes... coords )
 	  {

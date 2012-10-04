@@ -36,11 +36,11 @@ namespace utk
 
       template< typename, typename > struct transform { /* unspecified */ };
 
-      template< typename T, T...Vector, typename UnaryScalarOperator >
-      struct transform< vector< T, Vector... >, UnaryScalarOperator >
+      template< typename T, T...VectorPack, typename UnaryScalarOperator >
+      struct transform< vector< T, VectorPack... >, UnaryScalarOperator >
       {
 	  typedef typename UnaryScalarOperator::value_type value_type;
-	  typedef vector< value_type, UnaryScalarOperator::template apply< Vector >::value... > type;
+	  typedef vector< value_type, UnaryScalarOperator::template apply< VectorPack >::value... > type;
       };
 
       //:::| unary operators
@@ -92,22 +92,22 @@ namespace utk
 
       template< typename, typename, typename > struct binary_apply { /* unspecified */ };
 
-      template< typename T1, T1...Vector1, typename T2, T2...Vector2 , typename BinaryScalarOperator >
-      struct binary_apply< vector< T1, Vector1... >, vector< T2, Vector2... >, BinaryScalarOperator >
+      template< typename T1, T1...VectorPack1, typename T2, T2...VectorPack2 , typename BinaryScalarOperator >
+      struct binary_apply< vector< T1, VectorPack1... >, vector< T2, VectorPack2... >, BinaryScalarOperator >
       {
 	  typedef vector< typename BinaryScalarOperator::value_type
-			, BinaryScalarOperator::template apply< Vector1, Vector2 >::value...
+			, BinaryScalarOperator::template apply< VectorPack1, VectorPack2 >::value...
 			> type;
       };
 
 
       //---| binary apply (vector x scalar -> vector)
       // TODO: test?
-      template< typename T1, T1...Vector, typename T2, T2 Scalar , typename BinaryScalarOperator >
-      struct binary_apply< vector< T1, Vector... >, constant< T2, Scalar >, BinaryScalarOperator >
+      template< typename T1, T1...VectorPack, typename T2, T2 Scalar , typename BinaryScalarOperator >
+      struct binary_apply< vector< T1, VectorPack... >, constant< T2, Scalar >, BinaryScalarOperator >
       {
 	  typedef vector< typename BinaryScalarOperator::value_type
-			, BinaryScalarOperator::template apply< Vector, Scalar >::value...
+			, BinaryScalarOperator::template apply< VectorPack, Scalar >::value...
 			> type;
       };
 
