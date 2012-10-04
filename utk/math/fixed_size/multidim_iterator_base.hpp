@@ -46,7 +46,6 @@ namespace utk
 	typedef typename parent_interface::template changed_layout< value_layout >::type value_interface;
 	typedef typename value_interface::storage_interface value_storage_interface;
 
-
 	//:::| container and value types
 
 	typedef value_interface	value_type;
@@ -77,7 +76,7 @@ namespace utk
 	bool operator==( const multidim_iterator_base< Interface, Index >& other ) const
 	{ return storage.ptr() == other.storage.ptr(); }
 
-      };
+      }; // of multidim_iterator_base<>
 
     } // of fixed_size::
   } // of math::

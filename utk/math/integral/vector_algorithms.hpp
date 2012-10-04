@@ -30,31 +30,18 @@ namespace utk
     namespace integral
     {
 
-      //:::| algorithms
+      //:::| unary algorithms
 
       //---| transform
 
       template< typename, typename > struct transform { /* unspecified */ };
 
-      template< typename T, typename UnaryScalarOperator >
-      struct transform< vector< T >, UnaryScalarOperator >
+      template< typename T, T...Vector, typename UnaryScalarOperator >
+      struct transform< vector< T, Vector... >, UnaryScalarOperator >
       {
-	typedef vector< typename UnaryScalarOperator::value_type > type;
+	  typedef typename UnaryScalarOperator::value_type value_type;
+	  typedef vector< value_type, UnaryScalarOperator::template apply< Vector >::value... > type;
       };
-
-      template< typename T, T...Input, typename UnaryScalarOperator >
-      class transform< vector< T, Input... >, UnaryScalarOperator >
-      {
-	  typedef pop_front< vector< T, Input... > > input;
-
-	  typedef typename transform< typename input::tail, UnaryScalarOperator >::type results;
-
-	public:
-	  typedef typename push_front< results
-				       , constant< T, UnaryScalarOperator::template apply< input::value >::value >
-				       >::type type;
-      };
-
 
       //:::| unary operators
 
@@ -105,61 +92,25 @@ namespace utk
 
       template< typename, typename, typename > struct binary_apply { /* unspecified */ };
 
-      template< typename T1, typename T2, typename BinaryScalarOperator >
-      struct binary_apply< vector< T1 >, vector< T2 >, BinaryScalarOperator >
+      template< typename T1, T1...Vector1, typename T2, T2...Vector2 , typename BinaryScalarOperator >
+      struct binary_apply< vector< T1, Vector1... >, vector< T2, Vector2... >, BinaryScalarOperator >
       {
-	typedef vector< typename BinaryScalarOperator::value_type > type;
+	  typedef vector< typename BinaryScalarOperator::value_type
+			, BinaryScalarOperator::template apply< Vector1, Vector2 >::value...
+			> type;
       };
 
-      template< typename T1, T1...Values1, typename T2, T2...Values2 , typename BinaryScalarOperator >
-      class binary_apply< vector< T1, Values1... >, vector< T2, Values2... >, BinaryScalarOperator >
-      {
-	  typedef pop_front< vector< T1, Values1... > > input1;
-	  typedef pop_front< vector< T2, Values2... > > input2;
-
-	  typedef typename binary_apply< typename input1::tail
-					   , typename input2::tail
-					   , BinaryScalarOperator
-					   >::type results;
-
-	public:
-	  typedef typename push_front< results
-				       , constant< typename BinaryScalarOperator::value_type
-						  , BinaryScalarOperator::template apply< input1::value
-											 , input2::value
-											 >::value
-						  >
-				       >::type type;
-      };
 
       //---| binary apply (vector x scalar -> vector)
-
-      template< typename T1, typename T2, T2 Scalar, typename BinaryScalarOperator >
-      struct binary_apply< vector< T1 >, constant< T2, Scalar >, BinaryScalarOperator >
+      // TODO: test?
+      template< typename T1, T1...Vector, typename T2, T2 Scalar , typename BinaryScalarOperator >
+      struct binary_apply< vector< T1, Vector... >, constant< T2, Scalar >, BinaryScalarOperator >
       {
-	typedef vector< typename BinaryScalarOperator::value_type > type;
+	  typedef vector< typename BinaryScalarOperator::value_type
+			, BinaryScalarOperator::template apply< Vector, Scalar >::value...
+			> type;
       };
 
-      template< typename T1, T1...Values1, typename T2, T2 Scalar , typename BinaryScalarOperator >
-      class binary_apply< vector< T1, Values1... >, constant< T2, Scalar >, BinaryScalarOperator >
-      {
-	  typedef pop_front< vector< T1, Values1... > > input1;
-	  typedef constant< T2, Scalar > input2;
-
-	  typedef typename binary_apply< typename input1::tail
-					   , input2
-					   , BinaryScalarOperator
-					   >::type results;
-
-	public:
-	  typedef typename push_front< results
-				       , constant< typename BinaryScalarOperator::value_type
-						  , BinaryScalarOperator::template apply< input1::value
-											, input2::value
-											>::value
-						  >
-				       >::type type;
-      };
 
       //---| accumulate ( vector -> scalar )
 

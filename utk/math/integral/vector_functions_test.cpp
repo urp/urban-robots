@@ -136,18 +136,38 @@ BOOST_AUTO_TEST_SUITE_END()
 
 BOOST_AUTO_TEST_SUITE( vector_create_functions )
 
-  BOOST_AUTO_TEST_CASE( make_uniform )
+  BOOST_AUTO_TEST_CASE( make_vector_test )
+  {
+    typedef typename make_vector< int, vector< unsigned, 1,2,3 > >::type  ints;
+
+    const int size = ints::size;
+    BOOST_CHECK_EQUAL( size, 3 );
+
+    const bool is_target_type = std::is_same< typename ints::value_type, int >::value;
+    BOOST_CHECK( is_target_type );
+
+    const int i0 = at< ints, 0 >::value;
+    BOOST_CHECK_EQUAL( i0, 1 );
+    const int i1 = at< ints, 1 >::value;
+    BOOST_CHECK_EQUAL( i1, 2 );
+    const int i2 = at< ints, 2 >::value;
+    BOOST_CHECK_EQUAL( i2, 3 );
+
+  }
+
+
+  BOOST_AUTO_TEST_CASE( make_uniform_vector_test )
   {
     typedef typename make_uniform_vector< int, 3,2 >::type  ints;
 
-    static const int size = ints::size;
+    const int size = ints::size;
     BOOST_CHECK_EQUAL( size, 3 );
 
-    static const int i0 = at< ints, 0 >::value;
+    const int i0 = at< ints, 0 >::value;
     BOOST_CHECK_EQUAL( i0, 2 );
-    static const int i1 = at< ints, 1 >::value;
+    const int i1 = at< ints, 1 >::value;
     BOOST_CHECK_EQUAL( i1, 2 );
-    static const int i2 = at< ints, 2 >::value;
+    const int i2 = at< ints, 2 >::value;
     BOOST_CHECK_EQUAL( i2, 2 );
 
   }

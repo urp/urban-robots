@@ -131,7 +131,7 @@ BOOST_AUTO_TEST_CASE( random_testing )
 
 
   typedef integral::assign< old_indices, 0, integral::constant< index_type, 7 > >::type new_indices;
-  typedef integral::assign< old_sizes  , 0, integral::constant< index_type, 9 > >::type new_sizes;
+  typedef integral::assign< old_sizes  , 0, integral::constant< size_type, 9 > >::type new_sizes;
 
   typedef multidim_layout< new_indices , new_sizes > new_layout;
   typedef multidim_interface< double, new_layout > new_multidim;

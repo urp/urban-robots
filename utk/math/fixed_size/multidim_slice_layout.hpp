@@ -48,7 +48,7 @@ namespace utk
       //-----| hides indices equal to size eg. at(FullIndexMask,i) == at(SizeVector,i)
       //-----| default: all indices visible
       template< typename FullLayout
-	      , typename FullIndexMask  = typename FullLayout::sizes
+	      , typename FullIndexMask = typename integral::make_vector< index_type, typename FullLayout::sizes >::type
 	      >
       class multidim_slice_layout : public make_slice_layout< FullLayout, FullIndexMask >::type
       {

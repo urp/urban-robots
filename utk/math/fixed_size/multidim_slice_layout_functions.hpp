@@ -16,7 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+
+# include "utk/math/fixed_size/multidim_slice_layout.hpp"
 
 namespace utk
 {
@@ -27,7 +29,8 @@ namespace utk
 
       //---| product_layout
 
-      // TODO: specify for vector x vector, vector x tensor and tensor x vector
+      // TODO: specify for all layout types (manage index attribs)
+      //       vector x vector, vector x tensor and tensor x vector
       template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
       template< index_type...IndicesA, size_type...SizesA, index_type...IndicesB, size_type...SizesB >
@@ -35,9 +38,9 @@ namespace utk
                            , multidim_layout< integral::vector< index_type, IndicesB... >, integral::vector< size_type, SizesB... > >
                            >
       {
-        typedef multidim_layout< index_vector< IndicesA..., IndicesB... >
-                               , size_vector< SizesA..., SizesB... >
-                               > type;
+        typedef multidim_slice_layout< index_vector< IndicesA..., IndicesB... >
+                                     , size_vector< SizesA..., SizesB... >
+                                     > type;
       };
     }
   }

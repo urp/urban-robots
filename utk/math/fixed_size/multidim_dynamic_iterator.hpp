@@ -38,84 +38,84 @@ namespace utk
 	  typedef multidim_iterator_base< Interface, Index >    base;
 	public:
 
-	//:::| iteration information
+	  //:::| iteration information
 
-	mutable index_type index_value = 0;
+	  mutable ptrdiff_t index_value;
 
-	//---| constructor with storage_interface
+	  //---| constructor with storage_interface
 
-	explicit
-	multidim_dynamic_iterator( const Interface& interface, index_type index_value = 0 )
-	: base( interface ), index_value( index_value )  { }
+	  explicit
+	  multidim_dynamic_iterator( const Interface& interface, ptrdiff_t index_value = 0 )
+	  : base( interface ), index_value( index_value )  { }
 
-	//---| copy constuctor
+	  //---| copy constuctor
 
-	multidim_dynamic_iterator( const type& other )
-	: base( other ), index_value( other.index_value )  { }
+	  multidim_dynamic_iterator( const type& other )
+	  : base( other ), index_value( other.index_value )  { }
 
-	//:::| iterator interface
+	  //:::| iterator interface
 
-	//---| dereference operators
-	// TODO: ask layout for offset
-	typename base::value_interface operator*()
-	{ return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + base::index_stride * index_value ) ); }
-	// TODO: ask layout for offset
-	const typename base::value_interface operator*() const
-	{ return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + base::index_stride * index_value ) ); }
+	  //---| dereference operators
+	  // TODO: ask layout for offset
+	  typename base::value_interface operator*()
+	  { return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+	  // TODO: ask layout for offset
+	  const typename base::value_interface operator*() const
+	  { return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
-	//---| increment iterators
+	  //---| increment iterators
 
-	type& operator++()
-	{
-	  ++index_value;
-	  return *this;
-	}
+	  type& operator++()
+	  {
+	    ++index_value;
+	    return *this;
+	  }
 
-	const type& operator++() const
-	{
-	  ++index_value;
-	  return *this;
-	}
+	  const type& operator++() const
+	  {
+	    ++index_value;
+	    return *this;
+	  }
 
-	// post_increment
-	type operator++(int) const
-	{
-	  type old_self( *this );
-	  ++index_value;
-	  return old_self;
-	}
+	  // post_increment
+	  type operator++(int) const
+	  {
+	    type old_self( *this );
+	    ++index_value;
+	    return old_self;
+	  }
 
-	//---| decrement iterators
+	  //---| decrement iterators
 
-	type& operator--()
-	{
-	  --index_value;
-	  return *this;
-	}
+	  type& operator--()
+	  {
+	    --index_value;
+	    return *this;
+	  }
 
-	const type& operator--() const
-	{
-	  --index_value;
-	  return *this;
-	}
+	  const type& operator--() const
+	  {
+	    --index_value;
+	    return *this;
+	  }
 
-	// post_increment
-	type operator--(int) const
-	{
-	  type old_self( *this );
-	  index_value--;
-	  return old_self;
-	}
+	  // post_increment
+	  type operator--(int) const
+	  {
+	    type old_self( *this );
+	    index_value--;
+	    return old_self;
+	  }
 
-	//:::| comparison operators
+	  //:::| comparison operators
 
-	bool operator==( const type& other ) const
-	{ return index_value == other.index_value and base::operator==( other ); }
+	  bool operator==( const type& other ) const
+	  { return index_value == other.index_value and base::operator==( other ); }
 
-	bool operator!=( const type& other ) const
-	{ return not operator==( other ); }
+	  bool operator!=( const type& other ) const
+	  { return not operator==( other ); }
 
-      };
+      }; // of multidim_dynamic_iterator<>
 
     } // of fixed_size::
   } // of math::

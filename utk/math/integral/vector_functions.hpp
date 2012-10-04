@@ -36,6 +36,20 @@ namespace utk
 
       //:::| data access
 
+      //---| make_vector
+
+
+      template< typename T, typename Vector >
+      struct make_vector { /* uspecified */ };
+
+      template< typename T, typename T2, T2...Values >
+      struct make_vector< T, vector< T2, Values... > >
+      {
+
+	typedef vector< T, T(Values)... > type;
+      };
+
+
       //---| make_uniform_vector
 
       namespace

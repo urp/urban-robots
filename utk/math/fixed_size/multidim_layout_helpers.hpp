@@ -28,12 +28,12 @@ namespace utk
     namespace fixed_size
     {
 
-      using integral::index_type;
-
+      //using integral::index_type;
+      typedef ptrdiff_t index_type;
       // TODO: move to common header?
 
       typedef size_t size_type;
-      typedef size_t stride_type;
+      typedef ptrdiff_t stride_type;
 
       //-----| bool_vector
 
