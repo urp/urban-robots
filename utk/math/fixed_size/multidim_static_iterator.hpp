@@ -19,6 +19,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim_iterator_base.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -31,66 +32,50 @@ namespace utk
 
       //-----| multidim_interface
       // TODO: cleanup and unify with dynamic_iterator
-      template < typename ProvidedInterface, index_type Index, index_type IndexValue = 0 >
-      struct multidim_static_iterator
+      template < typename Interface, index_type Index, index_type IndexValue = 0 >
+      struct multidim_static_iterator : public multidim_iterator_base< Interface, Index >
       {
 
-	//:::| parent interface
+	typedef multidim_iterator_base< Interface, Index > base;
 
-	typedef ProvidedInterface parent_interface;
-	typedef typename parent_interface::layout parent_layout;
-	typedef typename parent_interface::storage_interface parent_storage_interface;
+	//:::| iterator types
 
-	//:::| value interface
-
-	typedef typename parent_layout::template remove_index< Index >::type value_layout;
-	typedef typename parent_interface::template changed_layout< value_layout >::type value_interface;
-	typedef typename value_interface::storage_interface value_storage_interface;
-
-	//:::| container and value types
-
-	typedef value_interface	value_type;
-
-	typedef multidim_static_iterator< parent_interface , Index, IndexValue + 1 > increment_iterator;
-	typedef multidim_static_iterator< parent_interface , Index, IndexValue - 1 > decrement_iterator;
-
-	//:::| storage interface
-
-	parent_storage_interface storage;
+	typedef multidim_static_iterator< Interface , Index, IndexValue + 1 > increment_iterator;
+	typedef multidim_static_iterator< Interface , Index, IndexValue - 1 > decrement_iterator;
 
 	//:::| iteration information
 
-	static constexpr index_type index = Index;
 	static constexpr index_type index_value = IndexValue;
-	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
-	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
 
 	//---| constructor with storage_interface
 
-	explicit
-	multidim_static_iterator( const parent_storage_interface& other_storage ) : storage( other_storage )  {	}
+	multidim_static_iterator( const Interface& interface )
+	: base( interface )  { }
 
 	//---| copy constuctor
 	template< index_type OtherIndexValue >
-	multidim_static_iterator( const multidim_static_iterator< parent_interface, Index, OtherIndexValue >& other )
-	: storage( other.storage )  { }
+	multidim_static_iterator( const multidim_static_iterator< Interface, Index, OtherIndexValue >& other )
+	: base( other )  { }
 
 	//:::| iterator interface
 	// TODO: ask layout for offset
-	value_interface operator*() { return value_interface( value_storage_interface( storage.ptr() + index_value * index_stride ) ); }
+	typename base::value_interface operator*()
+	{ return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + index_value * base::index_stride ) ); }
 
-	increment_iterator increment() const { return increment_iterator( storage ); }
+	increment_iterator increment() const
+	{ return increment_iterator( *this ); }
 
 	// TODO: !!! CHECK for underrun ( mark rend() )
-	decrement_iterator decrement() const { return decrement_iterator( storage ); }
+	decrement_iterator decrement() const
+	{ return decrement_iterator( *this ); }
 
 	template< typename OtherLayout, index_type OtherIndexValue >
 	bool operator==( const multidim_static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
-	{ return OtherIndexValue == IndexValue && storage.ptr() == other.storage.ptr();	}
+	{ return OtherIndexValue == IndexValue && base::operator==(other); }
 
 	template< typename OtherLayout, index_type OtherIndexValue >
 	bool operator!=( const multidim_static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
-	{ return ! operator==( other ); }
+	{ return not operator==( other ); }
 
       };
 

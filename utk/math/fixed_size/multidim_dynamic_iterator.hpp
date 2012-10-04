@@ -31,58 +31,37 @@ namespace utk
 
       //-----| multidim_interface
 
-      template< typename ProvidedInterface, index_type Index >
-      struct multidim_dynamic_iterator
+      template< typename Interface, index_type Index >
+      class multidim_dynamic_iterator : public multidim_iterator_base< Interface, Index >
       {
-	//:::| parent interface
-
-	typedef ProvidedInterface parent_interface;
-	typedef typename parent_interface::layout parent_layout;
-	typedef typename parent_interface::storage_interface parent_storage_interface;
-
-	//:::| value interface
-
-	typedef typename parent_layout::template remove_index< Index >::type value_layout;
-	typedef typename parent_interface::template changed_layout< value_layout >::type value_interface;
-	typedef typename value_interface::storage_interface value_storage_interface;
-
-
-	//:::| container and value types
-
-	typedef value_interface	value_type;
-	typedef multidim_dynamic_iterator< parent_interface, Index > type;
-
-	//:::| storage interface
-
-	parent_storage_interface storage;
+	  typedef multidim_dynamic_iterator< Interface, Index > type;
+	  typedef multidim_iterator_base< Interface, Index >    base;
+	public:
 
 	//:::| iteration information
 
-	static constexpr index_type index = Index;
 	mutable index_type index_value = 0;
-	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
-	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
 
 	//---| constructor with storage_interface
 
 	explicit
-	multidim_dynamic_iterator( const parent_storage_interface& storage, index_type index_value = 0 )
-	: storage( storage ), index_value( index_value )  { }
+	multidim_dynamic_iterator( const Interface& interface, index_type index_value = 0 )
+	: base( interface ), index_value( index_value )  { }
 
 	//---| copy constuctor
 
 	multidim_dynamic_iterator( const type& other )
-	: storage( other.storage ), index_value( other.index_value )  { }
+	: base( other ), index_value( other.index_value )  { }
 
 	//:::| iterator interface
 
 	//---| dereference operators
 	// TODO: ask layout for offset
-	value_interface operator*()
-	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
+	typename base::value_interface operator*()
+	{ return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + base::index_stride * index_value ) ); }
 	// TODO: ask layout for offset
-	const value_interface operator*() const
-	{ return value_interface( value_storage_interface( storage.ptr() + index_stride * index_value ) ); }
+	const typename base::value_interface operator*() const
+	{ return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + base::index_stride * index_value ) ); }
 
 	//---| increment iterators
 
@@ -128,11 +107,13 @@ namespace utk
 	  return old_self;
 	}
 
+	//:::| comparison operators
 
 	bool operator==( const type& other ) const
-	{ return index_value == other.index_value and storage.ptr() == other.storage.ptr(); }
+	{ return index_value == other.index_value and base::operator==( other ); }
 
-	bool operator!=( const type& other ) const { return not operator==( other ); }
+	bool operator!=( const type& other ) const
+	{ return not operator==( other ); }
 
       };
 
