@@ -34,8 +34,8 @@ namespace utk
       template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
       template< index_type...IndicesA, size_type...SizesA, index_type...IndicesB, size_type...SizesB >
-      struct product_layout< multidim_layout< integral::vector< index_type, IndicesA... >, integral::vector< size_type, SizesA... > >
-                           , multidim_layout< integral::vector< index_type, IndicesB... >, integral::vector< size_type, SizesB... > >
+      struct product_layout< multidim_layout< meta::integral::vector< index_type, IndicesA... >, meta::integral::vector< size_type, SizesA... > >
+                           , multidim_layout< meta::integral::vector< index_type, IndicesB... >, meta::integral::vector< size_type, SizesB... > >
                            >
       {
         typedef multidim_slice_layout< index_vector< IndicesA..., IndicesB... >

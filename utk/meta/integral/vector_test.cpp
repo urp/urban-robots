@@ -17,13 +17,13 @@
 #include <boost/mpl/at.hpp>
 #include <boost/mpl/size.hpp>
 
-# include "utk/math/integral/vector.hpp"
+# include "utk/meta/integral/vector.hpp"
 
 # define BOOST_TEST_DYN_LINK
-# define BOOST_TEST_MODULE integral vector
+# define BOOST_TEST_MODULE meta/integral vector
 # include <boost/test/unit_test.hpp>
 
-using namespace utk::math::integral;
+using namespace utk::meta::integral;
 
 BOOST_AUTO_TEST_CASE( type )
 {
@@ -53,6 +53,3 @@ BOOST_AUTO_TEST_CASE( mpl_vector_c )
   static const int at_index2 = boost::mpl::at_c< indices::mpl_vector_c ,2 >::type::value;
   BOOST_CHECK_EQUAL( at_index2, 4 );
 }
-
-
-

@@ -16,13 +16,13 @@
 
 # include <type_traits>
 
-# include "utk/math/integral/constant.hpp"
+# include "utk/meta/integral/constant.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE integral constant
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math::integral;
+using namespace utk::meta::integral;
 
 
 BOOST_AUTO_TEST_CASE( type_consistency )
@@ -38,4 +38,3 @@ BOOST_AUTO_TEST_CASE( value_consistency )
   int value = const_int::value;
   BOOST_CHECK_EQUAL( value, -1 );
 }
-

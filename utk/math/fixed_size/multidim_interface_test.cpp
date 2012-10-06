@@ -21,7 +21,7 @@
 #define BOOST_TEST_MODULE multidim interface
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
@@ -130,8 +130,8 @@ BOOST_AUTO_TEST_CASE( random_testing )
   BOOST_CHECK_EQUAL( old_indices_size, 3 );
 
 
-  typedef integral::assign< old_indices, 0, integral::constant< index_type, 7 > >::type new_indices;
-  typedef integral::assign< old_sizes  , 0, integral::constant< size_type, 9 > >::type new_sizes;
+  typedef meta::integral::assign< old_indices, 0, meta::integral::constant< index_type, 7 > >::type new_indices;
+  typedef meta::integral::assign< old_sizes  , 0, meta::integral::constant< size_type, 9 > >::type new_sizes;
 
   typedef multidim_layout< new_indices , new_sizes > new_layout;
   typedef multidim_interface< double, new_layout > new_multidim;
@@ -140,7 +140,7 @@ BOOST_AUTO_TEST_CASE( random_testing )
   const int new_index = boost::mpl::at_c< new_indices::mpl_vector_c, 0 >::type::value;
   BOOST_CHECK_EQUAL( new_index, 7 );
 
-  const int new_size = integral::at< new_sizes, 0 >::value;
+  const int new_size = meta::integral::at< new_sizes, 0 >::value;
   BOOST_CHECK_EQUAL( new_size, 9 );
 
 

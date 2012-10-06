@@ -58,8 +58,8 @@ namespace utk
 
 	static constexpr index_type index = Index;
 
-	static constexpr stride_type index_stride = integral::at< typename parent_layout::strides, Index >::value;
-	static constexpr size_type   index_size   = integral::at< typename parent_layout::sizes  , Index >::value;
+	static constexpr stride_type index_stride = meta::integral::at< typename parent_layout::strides, Index >::value;
+	static constexpr size_type   index_size   = meta::integral::at< typename parent_layout::sizes  , Index >::value;
 
 	//---| constructor with storage_interface
 

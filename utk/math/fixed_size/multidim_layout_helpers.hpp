@@ -19,7 +19,7 @@
 # include <boost/mpl/at.hpp>
 
 
-# include "utk/math/integral/integral.hpp"
+# include "utk/meta/integral/integral.hpp"
 
 namespace utk
 {
@@ -28,7 +28,7 @@ namespace utk
     namespace fixed_size
     {
 
-      //using integral::index_type;
+      //using meta::integral::index_type;
       typedef ptrdiff_t index_type;
       // TODO: move to common header?
 
@@ -38,22 +38,22 @@ namespace utk
       //-----| bool_vector
 
       template< bool...Bools >
-      using bool_vector = integral::vector< bool, Bools... >;
+      using bool_vector = meta::integral::vector< bool, Bools... >;
 
       //-----| index_vector
 
       template< index_type... Indices >
-      using index_vector = integral::vector< index_type, Indices... >;
+      using index_vector = meta::integral::vector< index_type, Indices... >;
 
       //-----| size_vector
 
       template< size_type... Sizes >
-      using size_vector = integral::vector< size_type, Sizes... >;
+      using size_vector = meta::integral::vector< size_type, Sizes... >;
 
       //-----| stride_vector
 
       template< size_type... Strides >
-      using stride_vector = integral::vector< stride_type, Strides... >;
+      using stride_vector = meta::integral::vector< stride_type, Strides... >;
 
       namespace helpers
       {
@@ -64,45 +64,45 @@ namespace utk
 	  template< typename, typename > struct stride_sequence_recursion { /* unspecified */ };
 
 	  template< stride_type...Strides >
-	  struct stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type > >
+	  struct stride_sequence_recursion< meta::integral::vector< stride_type, Strides... >, meta::integral::vector< size_type > >
 	  {
 	    typedef stride_vector< Strides... > type;
 	  };
 
 	  template< stride_type...Strides, size_type...Sizes >
-	  class stride_sequence_recursion< integral::vector< stride_type, Strides... >, integral::vector< size_type, Sizes... > >
+	  class stride_sequence_recursion< meta::integral::vector< stride_type, Strides... >, meta::integral::vector< size_type, Sizes... > >
 	  {
-	      typedef typename integral::pop_front< integral::vector< size_type, Sizes... > > stripped;
+	      typedef typename meta::integral::pop_front< meta::integral::vector< size_type, Sizes... > > stripped;
 
-	      static const stride_type new_stride = integral::pop_back< integral::vector< stride_type, Strides... > >::value * stripped::value;
+	      static const stride_type new_stride = meta::integral::pop_back< meta::integral::vector< stride_type, Strides... > >::value * stripped::value;
 
 	    public:
 
-	      typedef typename stride_sequence_recursion< integral::vector< stride_type, Strides..., new_stride >, typename stripped::tail >::type type;
+	      typedef typename stride_sequence_recursion< meta::integral::vector< stride_type, Strides..., new_stride >, typename stripped::tail >::type type;
 	  };
 	}
 
 	template< typename > struct stride_sequence { /* unspecified */ };
 
 	template< size_type... Sizes >
-	struct stride_sequence< integral::vector< size_type, Sizes... > >
+	struct stride_sequence< meta::integral::vector< size_type, Sizes... > >
 	{
 	  private:
-	    typedef typename integral::reverse< integral::vector< size_type, Sizes... > >::type reverse_sizes;
+	    typedef typename meta::integral::reverse< meta::integral::vector< size_type, Sizes... > >::type reverse_sizes;
 
-	    typedef typename stride_sequence_recursion< integral::vector< stride_type, 1 >
+	    typedef typename stride_sequence_recursion< meta::integral::vector< stride_type, 1 >
 						      ,  reverse_sizes >::type reverse_result;
 
 	    // strip last stride
-	    typedef typename integral::pop_back< reverse_result >::tail reverse_stripped_result;
+	    typedef typename meta::integral::pop_back< reverse_result >::tail reverse_stripped_result;
 	  public:
-	    typedef typename integral::reverse< reverse_stripped_result >::type type;
+	    typedef typename meta::integral::reverse< reverse_stripped_result >::type type;
 	};
 
 	//---| total_size
 	// TODO: tests
 	template< typename SizeVector, typename StrideVector > struct total_size
-	{ static constexpr size_type value = integral::pop_front< SizeVector >::value * integral::at< StrideVector, 0 >::value; };
+	{ static constexpr size_type value = meta::integral::pop_front< SizeVector >::value * meta::integral::at< StrideVector, 0 >::value; };
 
 	// scalar
 	template< > struct total_size< size_vector< >, stride_vector< > > { static constexpr size_type value = 1; };

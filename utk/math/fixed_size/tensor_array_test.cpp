@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE tensor array
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )

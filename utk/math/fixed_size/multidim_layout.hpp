@@ -19,7 +19,7 @@
 # include <boost/mpl/at.hpp>
 
 
-# include "utk/math/integral/integral.hpp"
+# include "utk/meta/integral/integral.hpp"
 
 # include "utk/math/fixed_size/multidim_layout_helpers.hpp"
 
@@ -36,17 +36,21 @@ namespace utk
 
       template< typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
+	      //, typename Attributes
 	      >
       class multidim_layout
       {
   	  static_assert( StrideVector::size == SizeVector::size
 		       , "Size of StrideVector and SizeVector must agree"
 		       );
-	  static_assert( not integral::any< typename integral::equal< SizeVector, integral::constant< size_type, 0 > >::type >::value
+	  static_assert( not meta::integral::any< typename meta::integral::equal< SizeVector, meta::integral::constant< size_type, 0 > >::type >::value
 		       , "Index with empty range (Size=0) are nor allowed"
 		       );
 
 	public:
+
+	  //vector_pack< Attributes... > attributes;
+
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
 
@@ -60,7 +64,7 @@ namespace utk
 	  struct stride
 	  {
 	    static_assert( Index < strides::size, "requested dimension does not exist" );
-	    const static stride_type value = integral::at< strides, Index >::value;
+	    const static stride_type value = meta::integral::at< strides, Index >::value;
 	  };
 
 	  //---| total_size
@@ -77,7 +81,7 @@ namespace utk
 	  {
 	    static_assert( sizeof...(CoordinateTypes) <= order, "number of provided coordinates and indices must agree." );
 
-	    return integral::inner_product_with_arguments< strides >( coords... );
+	    return meta::integral::inner_product_with_arguments< strides >( coords... );
 	  }
 
 	  //---| static_offset
@@ -92,12 +96,11 @@ namespace utk
 	  {
 	    static_assert( Index < order, "Index greater or equal than multidim order");
 
-	    typedef typename integral::remove_at< sizes  , Index >::type new_sizes;
-	    typedef typename integral::remove_at< strides, Index >::type new_strides;
+	    typedef typename meta::integral::remove_at< sizes  , Index >::type new_sizes;
+	    typedef typename meta::integral::remove_at< strides, Index >::type new_strides;
 
 	    typedef multidim_layout< new_sizes, new_strides > type;
 	  };
-
 
       };
 

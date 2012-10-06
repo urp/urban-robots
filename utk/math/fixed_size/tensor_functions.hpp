@@ -33,20 +33,20 @@ namespace utk
       struct make_non_mixed_tensor_interface
       {
 	typedef tensor_interface< T, MultiDimLayout
-							      , typename integral::make_uniform_vector< variance_type, MultiDimLayout::order, Variance >::type
+							      , typename meta::integral::make_uniform_vector< variance_type, MultiDimLayout::order, Variance >::type
 							      > type;
       };
 
       template< typename T, typename MultiDimLayout, index_type ContravariantIndices >
       class make_mixed_tensor_interface
       {
-	typedef typename integral::make_uniform_vector< variance_type, ContravariantIndices, contravariant >::type contravar;
-	typedef typename integral::make_uniform_vector< variance_type, MultiDimLayout::order - ContravariantIndices, covariant >::type covar;
+	typedef typename meta::integral::make_uniform_vector< variance_type, ContravariantIndices, contravariant >::type contravar;
+	typedef typename meta::integral::make_uniform_vector< variance_type, MultiDimLayout::order - ContravariantIndices, covariant >::type covar;
 
 	public:
 
 	  typedef tensor_interface< T, MultiDimLayout
-				  , typename integral::concatinate< contravar, covar >::type
+				  , typename meta::integral::concatinate< contravar, covar >::type
 				  > type;
       };
 
@@ -60,7 +60,7 @@ namespace utk
       {
 	typedef tensor_array< T
 			    , typename product_layout< LayoutA, LayoutB >::type
-			    , typename integral::concatinate< VariancesA, VariancesB >::type
+			    , typename meta::integral::concatinate< VariancesA, VariancesB >::type
 			    > type;
       };
 

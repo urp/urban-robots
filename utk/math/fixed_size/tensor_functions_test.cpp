@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE tensor functions
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_SUITE( make_tensor_interface )
@@ -34,11 +34,11 @@ BOOST_AUTO_TEST_CASE( make_non_mixed_tensor_interface_test )
   typedef typename make_non_mixed_tensor_interface< double, layout, contravariant >::type contravariant_tensor;
   contravariant_tensor contravariant_test_tensor( nullptr );
 
-  const size_type var1 = integral::at< contravariant_tensor::variances, 0 >::value;
+  const size_type var1 = meta::integral::at< contravariant_tensor::variances, 0 >::value;
   BOOST_CHECK_EQUAL( var1, contravariant );
-  const size_type var2 = integral::at< contravariant_tensor::variances, 1 >::value;
+  const size_type var2 = meta::integral::at< contravariant_tensor::variances, 1 >::value;
   BOOST_CHECK_EQUAL( var2, contravariant );
-  const size_type var3 = integral::at< contravariant_tensor::variances, 2 >::value;
+  const size_type var3 = meta::integral::at< contravariant_tensor::variances, 2 >::value;
   BOOST_CHECK_EQUAL( var3, contravariant );
 
   // covariant
@@ -46,11 +46,11 @@ BOOST_AUTO_TEST_CASE( make_non_mixed_tensor_interface_test )
   typedef typename make_non_mixed_tensor_interface< double, layout, covariant >::type covariant_tensor;
   covariant_tensor covariant_test_tensor( nullptr );
 
-  const size_type covar1 = integral::at< covariant_tensor::variances, 0 >::value;
+  const size_type covar1 = meta::integral::at< covariant_tensor::variances, 0 >::value;
   BOOST_CHECK_EQUAL( covar1, covariant );
-  const size_type covar2 = integral::at< covariant_tensor::variances, 1 >::value;
+  const size_type covar2 = meta::integral::at< covariant_tensor::variances, 1 >::value;
   BOOST_CHECK_EQUAL( covar2, covariant );
-  const size_type covar3 = integral::at< covariant_tensor::variances, 2 >::value;
+  const size_type covar3 = meta::integral::at< covariant_tensor::variances, 2 >::value;
   BOOST_CHECK_EQUAL( covar3, covariant );
 }
 
@@ -61,11 +61,11 @@ BOOST_AUTO_TEST_CASE( make_mixed_tensor_interface_test )
   typedef typename make_mixed_tensor_interface< double, layout, 2 >::type mixed_tensor;
   mixed_tensor mixed_test_tensor( nullptr );
 
-  const size_type var1 = integral::at< mixed_tensor::variances, 0 >::value;
+  const size_type var1 = meta::integral::at< mixed_tensor::variances, 0 >::value;
   BOOST_CHECK_EQUAL( var1, contravariant );
-  const size_type var2 = integral::at< mixed_tensor::variances, 1 >::value;
+  const size_type var2 = meta::integral::at< mixed_tensor::variances, 1 >::value;
   BOOST_CHECK_EQUAL( var2, contravariant );
-  const size_type var3 = integral::at< mixed_tensor::variances, 2 >::value;
+  const size_type var3 = meta::integral::at< mixed_tensor::variances, 2 >::value;
   BOOST_CHECK_EQUAL( var3, covariant );
 }
 
@@ -88,10 +88,10 @@ BOOST_AUTO_TEST_CASE( product_tensor_array_test )
   // variances
   typedef typename product::variances variances;
 
-  const bool dim_0_contravariant = integral::at< variances, 0 >::value == contravariant;
+  const bool dim_0_contravariant = meta::integral::at< variances, 0 >::value == contravariant;
   BOOST_CHECK_EQUAL( dim_0_contravariant, true );
 
-  const bool dim_1_covariant = integral::at< variances, 1 >::value == covariant;
+  const bool dim_1_covariant = meta::integral::at< variances, 1 >::value == covariant;
   BOOST_CHECK_EQUAL( dim_1_covariant, true );
 }
 

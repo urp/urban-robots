@@ -22,7 +22,7 @@
 #define BOOST_TEST_MODULE multidim dynamic iterator
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( multidim_1d_iterator_with_storage )

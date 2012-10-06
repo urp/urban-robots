@@ -58,7 +58,7 @@ namespace utk
 	template< typename OtherInterface >
 	multidim_interface( const OtherInterface& other ) : storage_interface( other )
 	{
-	  static_assert( integral::all< typename integral::equal< typename OtherInterface::layout::sizes, typename layout::sizes >::type >::value
+	  static_assert( meta::integral::all< typename meta::integral::equal< typename OtherInterface::layout::sizes, typename layout::sizes >::type >::value
 		       , "incompatible layouts!"
 		       );
 	}*/
@@ -75,7 +75,7 @@ namespace utk
 	template< typename OtherLayout >
 	typename changed_layout< OtherLayout >::type change_layout() const
 	{
-	  static_assert( integral::all< typename integral::equal< typename OtherLayout::sizes, typename layout::sizes >::type >::value
+	  static_assert( meta::integral::all< typename meta::integral::equal< typename OtherLayout::sizes, typename layout::sizes >::type >::value
 		       , "OtherLayouts vector-space dimensions must agree with original layout"
 		       );
 
@@ -97,10 +97,10 @@ namespace utk
 	//:::::| prepare iterator_end
 
 	template< index_type Index >
-	using iterator_end = multidim_static_iterator< type, Index, integral::at< typename layout::sizes, Index >::value >;
+	using iterator_end = multidim_static_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
 
 	template< index_type Index >
-	using const_iterator_end = const multidim_static_iterator< type, Index, integral::at< typename layout::sizes, Index >::value >;
+	using const_iterator_end = const multidim_static_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
 
 	//---| begin
 	//---| TODO: test iterator interface

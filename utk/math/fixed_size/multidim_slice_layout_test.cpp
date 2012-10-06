@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE multidim layout
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_SUITE( compile_time_information )
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     BOOST_CHECK_EQUAL( layout::total_size, 24 );
 
 
-    std::array< size_type, 3 > size_array = utk::math::integral::make_array< layout::sizes >::value;
+    std::array< size_type, 3 > size_array = utk::math::meta::integral::make_array< layout::sizes >::value;
     BOOST_CHECK_EQUAL( size_array[0], 2 );
   }
 
@@ -64,15 +64,15 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     // fix
     typedef typename layout::fix_index< 0, 1 >::type fixed;
 
-    index_type fixed0 = integral::at< typename fixed::indices, 0 >::value;
+    index_type fixed0 = meta::integral::at< typename fixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( fixed0 , 1 );
 
     // remove_fixed
     typedef typename fixed::remove_fixed::type removed;
 
-    index_type removed0 = integral::at< typename removed::indices, 0 >::value;
+    index_type removed0 = meta::integral::at< typename removed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( removed0, 3 );
-    index_type removed1 = integral::at< typename removed::indices, 1 >::value;
+    index_type removed1 = meta::integral::at< typename removed::indices, 1 >::value;
     BOOST_CHECK_EQUAL( removed1, 4 );
 
     BOOST_CHECK_EQUAL( removed::total_size, 12 );
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     // unfix
     typedef typename layout::release_index< 0 >::type unfixed;
     BOOST_CHECK_EQUAL( unfixed::total_size, 24 );
-    index_type unfixed0 = integral::at< unfixed::indices, 0 >::value;
+    index_type unfixed0 = meta::integral::at< unfixed::indices, 0 >::value;
     BOOST_CHECK_EQUAL( unfixed0, 2 );
 
   }
@@ -95,9 +95,9 @@ BOOST_AUTO_TEST_SUITE( compile_time_information )
     typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
 
     // remove last element (total_size) from strides
-    typedef typename integral::pop_front< strides >::tail strides_tail;
+    typedef typename meta::integral::pop_front< strides >::tail strides_tail;
     // reverse strides (last index has stride=1)
-    typedef typename integral::reverse< strides_tail >::type strides_reverse;
+    typedef typename meta::integral::reverse< strides_tail >::type strides_reverse;
 
     strides         strides_instance;
     strides_reverse strides_reverse_instance;

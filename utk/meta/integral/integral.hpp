@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  integral.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,28 +16,19 @@
 
 # pragma once
 
-#include <boost/mpl/vector_c.hpp>
+# include "utk/meta/integral/constant.hpp"
+# include "utk/meta/integral/vector.hpp"
+# include "utk/meta/integral/vector_functions.hpp"
+# include "utk/meta/integral/vector_algorithms.hpp"
 
 namespace utk
 {
-  namespace math
+  namespace meta
   {
     namespace integral
     {
-      //---| vector
 
-      template< typename T, T... Content >
-      struct vector
-      {
-        typedef T value_type;
 
-        static const size_t size = sizeof...(Content);
-
-        typedef boost::mpl::vector_c< T, Content... > mpl_vector_c;
-
-        vector() = default;
-      };
-
-    } // of integral::
-  } // of math::
-} // of utk::
+    }
+  }
+}

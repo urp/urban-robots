@@ -20,5 +20,5 @@
 #define BOOST_TEST_MODULE multidim layout functions
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;

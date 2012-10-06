@@ -30,7 +30,7 @@ namespace utk
       typedef enum { contravariant=false, covariant=true } variance_type;
 
       template< variance_type... Variances >
-      using variance_vector = integral::vector< variance_type, Variances... >;
+      using variance_vector = meta::integral::vector< variance_type, Variances... >;
 
       //-----| tensor_interface
       template < typename T, typename Layout, typename VarianceVector >
@@ -54,8 +54,8 @@ namespace utk
 
 	/*template< index_type Index >
 	change_basis( const tensor_interface< T
-					       , initial_layout< integral::at< sizes, Index >::value
-							       , integral::at< sizes, Index >::value
+					       , initial_layout< meta::integral::at< sizes, Index >::value
+							       , meta::integral::at< sizes, Index >::value
 							       >
 					       , variance_vector< contravariant
 								, covariant

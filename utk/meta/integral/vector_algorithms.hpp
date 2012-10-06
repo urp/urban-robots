@@ -19,13 +19,13 @@
 //# include <array>
 # include <type_traits>
 
-# include "utk/math/integral/constant.hpp"
-# include "utk/math/integral/vector.hpp"
-# include "utk/math/integral/vector_functions.hpp"
+# include "utk/meta/integral/constant.hpp"
+# include "utk/meta/integral/vector.hpp"
+# include "utk/meta/integral/vector_functions.hpp"
 
 namespace utk
 {
-  namespace math
+  namespace meta
   {
     namespace integral
     {
@@ -383,7 +383,7 @@ namespace utk
       {
 	  static_assert( Index < sizeof...(Values), "Size of packs Predicates and Values must agree." );
 	  typedef typename make_uniform_vector< bool, sizeof...(Values), true >::type false_vector;
-	  typedef typename assign< false_vector, Index, integral::constant< bool, false > >::type mask_predicate;
+	  typedef typename assign< false_vector, Index, constant< bool, false > >::type mask_predicate;
 	public:
 	  typedef typename remove_false< vector< T, Values... >, mask_predicate >::type type;
       };
@@ -421,5 +421,5 @@ namespace utk
       }
 
     } // of integral::
-  } // of math::
+  } // of meta::
 } // of utk::

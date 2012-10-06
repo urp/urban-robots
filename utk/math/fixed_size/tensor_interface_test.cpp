@@ -21,13 +21,13 @@
 #define BOOST_TEST_MODULE tensor interface
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math;
+using namespace utk;
 using namespace utk::math::fixed_size;
 
 BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
 {
   typedef multidim_layout< size_vector<1,2,3> > layout;
-  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef meta::integral::vector< variance_type, covariant,covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor;
   tensor test_tensor( nullptr );
 }
@@ -35,7 +35,7 @@ BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
 BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
 {
   typedef multidim_layout< size_vector<1,2,3> > layout;
-  typedef integral::vector< variance_type, covariant,covariant,covariant > variances;
+  typedef meta::integral::vector< variance_type, covariant,covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor_type;
   double  data[ layout::total_size ] = { 0.,1.,2.,3.,4.,5. };
   tensor_type tensor( data );
@@ -53,7 +53,7 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_fixed_dimensions )
 {
   typedef multidim_slice_layout< multidim_layout< size_vector<3,2,3> > > unfixed_layout;
   typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
-  typedef integral::vector< variance_type, covariant,covariant > variances;
+  typedef meta::integral::vector< variance_type, covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor_type;
   double  data[ layout::total_size ] = {  0., 1., 2., 3., 4., 5.
                                        ,  6.,  7., 8., 9.,10.,11.

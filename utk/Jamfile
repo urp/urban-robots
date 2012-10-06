@@ -2,4 +2,5 @@ project utk : requirements <include>/$(TOP) ;
 
 build-project io ;
 build-project cache ;
+build-project meta ;
 build-project math ;

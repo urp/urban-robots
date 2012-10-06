@@ -1,4 +1,4 @@
-/*  integral.hpp - Copyright Peter Urban 2012
+/*  bla.h - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +16,30 @@
 
 # pragma once
 
-# include "utk/math/integral/constant.hpp"
-# include "utk/math/integral/vector.hpp"
-# include "utk/math/integral/vector_functions.hpp"
-# include "utk/math/integral/vector_algorithms.hpp"
+# include <type_traits>
 
 namespace utk
 {
-  namespace math
+  namespace meta
   {
     namespace integral
     {
 
+      //---| constant
+      //-----stores an meta/integral constant value
 
-    }
-  }
-}
+      template<typename T, T Value>
+      struct constant
+      {
+        static_assert( std::is_fundamental< T >::value
+                      , "utk::meta::integral::constant is supposed to store "
+                        "only meta/integral constants (fundamental types)" );
+
+        typedef const T value_type;
+
+        static const T value = Value;
+      };
+
+    } // of integral::
+  } // of meta::
+} // of utk::

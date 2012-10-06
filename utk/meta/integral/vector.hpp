@@ -16,30 +16,33 @@
 
 # pragma once
 
-# include <type_traits>
+#include <boost/mpl/vector_c.hpp>
 
 namespace utk
 {
-  namespace math
+  namespace meta
   {
     namespace integral
     {
 
-      //---| constant
-      //-----stores an integral constant value
+      // TODO: move to seperate file
+      typedef size_t index_type;
 
-      template<typename T, T Value>
-      struct constant
+
+      //---| vector
+
+      template< typename T, T... Content >
+      struct vector
       {
-        static_assert( std::is_fundamental< T >::value
-                      , "utk::math::integral::constant is supposed to store "
-                        "only integral constants (fundamental types)" );
+        typedef T value_type;
 
-        typedef const T value_type;
+        static const size_t size = sizeof...(Content);
 
-        static const T value = Value;
+        typedef boost::mpl::vector_c< T, Content... > mpl_vector_c;
+
+        vector() = default;
       };
 
     } // of integral::
-  } // of math::
+  } // of meta::
 } // of utk::

@@ -14,13 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/integral/vector_functions.hpp"
+# include "utk/meta/integral/vector_functions.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE vector functions
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math::integral;
+using namespace utk::meta::integral;
 
 BOOST_AUTO_TEST_SUITE( data_access )
 
@@ -50,9 +50,15 @@ BOOST_AUTO_TEST_CASE( element_access )
 BOOST_AUTO_TEST_CASE( vector_assign_element )
 {
   typedef vector< int, -1, 0, 3 >  ints;
+
   typedef assign< ints, 1, constant< int, 7 > >::type new_ints;
-  static const int ni1 = at< new_ints, 1 >::value;
+  const int ni1 = at< new_ints, 1 >::value;
   BOOST_CHECK_EQUAL( ni1, 7 );
+  BOOST_TEST_MESSAGE( "assign 7 at index 1 : " << ints() << " -> " << new_ints() );
+
+  const size_t result_size = new_ints::size;
+  BOOST_CHECK_EQUAL( result_size, 3 );
+
 }
 
 BOOST_AUTO_TEST_SUITE_END()

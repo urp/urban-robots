@@ -14,13 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/integral/vector_algorithms.hpp"
+# include "utk/meta/integral/vector_algorithms.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE vector algorithms
 #include <boost/test/unit_test.hpp>
 
-using namespace utk::math::integral;
+using namespace utk::meta::integral;
 
 BOOST_AUTO_TEST_SUITE( unary_transforms )
 
