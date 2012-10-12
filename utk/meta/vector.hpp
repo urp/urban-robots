@@ -16,35 +16,26 @@
 
 # pragma once
 
-#include "utk/meta/vector.hpp"
-
-#include "utk/meta/integral/constant.hpp"
-
-#include <boost/mpl/vector_c.hpp>
+#include <boost/mpl/vector.hpp>
 
 namespace utk
 {
   namespace meta
   {
-    namespace integral
+    // TODO: move to seperate file
+    typedef ptrdiff_t index_type;
+    typedef size_t size_type;
+
+    //---| vector
+
+    template< typename... Content >
+    struct vector
     {
+      static constexpr size_type size = sizeof...(Content);
 
-      //---| vector
+      typedef boost::mpl::vector< Content... > mpl_vector;
 
-      template< typename T, T... Content >
-      struct vector
-      {
-        typedef T value_type;
-
-        static constexpr size_t size = sizeof...(Content);
-
-        typedef meta::vector< constant< T, Content >... > meta_vector;
-
-        typedef boost::mpl::vector_c< T, Content... > mpl_vector_c;
-
-        vector() = default;
-      };
-
-    } // of integral::
+      vector() = default;
+    };
   } // of meta::
 } // of utk::

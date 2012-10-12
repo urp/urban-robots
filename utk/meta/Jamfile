@@ -2,5 +2,7 @@ project utk/meta ;
 
 build-project integral ;
 
-             	       
-
+run vector_test.cpp    				/robots//boost-unit-test : --log_level=test_suite : ;
+run vector_at_test.cpp 				/robots//boost-unit-test : --log_level=test_suite : ;
+run vector_push_back_test.cpp /robots//boost-unit-test : --log_level=test_suite : ;
+run zip_view_test.cpp  				/robots//boost-unit-test : --log_level=test_suite : ;

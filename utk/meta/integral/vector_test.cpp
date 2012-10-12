@@ -20,7 +20,7 @@
 # include "utk/meta/integral/vector.hpp"
 
 # define BOOST_TEST_DYN_LINK
-# define BOOST_TEST_MODULE meta/integral vector
+# define BOOST_TEST_MODULE integral vector
 # include <boost/test/unit_test.hpp>
 
 using namespace utk::meta::integral;
@@ -38,6 +38,22 @@ BOOST_AUTO_TEST_CASE( size )
   unsigned size = indices::size;
   BOOST_CHECK_EQUAL( size, 3 );
 }
+
+BOOST_AUTO_TEST_CASE( meta_vector )
+{
+  typedef vector< int, 2,3,4> indices;
+
+  //---| mpl::size
+
+  const int indices_size = indices::meta_vector::size;
+  BOOST_CHECK_EQUAL( indices_size, 3 );
+
+  //---| mpl::at_c
+
+  static const int at_index2 = boost::mpl::at_c< indices::meta_vector::mpl_vector ,2 >::type::value;
+  BOOST_CHECK_EQUAL( at_index2, 4 );
+}
+
 
 BOOST_AUTO_TEST_CASE( mpl_vector_c )
 {

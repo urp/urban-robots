@@ -17,8 +17,6 @@
 
 # pragma once
 
-//# include <tuple>
-
 # include <cassert>
 # include <stdexcept>
 
@@ -39,7 +37,7 @@ namespace utk
       {
           T*	val;
 
-          // leave memory unassigned (use vector_interface<T,Size>::invalid you need it)
+          // leave memory unassigned (use vector_interface<T,Size>::invalid if you need it)
 	  vector_interface() : val( nullptr ) { }
 
         public:
@@ -60,7 +58,7 @@ namespace utk
 	  // invalid vector
           static const type invalid;
 
-          // constructs s vector_interface interface for an array.
+          // constructs a vector_interface interface for the provided pointer.
           // the memory is NOT deleted by the destructor
           explicit
           vector_interface( pointer_type pointer ) : val( pointer ) { }
@@ -168,8 +166,6 @@ namespace utk
 
 	  template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >
 	  operator const value_type&() const { return val[0]; }
-          //template< size_t C = Size, typename = typename std::enable_if< C==1 >::type >
-	  //operator const value_type&() const { return val[0]; }
 
 	  //-----| bool
 	  //-------enabled only if Size > 1 AND value_type == bool.
