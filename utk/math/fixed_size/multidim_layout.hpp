@@ -20,6 +20,7 @@
 
 
 # include "utk/meta/integral/integral.hpp"
+# include "utk/meta/zip_view.hpp"
 
 # include "utk/math/fixed_size/multidim_layout_helpers.hpp"
 
@@ -34,9 +35,9 @@ namespace utk
       //---| tensor layout
       //---------------------
 
-      template< typename SizeVector
+      template< typename SizeVector // integral_vector TODO: specialize
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
-	      //, typename Attributes
+	      , typename...Attributes // meta::vector
 	      >
       class multidim_layout
       {
@@ -49,7 +50,7 @@ namespace utk
 
 	public:
 
-	  //vector_pack< Attributes... > attributes;
+	  typedef typename meta::zip_view< Attributes... >::type attributes;
 
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
