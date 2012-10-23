@@ -16,20 +16,34 @@
 
 # include "utk/meta/vector_at.hpp"
 
+# include "utk/meta/vector_pop_front.hpp"
+
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE meta::vector at
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::meta;
 
-BOOST_AUTO_TEST_CASE( element_access )
+BOOST_AUTO_TEST_CASE( pop_3 )
 {
   typedef vector< int, double, char >  vec;
 
-  const bool same_type0 = std::is_same< typename at< vec, 0 >::type, int >::value;
+  typedef pop_front< vec > pop;
+
+  const bool same_type0 = std::is_same< typename pop::type, int >::value;
   BOOST_CHECK( same_type0 );
-  const bool same_type1 = std::is_same< typename at< vec, 1 >::type, double >::value;
+  const bool same_type1 = std::is_same< typename at< typename pop::tail, 0 >::type, double >::value;
   BOOST_CHECK( same_type1 );
-  const bool same_type2 = std::is_same< typename at< vec, 2 >::type, char >::value;
+  const bool same_type2 = std::is_same< typename at< typename pop::tail, 1 >::type, char >::value;
   BOOST_CHECK( same_type2 );
+}
+
+BOOST_AUTO_TEST_CASE( pop_1 )
+{
+  typedef vector< int >  vec;
+
+  typedef pop_front< vec > pop;
+
+  const bool same_type0 = std::is_same< typename pop::type, int >::value;
+  BOOST_CHECK( same_type0 );
 }

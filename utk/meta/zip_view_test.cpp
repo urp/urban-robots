@@ -31,7 +31,8 @@ using namespace utk::meta;
 
 BOOST_AUTO_TEST_CASE( two )
 {
-  typedef typename zip_view< typename integral::vector< int, 1,2 >::meta_vector
+  typedef typename zip_view< 2
+                           , typename integral::vector< int, 1,2 >::meta_vector
                            , typename integral::vector< int, 3,4 >::meta_vector >::type zip;
 
   const size_type zip_size = zip::size;
@@ -49,7 +50,8 @@ BOOST_AUTO_TEST_CASE( two )
 
 BOOST_AUTO_TEST_CASE( three )
 {
-  typedef typename zip_view< typename integral::vector< int, 1,2 >::meta_vector
+  typedef typename zip_view< 2
+                           , typename integral::vector< int, 1,2 >::meta_vector
                            , typename integral::vector< int, 3,4 >::meta_vector
                            , typename integral::vector< int, 5,6 >::meta_vector >::type zip;
 

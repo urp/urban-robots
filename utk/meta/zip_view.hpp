@@ -18,6 +18,7 @@
 
 # include "utk/meta/vector.hpp"
 
+# include "utk/meta/vector_make_uniform_vector.hpp"
 # include "utk/meta/vector_push_front.hpp"
 
 namespace utk
@@ -39,27 +40,28 @@ namespace utk
 
     //---| zip_view
 
-    template< typename... Vectors > struct zip_view { /* unspecified */ };
+    template< size_type Size, typename... Vectors >
+    struct zip_view { /* unspecified */ };
 
-    template< >
-    struct zip_view< >
+    template< size_type Size >
+    struct zip_view< Size >
     {
-      typedef vector< > type;
+      typedef typename make_uniform_vector< Size, vector< > >::type type;
     };
 
-
-    template< typename...Vector >
-    struct zip_view< vector< Vector... > >
+    template< size_type Size, typename...Vector >
+    struct zip_view< Size, vector< Vector... > >
     {
+      static_assert( Size == sizeof...(Vector), "Size mismatch!");
+
       typedef vector< vector< Vector >... > type;
     };
 
-    template< typename...Vector, typename...MoreVectors >
-    struct zip_view< vector< Vector... >, MoreVectors... >
+    template< size_type Size, typename Vector, typename...MoreVectors >
+    struct zip_view< Size, Vector, MoreVectors... >
     {
-
-      typedef typename zip_view< MoreVectors... >::type tail;
-      typedef typename push_to_zip_view< tail, vector< Vector... > >::type type;
+      typedef typename zip_view< Size, MoreVectors... >::type tail;
+      typedef typename push_to_zip_view< tail, Vector >::type type;
 
     };
 

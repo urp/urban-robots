@@ -324,57 +324,35 @@ namespace utk
 
       //---| remove_false
 
-      namespace
+      template< typename, typename >
+      struct remove_false { /* unspecified */ };
+
+      // terminate
+      template< typename T >
+      struct remove_false< vector< T >, vector< bool > >
       {
-	template< typename, typename, typename >
-	class remove_false_recursion	{ /* unspecified */ };
-
-	// terminate
-	template< typename T, T...NewValues >
-	class remove_false_recursion< vector< bool >
-					, vector< T, NewValues... >
-					, vector< T >
-					>
-	{
-	  public:
-	    typedef vector< T, NewValues... > type;
-	};
-
-	// remove if predicate is false -> continue
-	template< bool...Predicates, typename T, T... NewValues, T...OldValues >
-	class remove_false_recursion< vector< bool, Predicates... >
-				     , vector< T, NewValues... >
-				     , vector< T, OldValues... >
-				     >
-	{
-	    typedef integral::pop_front< vector< bool, Predicates... > > predicates;
-	    typedef integral::pop_front< vector< T, OldValues... > > old_values;
-	  public:
-	    typedef typename std::conditional< predicates::value
-					       , typename remove_false_recursion< typename predicates::tail
-										 , vector< T, NewValues... , old_values::value >
-										 , typename old_values::tail
-										 >::type
-					       , typename remove_false_recursion< typename predicates::tail
-										 , vector< T, NewValues... >
-										 , typename old_values::tail
-										 >::type
-					       >::type type;
-	};
-
-      } // of <anonymous>::
-
-      template< typename, typename >  struct remove_false { /* unspecified */ };
-
-      template< typename T, T...Values, bool...Predicates >
-      struct remove_false< vector< T, Values... >, vector< bool, Predicates... > >
-      {
-	static_assert( sizeof...(Predicates) == sizeof...(Values), "Size of packs Predicates and Values must agree." );
-	typedef typename remove_false_recursion< vector< bool, Predicates... >, vector< T >, vector< T, Values... > >::type type;
+	typedef vector< T > type;
       };
 
+      // recurse
+      template< typename T, T...Values, bool...Predicates >
+      class remove_false< vector< T, Values... >, vector< bool, Predicates... > >
+      {
+	  typedef pop_front< vector< bool, Predicates... > > predicates;
+	  typedef pop_front< vector< T, Values... > > values;
 
-      // remove_at<
+	  typedef typename remove_false< typename values::tail
+				       , typename predicates::tail
+				       >::type tail;
+
+	public:
+	  typedef typename std::conditional< predicates::value
+					   , typename push_front< tail, constant< T, values::value > >::type
+					   , tail
+					   >::type type;
+      };
+
+      // remove_at
 
       template< typename Container, index_type Index >  struct remove_at { /* unspecified */ };
 

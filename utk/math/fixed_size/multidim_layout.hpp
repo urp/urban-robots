@@ -20,6 +20,7 @@
 
 
 # include "utk/meta/integral/integral.hpp"
+# include "utk/meta/vector_remove_at.hpp"
 # include "utk/meta/zip_view.hpp"
 
 # include "utk/math/fixed_size/multidim_layout_helpers.hpp"
@@ -35,12 +36,13 @@ namespace utk
       //---| tensor layout
       //---------------------
 
-      template< typename SizeVector // integral_vector TODO: specialize
+      template< typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
 	      , typename...Attributes // meta::vector
 	      >
       class multidim_layout
       {
+
   	  static_assert( StrideVector::size == SizeVector::size
 		       , "Size of StrideVector and SizeVector must agree"
 		       );
@@ -50,7 +52,7 @@ namespace utk
 
 	public:
 
-	  typedef typename meta::zip_view< Attributes... >::type attributes;
+	  typedef typename meta::zip_view< SizeVector::size, Attributes... >::type attributes;
 
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
@@ -99,6 +101,9 @@ namespace utk
 
 	    typedef typename meta::integral::remove_at< sizes  , Index >::type new_sizes;
 	    typedef typename meta::integral::remove_at< strides, Index >::type new_strides;
+
+	    typedef typename meta::remove_at< attributes , Index > new_attributes;
+
 
 	    typedef multidim_layout< new_sizes, new_strides > type;
 	  };
