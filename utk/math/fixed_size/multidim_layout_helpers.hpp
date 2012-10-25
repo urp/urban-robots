@@ -18,7 +18,6 @@
 
 # include <boost/mpl/at.hpp>
 
-
 # include "utk/meta/integral/integral.hpp"
 
 namespace utk
@@ -27,11 +26,9 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //using meta::integral::index_type;
       typedef ptrdiff_t index_type;
-      // TODO: move to common header?
 
+      // TODO: move to common header?
       typedef size_t size_type;
       typedef ptrdiff_t stride_type;
 
@@ -59,57 +56,41 @@ namespace utk
       {
 	//---| stride_sequence
 
-	namespace
- 	{
-	  template< typename, typename > struct stride_sequence_recursion { /* unspecified */ };
-
-	  template< stride_type...Strides >
-	  struct stride_sequence_recursion< meta::integral::vector< stride_type, Strides... >, meta::integral::vector< size_type > >
-	  {
-	    typedef stride_vector< Strides... > type;
-	  };
-
-	  template< stride_type...Strides, size_type...Sizes >
-	  class stride_sequence_recursion< meta::integral::vector< stride_type, Strides... >, meta::integral::vector< size_type, Sizes... > >
-	  {
-	      typedef typename meta::integral::pop_front< meta::integral::vector< size_type, Sizes... > > stripped;
-
-	      static const stride_type new_stride = meta::integral::pop_back< meta::integral::vector< stride_type, Strides... > >::value * stripped::value;
-
-	    public:
-
-	      typedef typename stride_sequence_recursion< meta::integral::vector< stride_type, Strides..., new_stride >, typename stripped::tail >::type type;
-	  };
-	}
-
 	template< typename > struct stride_sequence { /* unspecified */ };
 
 	template< size_type... Sizes >
-	struct stride_sequence< meta::integral::vector< size_type, Sizes... > >
+	class stride_sequence< meta::integral::vector< size_type, Sizes... > >
 	{
-	  private:
-	    typedef typename meta::integral::reverse< meta::integral::vector< size_type, Sizes... > >::type reverse_sizes;
+	    // strip 'last' stride (in advance)
+	    typedef typename meta::integral::pop_front< meta::integral::vector< size_type, Sizes... > >::tail tail;
+	    // reverse to get stride sequences with the last stride always 1 (could be the first index, this choice is arbitrary)
+	    typedef typename meta::integral::reverse< tail >::type reverse_tail;
 
-	    typedef typename stride_sequence_recursion< meta::integral::vector< stride_type, 1 >
-						      ,  reverse_sizes >::type reverse_result;
-
-	    // strip last stride
-	    typedef typename meta::integral::pop_back< reverse_result >::tail reverse_stripped_result;
+	    typedef typename meta::integral::accumulate< reverse_tail
+						       , meta::integral::multiply< stride_type, stride_type >
+						       , 1
+						       >::type reverse_result;
 	  public:
-	    typedef typename meta::integral::reverse< reverse_stripped_result >::type type;
+	    // compensate above reverse
+	    typedef typename meta::integral::reverse< reverse_result >::type type;
 	};
 
 	//---| total_size
-	// TODO: tests
-	template< typename SizeVector, typename StrideVector > struct total_size
-	{ static constexpr size_type value = meta::integral::pop_front< SizeVector >::value * meta::integral::at< StrideVector, 0 >::value; };
 
-	// scalar
-	template< > struct total_size< size_vector< >, stride_vector< > > { static constexpr size_type value = 1; };
+	// TODO: tests
+	template< typename SizeVector, typename StrideVector >
+	struct total_size
+	{
+	  static constexpr size_type value = meta::integral::pop_front< SizeVector >::value
+					     * meta::integral::at< StrideVector, 0 >::value;
+	};
+
+	// scalar case - has one elemnet!
+	template< >
+	struct total_size< size_vector< >, stride_vector< > >
+	{ static constexpr size_type value = 1; };
 
       } // of helpers::
-
-
-    }
-  }
-}
+    } // of fixed_size::
+  } // of math::
+} // of utk::

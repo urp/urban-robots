@@ -38,7 +38,7 @@ namespace utk
 
       template< typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
-	      , typename...Attributes // meta::vector
+	      /*attributes/, typename Attributes = typename meta::zip_view< SizeVector::size >::type*/
 	      >
       class multidim_layout
       {
@@ -52,7 +52,7 @@ namespace utk
 
 	public:
 
-	  typedef typename meta::zip_view< SizeVector::size, Attributes... >::type attributes;
+	  /*attributes/typedef Attributes attributes;*/
 
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
@@ -102,10 +102,12 @@ namespace utk
 	    typedef typename meta::integral::remove_at< sizes  , Index >::type new_sizes;
 	    typedef typename meta::integral::remove_at< strides, Index >::type new_strides;
 
-	    typedef typename meta::remove_at< attributes , Index > new_attributes;
+	    /*attributes/typedef typename meta::remove_at< attributes , Index > new_attributes;*/
 
-
-	    typedef multidim_layout< new_sizes, new_strides > type;
+	    typedef multidim_layout< new_sizes
+				   , new_strides
+				   /*attributes/, new_attributes*/
+				   > type;
 	  };
 
       };

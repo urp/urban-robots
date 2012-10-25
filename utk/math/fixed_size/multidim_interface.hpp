@@ -32,6 +32,7 @@ namespace utk
 
       template < typename T, typename Layout >
       struct multidim_interface
+      // TODO: make member
       :	public vector_interface< T, Layout::total_size >
       {
 	typedef multidim_interface< T, Layout > type;

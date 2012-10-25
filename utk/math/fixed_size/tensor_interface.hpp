@@ -33,11 +33,11 @@ namespace utk
       using variance_vector = meta::integral::vector< variance_type, Variances... >;
 
       //-----| tensor_interface
-      template < typename T, typename Layout, typename VarianceVector >
+      template < typename ValueType, typename Layout, typename VarianceVector >
       struct tensor_interface
-      :	public multidim_interface< T, Layout >
+      :	public multidim_interface< ValueType, Layout >
       {
-	typedef multidim_interface< T, Layout > multidim;
+	typedef multidim_interface< ValueType, Layout > multidim;
 
 	typedef VarianceVector variances;
 
@@ -49,11 +49,26 @@ namespace utk
 	tensor_interface( const typename multidim::storage_interface::pointer_type pointer ) : multidim( pointer )  {	}
 
 	//TODO: !!!
-	//template<  dsd > remove_index
+	template< index_type Index >
+	class remove_index
+	{
+	    // prepare layout
+	    typedef typename multidim::layout::template remove_index< Index >::type new_layout;
+	    // make new interface
+	    typedef typename multidim::template change_layout< new_layout >::type new_interface;
+
+    	    // prepare variances-vector
+	    typedef typename meta::integral::remove_at< variances, Index >::type new_variances;
+
+	  public:
+
+	    typedef tensor_interface< ValueType, new_interface, new_variances > type;
+
+	};
 
 
 	/*template< index_type Index >
-	change_basis( const tensor_interface< T
+	change_basis( const tensor_interface< ValueType
 					       , initial_layout< meta::integral::at< sizes, Index >::value
 							       , meta::integral::at< sizes, Index >::value
 							       >

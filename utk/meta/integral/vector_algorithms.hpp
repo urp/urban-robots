@@ -111,14 +111,18 @@ namespace utk
 			> type;
       };
 
-
+      //TODO: tests
       //---| accumulate ( vector -> scalar )
 
       template< typename
 	      , typename BinaryScalarOperator
 	      , typename BinaryScalarOperator::value_type InitialValue = 0
 	      >
-      struct accumulate { /* unspecified */ };
+      struct accumulate
+      { /* typedef unspecified value_type */
+	/* static constexpr value_type value - accumulation result */
+	/* typedef vector< value_type, unspecified > type - accumulation sequence (including InitialValue) */
+      };
 
       // return scalar -> terminate
       template< typename T

@@ -18,10 +18,7 @@
 
 # include <boost/mpl/at.hpp>
 
-
 # include "utk/meta/integral/integral.hpp"
-
-# include "utk/math/fixed_size/multidim_layout_helpers.hpp"
 
 namespace utk
 {
@@ -32,13 +29,53 @@ namespace utk
 
       namespace
       {
-	template< typename FullLayout, typename FullIndexMask >
-	struct make_slice_layout
+	//---| make_position_index_vector
+
+	template< typename T, size_type Size >
+	class make_position_index_vector
 	{
-	  typedef typename meta::integral::equal< typename FullLayout::sizes, FullIndexMask >::type visibility_mask;
-	  typedef multidim_layout< typename meta::integral::remove_false< typename FullLayout::sizes  , visibility_mask >::type
-				 , typename meta::integral::remove_false< typename FullLayout::strides, visibility_mask >::type
-				 > type;
+	    typedef typename meta::integral::make_uniform_vector< T, Size-1, 1 >::type ones;
+
+	  public:
+
+	    typedef typename meta::integral::accumulate< ones, meta::integral::add< index_type, index_type >, 0 >::type type;
+	};
+
+	//---| remove_indices
+
+	template< typename, typename > struct remove_indices { /* unspecified */ };
+
+	// terminate
+	template< typename FullLayout >
+	struct remove_indices< FullLayout, meta::integral::vector< index_type > >
+	{
+	  typedef FullLayout type;
+	};
+
+	// start -> recurse
+	template< typename FullLayout, index_type...Indices >
+	class remove_indices< FullLayout, meta::integral::vector< index_type, Indices... > >
+	{
+	    typedef typename meta::integral::pop_front< meta::integral::vector< index_type, Indices... > > indices_pop;
+	    typedef typename remove_indices< FullLayout, typename indices_pop::tail >::type tail;
+	  public:
+	    typedef typename FullLayout::template remove_index< indices_pop::value >::type type;
+	};
+
+	//---| make_slice_layout
+
+	template< typename FullLayout, typename FullIndexMask >
+	class make_slice_layout
+	{
+	    typedef typename make_position_index_vector< index_type, FullLayout::order >::type index_positions;
+	  public:
+
+	    typedef typename meta::integral::equal< typename FullLayout::sizes, FullIndexMask >::type visibility_mask;
+	    typedef typename meta::integral::transform< visibility_mask , meta::integral::negate<bool> >::type hidden_mask;
+
+	    typedef typename meta::integral::remove_false< index_positions, hidden_mask >::type hidden_indices;
+
+	    typedef typename remove_indices< FullLayout, hidden_indices >::type type;
 	};
       }
 
@@ -52,7 +89,7 @@ namespace utk
 	      >
       class multidim_slice_layout : public make_slice_layout< FullLayout, FullIndexMask >::type
       {
-	  static_assert( FullIndexMask::size == FullLayout::sizes::size
+	  static_assert( FullIndexMask::size == FullLayout::order
 		       , "Size of FullIndexMask and SizeVector must agree"
 		       );
 	  static_assert( not meta::integral::any< typename meta::integral::equal< typename FullLayout::sizes
@@ -70,9 +107,6 @@ namespace utk
 
 	  typedef FullIndexMask  full_index_mask;
 	  typedef FullLayout full_layout;
-	  //typedef typename full_layout::sizes   full_sizes;
-	  //typedef typename full_layout::strides full_strides;
-
 
 	  //---| total_size
 	  //-----query size (number of scalars)
@@ -81,7 +115,7 @@ namespace utk
 	  static constexpr size_type total_size = full_layout::total_size;
 
 	  //---| remove_index
-	  //-----returns a new multidim_layout with Index fixed (to Value)
+	  //-----returns a new multidim_slice_layout with Index fixed (to Value)
 	  // TODO: tests
 	  template< index_type MaskedIndex >
 	  struct remove_index
@@ -89,8 +123,7 @@ namespace utk
 	      static_assert( MaskedIndex < slice_layout::order, "Index greater or equal than multidim order");
 
 	      // find index in full_layout corresponding to MaskedIndex
-	      typedef typename meta::integral::make_uniform_vector< index_type, full_layout::order, 1 >::type ones;
-	      typedef typename meta::integral::accumulate< ones, meta::integral::add< index_type, index_type >, 0 >::type index_positions;
+	      typedef typename make_position_index_vector< index_type, full_layout::order >::type index_positions;
 	      typedef typename meta::integral::remove_false< index_positions, visibility_mask >::type visible_index_positions;
 
 	      static constexpr index_type full_layout_index = meta::integral::at< visible_index_positions, MaskedIndex >::value;
@@ -107,7 +140,7 @@ namespace utk
 
 
 	  //---| fix_index
-	  //-----returns a new multidim_layout with Index fixed (to Value)
+	  //-----returns a new multidim_slice_layout with Index (referring to FullLayout) fixed (to Value)
 	  template< index_type FullIndex, index_type Value >
 	  class fix_index
 	  {
@@ -118,7 +151,7 @@ namespace utk
 	  };
 
 	  //---| release_index
-	  //-----returns a new multidim_layout with Index released.
+	  //-----returns a new multidim_slice_layout with Index released.
 	  // TODO: tests
 	  template< index_type Index >
 	  class release_index

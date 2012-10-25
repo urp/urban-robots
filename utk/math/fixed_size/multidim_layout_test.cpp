@@ -69,14 +69,29 @@ BOOST_AUTO_TEST_SUITE( static_use )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( runtime_interface )
+BOOST_AUTO_TEST_SUITE( layout_remove_index )
 
-  BOOST_AUTO_TEST_CASE( index_offset )
+  BOOST_AUTO_TEST_CASE( size_and_stride_with_3d )
   {
-    typedef multidim_layout< size_vector<1,2,3,4> > layout;
+    typedef multidim_layout< size_vector<1,2,3> > old_layout;
 
-    const stride_type offset_111 = layout::index_offset( 0,1,1,1 );
-    BOOST_CHECK_EQUAL( offset_111, 17 );
+    typedef typename old_layout::template remove_index< 0 >::type layout;
+
+    const size_type order = layout::order;
+    BOOST_CHECK_EQUAL( order, 2 );
+
+    const size_type size0 = meta::integral::at< typename layout::sizes, 0 >::value;
+    BOOST_CHECK_EQUAL( size0, 2 );
+
+    const size_type size1 = meta::integral::at< typename layout::sizes, 1 >::value;
+    BOOST_CHECK_EQUAL( size1, 3 );
+
+    const stride_type stride0 = meta::integral::at< typename layout::strides, 0 >::value;
+    BOOST_CHECK_EQUAL( stride0, 3 );
+
+    const stride_type stride1 = meta::integral::at< typename layout::strides, 1 >::value;
+    BOOST_CHECK_EQUAL( stride1, 1 );
+
   }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -27,6 +27,9 @@ BOOST_AUTO_TEST_CASE( strides_sequence_helper )
 {
   typedef helpers::stride_sequence< size_vector<2,3,4,5> >::type strides;
 
+  const size_type size = strides::size;
+  BOOST_CHECK_EQUAL( size, 4 );
+
   static const stride_type s0 = meta::integral::at< strides, 0 >::value;
   BOOST_CHECK_EQUAL( s0, 60 );
   static const stride_type s1 = meta::integral::at< strides, 1 >::value;
