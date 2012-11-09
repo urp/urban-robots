@@ -20,8 +20,9 @@
 
 
 # include "utk/meta/integral/integral.hpp"
+# include "utk/meta/vector.hpp"
 # include "utk/meta/vector_remove_at.hpp"
-# include "utk/meta/zip_view.hpp"
+# include "utk/meta/vector_transform.hpp"
 
 # include "utk/math/fixed_size/multidim_layout_helpers.hpp"
 
@@ -38,11 +39,10 @@ namespace utk
 
       template< typename SizeVector
 	      , typename StrideVector = typename helpers::stride_sequence< SizeVector >::type
-	      /*attributes/, typename Attributes = typename meta::zip_view< SizeVector::size >::type*/
+	      , typename...IndexAttributes
 	      >
       class multidim_layout
       {
-
   	  static_assert( StrideVector::size == SizeVector::size
 		       , "Size of StrideVector and SizeVector must agree"
 		       );
@@ -52,7 +52,7 @@ namespace utk
 
 	public:
 
-	  /*attributes/typedef Attributes attributes;*/
+	  typedef meta::vector< SizeVector, StrideVector, IndexAttributes... > attributes;
 
 	  typedef   SizeVector sizes;
 	  typedef StrideVector strides;
@@ -91,26 +91,41 @@ namespace utk
 
 	  static constexpr stride_type static_offset() { return 0; }
 
-	  //---| remove_index
-	  //-----returns a new multidim_layout with Index fixed (to Value)
-	  // TODO: tests
-	  template< index_type Index >
-	  struct remove_index
-	  {
-	    static_assert( Index < order, "Index greater or equal than multidim order");
-
-	    typedef typename meta::integral::remove_at< sizes  , Index >::type new_sizes;
-	    typedef typename meta::integral::remove_at< strides, Index >::type new_strides;
-
-	    /*attributes/typedef typename meta::remove_at< attributes , Index > new_attributes;*/
-
-	    typedef multidim_layout< new_sizes
-				   , new_strides
-				   /*attributes/, new_attributes*/
-				   > type;
-	  };
-
       };
+
+      template< typename >
+      struct make_multidim_layout { /* unspecified */ };
+
+      template< typename...IndexAttributes >
+      struct make_multidim_layout< meta::vector< IndexAttributes... > >
+      {
+	typedef multidim_layout< IndexAttributes... > type;
+      };
+
+      //---| remove_index
+      //-----returns a new multidim_layout with Index fixed (to Value)
+      // TODO: tests
+      template< typename Layout, index_type Index >
+      struct remove_index { /* unspecified */ };
+
+      template< typename SizeVector, typename StrideVector, typename...MoreAttributes, index_type Index>
+      struct remove_index< multidim_layout< SizeVector, StrideVector, MoreAttributes... >, Index >
+      {
+	typedef multidim_layout< SizeVector, StrideVector, MoreAttributes... > old_layout;
+
+	static_assert( Index < old_layout::order, "Index greater or equal than multidim order");
+
+	typedef typename meta::integral::remove_at< typename old_layout::sizes  , Index >::type new_sizes;
+	typedef typename meta::integral::remove_at< typename old_layout::strides, Index >::type new_strides;
+
+	template< typename Vector >
+	using remove_attrib = meta::integral::remove_at< Vector, Index >;
+
+	typedef typename meta::transform< typename old_layout::attributes , meta::function_operator<remove_attrib> >::type new_attributes;
+
+	typedef typename make_multidim_layout< new_attributes >::type type;
+      };
+
 
     }
   }

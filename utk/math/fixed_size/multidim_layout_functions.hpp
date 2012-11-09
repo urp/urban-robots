@@ -31,15 +31,18 @@ namespace utk
       // TODO: specialize for multidim_slice_layout
       template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
-      template< index_type...StridesA, size_type...SizesA, index_type...StridesB, size_type...SizesB >
-      struct product_layout< multidim_layout< meta::integral::vector< size_type, SizesA... >, meta::integral::vector< stride_type, StridesA... > >
-                           , multidim_layout< meta::integral::vector< size_type, SizesB... >, meta::integral::vector< stride_type, StridesB... > >
-                           >
+      template< typename...AttributesA, typename...AttributesB >
+      struct product_layout< multidim_layout< AttributesA... >, multidim_layout< AttributesB... > >
       {
-        typedef multidim_layout< size_vector< SizesA..., SizesB... >
-                               , stride_vector< StridesA..., StridesB... >
-                               > type;
+        typedef typename meta::binary_transform< meta::vector< AttributesA... >
+                                               , meta::vector< AttributesB... >
+                                               , meta::integral::concatinate
+                                               >::type product_attributes;
+        typedef typename make_multidim_layout< product_attributes >::type type;
       };
+
+
+
     }
   }
 }

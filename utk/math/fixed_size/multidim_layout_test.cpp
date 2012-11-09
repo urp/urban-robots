@@ -75,7 +75,7 @@ BOOST_AUTO_TEST_SUITE( layout_remove_index )
   {
     typedef multidim_layout< size_vector<1,2,3> > old_layout;
 
-    typedef typename old_layout::template remove_index< 0 >::type layout;
+    typedef typename remove_index< old_layout, 0 >::type layout;
 
     const size_type order = layout::order;
     BOOST_CHECK_EQUAL( order, 2 );
