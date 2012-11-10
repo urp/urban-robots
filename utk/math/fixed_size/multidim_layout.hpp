@@ -121,7 +121,7 @@ namespace utk
 	template< typename Vector >
 	using remove_attrib = meta::integral::remove_at< Vector, Index >;
 
-	typedef typename meta::transform< typename old_layout::attributes , meta::function_operator<remove_attrib> >::type new_attributes;
+	typedef typename meta::transform< typename old_layout::attributes , meta::function<remove_attrib> >::type new_attributes;
 
 	typedef typename make_multidim_layout< new_attributes >::type type;
       };

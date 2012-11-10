@@ -36,7 +36,7 @@ namespace utk
       {
         typedef typename meta::binary_transform< meta::vector< AttributesA... >
                                                , meta::vector< AttributesB... >
-                                               , meta::integral::concatinate
+                                               , meta::function< meta::integral::concatinate >
                                                >::type product_attributes;
         typedef typename make_multidim_layout< product_attributes >::type type;
       };

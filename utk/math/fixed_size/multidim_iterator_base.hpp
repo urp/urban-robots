@@ -42,7 +42,7 @@ namespace utk
 
 	//:::| value interface
 
-	typedef typename parent_layout::template remove_index< Index >::type value_layout;
+	typedef typename remove_index< parent_layout, Index >::type value_layout;
 	typedef typename parent_interface::template changed_layout< value_layout >::type value_interface;
 	typedef typename value_interface::storage_interface value_storage_interface;
 

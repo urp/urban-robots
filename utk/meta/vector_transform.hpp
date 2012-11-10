@@ -33,17 +33,24 @@ namespace utk
         typedef vector< typename UnaryScalarOperator::template apply<Vector>::type... > type;
       };
 
+      //---| transform
 
-      //---| function_operator
+      template< typename, typename, typename > struct binary_transform { /* unspecified */ };
 
-      template< template<class> class Function >
-      struct function_operator
+      template< typename...VectorA, typename...VectorB, class BinaryScalarOperator >
+      struct binary_transform< vector< VectorA... >, vector< VectorB... >, BinaryScalarOperator >
       {
-        template< typename Value >
-        struct apply
-        { typedef typename Function< Value >::type type; };
+        typedef vector< typename BinaryScalarOperator::template apply< VectorA, VectorB>::type... > type;
       };
 
+      //---| function
+
+      template< template< typename... > class Function >
+      struct function
+      {
+        template< typename...Parameters >
+        struct apply { typedef typename Function< Parameters... >::type type; };
+      };
 
   } // of meta::
 } // of utk::
