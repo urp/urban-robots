@@ -16,63 +16,63 @@
 
 # pragma once
 
-# include "vector_interface.hpp"
-# include "vector_array.hpp"
-
-# include "vector_operators.hpp"
-# include "vector_functions.hpp"
+# include "utk/math/fixed_size/vector/interface.hpp"
+# include "utk/math/fixed_size/vector/array.hpp"
+# include "utk/math/fixed_size/vector/operators.hpp"
+# include "utk/math/fixed_size/vector/functions.hpp"
 
 namespace utk
 {
   namespace math
   {
-	namespace fixed_size
-	{
-    
-      //---| predifined vector types
-      
-      typedef	vector_array<bool,1>		vec1b;
-      typedef	vector_array<bool,2>		vec2b;
-      typedef	vector_array<bool,3>		vec3b;
-      typedef	vector_array<bool,4>		vec4b;
-      typedef	vector_array<size_t,1>	vec1s;
-      typedef	vector_array<size_t,2>	vec2s;
-      typedef	vector_array<size_t,3>	vec3s;
-      typedef	vector_array<size_t,4>	vec4s;
-      typedef	vector_array<int,1>		vec1i;
-      typedef	vector_array<int,2>		vec2i;
-      typedef	vector_array<int,3>		vec3i;
-      typedef	vector_array<int,4>		vec4i;
-      typedef	vector_array<float,1>		vec1f;
-      typedef	vector_array<float,2>		vec2f;
-      typedef	vector_array<float,3>		vec3f;
-      typedef	vector_array<float,4>		vec4f;
-      typedef	vector_array<double,1>	vec1d;
-      typedef	vector_array<double,2>	vec2d;
-      typedef	vector_array<double,3>	vec3d;
-      typedef	vector_array<double,4>	vec4d;
-  
-      typedef	vector_interface<bool,1>		vecn1b;
-      typedef	vector_interface<bool,2>		vecn2b;
-      typedef	vector_interface<bool,3>		vecn3b;
-      typedef	vector_interface<bool,4>		vecn4b;
-      typedef	vector_interface<size_t,1>	vecn1s;
-      typedef	vector_interface<size_t,2>	vecn2s;
-      typedef	vector_interface<size_t,3>	vecn3s;
-      typedef	vector_interface<size_t,4>	vecn4s;
-      typedef	vector_interface<int,1>		vecn1i;
-      typedef	vector_interface<int,2>		vecn2i;
-      typedef	vector_interface<int,3>		vecn3i;
-      typedef	vector_interface<int,4>		vecn4i;
-      typedef	vector_interface<float,1>	vecn1f;
-      typedef	vector_interface<float,2>	vecn2f;
-      typedef	vector_interface<float,3>	vecn3f;
-      typedef	vector_interface<float,4>	vecn4f;
-      typedef	vector_interface<double,1>	vecn1d;
-      typedef	vector_interface<double,2>	vecn2d;
-      typedef	vector_interface<double,3>	vecn3d;
-      typedef	vector_interface<double,4>	vecn4d;
+    namespace fixed_size
+    {
+      namespace vector
+      {
+        //---| predifined vector types
 
-	} // of fixed_size::
+        typedef	array<bool,1>		vec1b;
+        typedef	array<bool,2>		vec2b;
+        typedef	array<bool,3>		vec3b;
+        typedef	array<bool,4>		vec4b;
+        typedef	array<size_t,1>	vec1s;
+        typedef	array<size_t,2>	vec2s;
+        typedef	array<size_t,3>	vec3s;
+        typedef	array<size_t,4>	vec4s;
+        typedef	array<int,1>		vec1i;
+        typedef	array<int,2>		vec2i;
+        typedef	array<int,3>		vec3i;
+        typedef	array<int,4>		vec4i;
+        typedef	array<float,1>		vec1f;
+        typedef	array<float,2>		vec2f;
+        typedef	array<float,3>		vec3f;
+        typedef	array<float,4>		vec4f;
+        typedef	array<double,1>	vec1d;
+        typedef	array<double,2>	vec2d;
+        typedef	array<double,3>	vec3d;
+        typedef	array<double,4>	vec4d;
+
+        typedef	interface<bool,1>		vecn1b;
+        typedef	interface<bool,2>		vecn2b;
+        typedef	interface<bool,3>		vecn3b;
+        typedef	interface<bool,4>		vecn4b;
+        typedef	interface<size_t,1>	vecn1s;
+        typedef	interface<size_t,2>	vecn2s;
+        typedef	interface<size_t,3>	vecn3s;
+        typedef	interface<size_t,4>	vecn4s;
+        typedef	interface<int,1>		vecn1i;
+        typedef	interface<int,2>		vecn2i;
+        typedef	interface<int,3>		vecn3i;
+        typedef	interface<int,4>		vecn4i;
+        typedef	interface<float,1>	vecn1f;
+        typedef	interface<float,2>	vecn2f;
+        typedef	interface<float,3>	vecn3f;
+        typedef	interface<float,4>	vecn4f;
+        typedef	interface<double,1>	vecn1d;
+        typedef	interface<double,2>	vecn2d;
+        typedef	interface<double,3>	vecn3d;
+        typedef	interface<double,4>	vecn4d;
+      } // of vector::
+    } // of fixed_size::
   } // of math::
 } // of utk::
