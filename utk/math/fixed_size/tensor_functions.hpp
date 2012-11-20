@@ -18,7 +18,7 @@
 
 # include "utk/math/fixed_size/tensor_interface.hpp"
 # include "utk/math/fixed_size/tensor_array.hpp"
-# include "utk/math/fixed_size/multidim_layout_functions.hpp"
+# include "utk/math/fixed_size/multidim_product_layout.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -33,8 +33,8 @@ namespace utk
       struct make_non_mixed_tensor_interface
       {
 	typedef tensor_interface< T, MultiDimLayout
-							      , typename meta::integral::make_uniform_vector< variance_type, MultiDimLayout::order, Variance >::type
-							      > type;
+				, typename meta::integral::make_uniform_vector< variance_type, MultiDimLayout::order, Variance >::type
+				> type;
       };
 
       template< typename T, typename MultiDimLayout, index_type ContravariantIndices >

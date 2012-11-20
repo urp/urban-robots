@@ -19,6 +19,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim_remove_index.hpp"
 
 # pragma GCC visibility push(default)
 

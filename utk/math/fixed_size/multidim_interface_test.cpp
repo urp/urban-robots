@@ -16,6 +16,7 @@
 
 # include "utk/math/fixed_size/multidim_interface.hpp"
 # include "utk/math/fixed_size/multidim_slice_layout.hpp"
+# include "utk/math/fixed_size/multidim_slice_fix_index.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE multidim interface
@@ -91,8 +92,8 @@ BOOST_AUTO_TEST_SUITE( sliced_layout_tests )
 
   BOOST_AUTO_TEST_CASE( multidim_at_with_fixed_dimensions )
   {
-    typedef multidim_slice_layout< multidim_layout< size_vector<2,3,4> > > unfixed_layout;
-    typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
+    typedef multidim_layout< size_vector<2,3,4> > unfixed_layout;
+    typedef typename fix_index< unfixed_layout, 2, 2 >::type layout;
     typedef multidim_interface< double, layout > multidim_type;
     double  data[ layout::total_size ] = {  0.,  1., 2., 3., 4., 5.
                                          ,  6.,  7., 8., 9.,10.,11.

@@ -31,8 +31,29 @@ namespace utk
       // TODO: specialize for multidim_slice_layout
       template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
 
+      template< typename SizeA, typename StrideA, typename...AttributesA, typename SizeB, typename StrideB, typename...AttributesB >
+      struct product_layout< multidim_layout< SizeA, StrideA, AttributesA... >
+                           , multidim_layout< SizeB, StrideB, AttributesB... > >
+      {
+        typedef typename meta::integral::concatinate< SizeA, SizeB >::type new_sizes;
+        typedef typename helpers::stride_sequence< new_sizes >::type new_strides;
+
+        typedef typename meta::binary_transform< meta::vector< AttributesA... >
+                                               , meta::vector< AttributesB... >
+                                               , meta::function< meta::integral::concatinate >
+                                               >::type product_attributes;
+
+        typedef typename meta::push_front< typename meta::push_front< product_attributes, new_strides >::type, new_sizes >::type new_attributes;
+
+        typedef typename make_multidim_layout< new_attributes >::type type;
+      };
+
+      //---| lazy_product_layout
+
+      template< typename LayoutA, typename LayoutB > struct lazy_product_layout { /* unspecified */ };
+
       template< typename...AttributesA, typename...AttributesB >
-      struct product_layout< multidim_layout< AttributesA... >, multidim_layout< AttributesB... > >
+      struct lazy_product_layout< multidim_layout< AttributesA... >, multidim_layout< AttributesB... > >
       {
         typedef typename meta::binary_transform< meta::vector< AttributesA... >
                                                , meta::vector< AttributesB... >
@@ -40,7 +61,6 @@ namespace utk
                                                >::type product_attributes;
         typedef typename make_multidim_layout< product_attributes >::type type;
       };
-
 
 
     }

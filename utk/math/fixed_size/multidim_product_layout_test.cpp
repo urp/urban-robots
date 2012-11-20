@@ -15,29 +15,32 @@
 */
 
 # include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim_product_layout.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim layout
+#define BOOST_TEST_MODULE multidim product layout
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
 using namespace utk::math::fixed_size;
 
-BOOST_AUTO_TEST_SUITE( static_use )
+BOOST_AUTO_TEST_SUITE( two_dim_x_one_dim )
 
   BOOST_AUTO_TEST_CASE( layout_stride )
   {
-    typedef multidim_layout< size_vector<2,3,4> > layout;
+    typedef multidim_layout< size_vector<1> > layout1;
+    typedef multidim_layout< size_vector<2,3> > layout2;
+    typedef typename product_layout< layout1, layout2 >::type layout;
 
     // number of elements in the whole tensor
     size_type stride0 =  layout::stride<0>::value;
-    BOOST_CHECK_EQUAL( stride0, 12 );
+    BOOST_CHECK_EQUAL( stride0, 6 );
 
-    // size of the first three sub dimensions
+    // size of the first two subspaces
     size_type stride1 = layout::stride<1>::value;
-    BOOST_CHECK_EQUAL( stride1, 4 );
+    BOOST_CHECK_EQUAL( stride1, 3 );
 
-    // scalar
+    // scalar - 1d
     size_type stride2 = layout::stride<2>::value;
     BOOST_CHECK_EQUAL( stride2, 1 );
 
@@ -45,22 +48,26 @@ BOOST_AUTO_TEST_SUITE( static_use )
 
   BOOST_AUTO_TEST_CASE( size )
   {
-    typedef multidim_layout< size_vector<2,3,4> > layout;
+    typedef multidim_layout< size_vector<1> > layout1;
+    typedef multidim_layout< size_vector<2,3> > layout2;
+    typedef typename product_layout< layout1, layout2 >::type layout;
 
     const index_type order = layout::order;
     BOOST_CHECK_EQUAL( order, 3 );
 
     const size_type total = layout::total_size;
-    BOOST_CHECK_EQUAL( total, 24 );
+    BOOST_CHECK_EQUAL( total, 6 );
 
 
     std::array< size_type, 3 > size_array = meta::integral::make_array< layout::sizes >::value;
-    BOOST_CHECK_EQUAL( size_array[0], 2 );
+    BOOST_CHECK_EQUAL( size_array[0], 1 );
   }
 
   BOOST_AUTO_TEST_CASE( layout_static_offset )
   {
-    typedef multidim_layout< size_vector<2,3,4,5> > layout;
+    typedef multidim_layout< size_vector<1> > layout1;
+    typedef multidim_layout< size_vector<2,3> > layout2;
+    typedef typename product_layout< layout1, layout2 >::type layout;
 
     const stride_type offset = layout::static_offset();
     BOOST_CHECK_EQUAL( offset, 0 );

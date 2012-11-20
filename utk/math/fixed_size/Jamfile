@@ -56,20 +56,37 @@ explicit install-vector-headers ;
 #				: <location>$(INSTALL_INC_PREFIX)/utk/math/fixed_size ;
 #explicit install-matrix-headers ;
 
+#---| multidim
+#-------------
+
+# multidim_layout
+run multidim_layout_helpers_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_layout_test.cpp 									/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_remove_index_test.cpp 						/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_product_layout_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_add_attributes_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+# slice_layout
+run multidim_slice_layout_test.cpp 						/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_slice_fix_index_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_slice_release_index_test.cpp 		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_slice_remove_index_test.cpp 			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_slice_add_attributes_test.cpp 		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+# multidim_interface
+run multidim_interface_test.cpp 							/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+# multidim iterators
+run multidim_static_iterator_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multidim_dynamic_iterator_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+# multidim_array
+run multidim_array_test.cpp 									/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
 
 #---| tensor
 #-----------
 
-run multidim_layout_helpers_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_layout_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_layout_functions_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_interface_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_static_iterator_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_dynamic_iterator_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run multidim_array_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run tensor_interface_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run tensor_array_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run tensor_functions_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run tensor_interface_test.cpp 								/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run tensor_array_test.cpp 										/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run tensor_functions_test.cpp 								/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
 
-unit-test test-tensor-interface  : tensor_interface_test.cpp /utk/io//io
-                                 : <library>/robots//boost-unit-test ;

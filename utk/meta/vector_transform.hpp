@@ -26,7 +26,7 @@ namespace utk
       //---| transform
 
       template< typename, typename > struct transform { /* unspecified */ };
-
+      // TODO: make variadic - use wrapper to vector< vector< ... >... > ? maybe destroying elegance of current impl
       template< typename...Vector, class UnaryScalarOperator >
       struct transform< vector< Vector... >, UnaryScalarOperator >
       {

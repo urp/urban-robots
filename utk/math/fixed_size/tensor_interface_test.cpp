@@ -16,6 +16,8 @@
 
 # include "utk/math/fixed_size/tensor_interface.hpp"
 # include "utk/math/fixed_size/multidim_slice_layout.hpp"
+# include "utk/math/fixed_size/multidim_slice_fix_index.hpp"
+# include "utk/math/fixed_size/multidim_slice_add_attributes.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE tensor interface
@@ -32,7 +34,7 @@ BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
   tensor test_tensor( nullptr );
 }
 
-BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
+BOOST_AUTO_TEST_CASE( tensor_with_multidim_layout )
 {
   typedef multidim_layout< size_vector<1,2,3> > layout;
   typedef meta::integral::vector< variance_type, covariant,covariant,covariant > variances;
@@ -49,10 +51,10 @@ BOOST_AUTO_TEST_CASE( tensor_at_with_free_dimensions )
   BOOST_CHECK_EQUAL( tensor.at( 0,1,2 ) , 5. );
 }
 
-BOOST_AUTO_TEST_CASE( tensor_at_with_fixed_dimensions )
+BOOST_AUTO_TEST_CASE( tensor_with_slice_layout )
 {
-  typedef multidim_slice_layout< multidim_layout< size_vector<3,2,3> > > unfixed_layout;
-  typedef typename unfixed_layout::fix_index< 2, 2 >::type layout;
+  typedef multidim_layout< size_vector<3,2,3> > unfixed_layout;
+  typedef typename fix_index< unfixed_layout, 2, 2 >::type layout;
   typedef meta::integral::vector< variance_type, covariant,covariant > variances;
   typedef tensor_interface< double, layout, variances > tensor_type;
   double  data[ layout::total_size ] = {  0., 1., 2., 3., 4., 5.

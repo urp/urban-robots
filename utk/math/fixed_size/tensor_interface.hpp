@@ -17,6 +17,8 @@
 # pragma once
 
 # include "utk/math/fixed_size/multidim_interface.hpp"
+# include "utk/math/fixed_size/multidim_add_attributes.hpp"
+
 
 # pragma GCC visibility push(default)
 
@@ -35,9 +37,9 @@ namespace utk
       //-----| tensor_interface
       template < typename ValueType, typename Layout, typename VarianceVector >
       struct tensor_interface
-      :	public multidim_interface< ValueType, Layout >
+      :	public multidim_interface< ValueType, typename add_attributes< Layout, VarianceVector >::type >
       {
-	typedef multidim_interface< ValueType, Layout > multidim;
+	typedef multidim_interface< ValueType, typename add_attributes< Layout, VarianceVector >::type > multidim;
 
 	typedef VarianceVector variances;
 

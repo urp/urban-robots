@@ -31,7 +31,7 @@ BOOST_AUTO_TEST_CASE( size_of_subvectors )
                 , vector< char, char, char >
                 >  vec_vec;
 
-  typedef typename transform< vec_vec, function_operator< size > >::type size_vec;
+  typedef typename transform< vec_vec, function< size > >::type size_vec;
 
   const size_type size0 = at< size_vec, 0 >::type::value;
   BOOST_CHECK_EQUAL( size0, 1 );

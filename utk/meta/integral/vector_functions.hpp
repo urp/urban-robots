@@ -103,7 +103,6 @@ namespace utk
       template< typename T, typename T2, T2...Values >
       struct make_vector< T, vector< T2, Values... > >
       {
-
 	typedef vector< T, T(Values)... > type;
       };
 
@@ -133,9 +132,9 @@ namespace utk
       template< typename T, T...Values >
       struct make_array< vector< T, Values... > >
       {
-	typedef std::array< T, sizeof...(Values) > type;
+	typedef std::array< T, sizeof...(Values) > value_type;
 
-	constexpr static type value = type{ {Values...} };
+	constexpr static value_type value = value_type{ {Values...} };
       };
 
       //:::| element access

@@ -85,7 +85,7 @@ namespace utk
 					     * meta::integral::at< StrideVector, 0 >::value;
 	};
 
-	// scalar case - has one elemnet!
+	// scalar case
 	template< >
 	struct total_size< size_vector< >, stride_vector< > >
 	{ static constexpr size_type value = 1; };
