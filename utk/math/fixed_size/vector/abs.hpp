@@ -16,9 +16,6 @@
 
 # pragma once
 
-# include <exception>
-# include <boost/lexical_cast.hpp>
-
 # include "utk/math/fixed_size/vector/array.hpp"
 # include "utk/math/fixed_size/vector/interface.hpp"
 
@@ -36,9 +33,7 @@ namespace utk
 	{
 	  array<T,Size>	res;
 	  std::transform( v.begin(), v.end(), res.begin()
-			, //std::function<T(const T&)>(
-			  []( const T& x ){ return std::abs( x ); }
-			  //)
+			, []( const T& x ){ return std::abs( x ); }
 			);
 	  return res;
 	}

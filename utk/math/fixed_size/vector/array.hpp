@@ -17,6 +17,7 @@
 # pragma once
 
 # define UTK_MATH_FIXED_SIZE_VECTOR__VALARRAY_SUPPORT
+
 # ifdef  UTK_MATH_FIXED_SIZE_VECTOR__VALARRAY_SUPPORT
 #   include <valarray>
 # endif

@@ -1,4 +1,4 @@
-/*  bla.cpp - Copyright Peter Urban 2009
+/*  named_access_test.cpp - Copyright Peter Urban 2006-2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,7 +17,7 @@
 # include "utk/math/fixed_size/vector/named_access.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE fixed_size::vector named-access test
+#define BOOST_TEST_MODULE fixed_size::vector named-access
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math::fixed_size::vector;

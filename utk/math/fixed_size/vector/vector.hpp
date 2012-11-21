@@ -19,7 +19,25 @@
 # include "utk/math/fixed_size/vector/interface.hpp"
 # include "utk/math/fixed_size/vector/array.hpp"
 # include "utk/math/fixed_size/vector/operators.hpp"
-# include "utk/math/fixed_size/vector/functions.hpp"
+
+# include "utk/math/fixed_size/vector/abs.hpp"
+# include "utk/math/fixed_size/vector/at.hpp"
+# include "utk/math/fixed_size/vector/ceil.hpp"
+# include "utk/math/fixed_size/vector/clamp.hpp"
+# include "utk/math/fixed_size/vector/cross.hpp"
+# include "utk/math/fixed_size/vector/distance.hpp"
+# include "utk/math/fixed_size/vector/dot.hpp"
+# include "utk/math/fixed_size/vector/flipped.hpp"
+# include "utk/math/fixed_size/vector/floor.hpp"
+# include "utk/math/fixed_size/vector/length.hpp"
+# include "utk/math/fixed_size/vector/max.hpp"
+# include "utk/math/fixed_size/vector/min.hpp"
+# include "utk/math/fixed_size/vector/named_access.hpp"
+# include "utk/math/fixed_size/vector/normal.hpp"
+# include "utk/math/fixed_size/vector/sgn.hpp"
+# include "utk/math/fixed_size/vector/shifted.hpp"
+# include "utk/math/fixed_size/vector/sum.hpp"
+
 
 namespace utk
 {
@@ -43,10 +61,10 @@ namespace utk
         typedef	array<int,2>		vec2i;
         typedef	array<int,3>		vec3i;
         typedef	array<int,4>		vec4i;
-        typedef	array<float,1>		vec1f;
-        typedef	array<float,2>		vec2f;
-        typedef	array<float,3>		vec3f;
-        typedef	array<float,4>		vec4f;
+        typedef	array<float,1>	vec1f;
+        typedef	array<float,2>	vec2f;
+        typedef	array<float,3>	vec3f;
+        typedef	array<float,4>	vec4f;
         typedef	array<double,1>	vec1d;
         typedef	array<double,2>	vec2d;
         typedef	array<double,3>	vec3d;
@@ -72,6 +90,7 @@ namespace utk
         typedef	interface<double,2>	vecn2d;
         typedef	interface<double,3>	vecn3d;
         typedef	interface<double,4>	vecn4d;
+
       } // of vector::
     } // of fixed_size::
   } // of math::

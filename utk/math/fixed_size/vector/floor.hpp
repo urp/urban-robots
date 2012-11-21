@@ -34,9 +34,7 @@ namespace utk
 	{
 	  array< T, Size > res;
 	  std::transform( v.begin(), v.end(), res.begin()
-			, //std::function<T(const T&)>(
-			  []( const T& x ){ return std::floor( x ); }
-			  // )
+			, []( const T& x ){ return std::floor( x ); }
 			);
 	  return res;
 	}

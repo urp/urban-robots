@@ -29,9 +29,9 @@ namespace utk
       namespace vector
       {
 
-	template< class T, size_t Size >
-	T   sum( const interface< T, Size >& v )
-	{ return std::accumulate( v.begin(), v.end(), T(0) ); }
+        template< class T, size_t Size >
+        T   sum( const interface< T, Size >& v )
+        { return std::accumulate( v.begin(), v.end(), T(0) ); }
 
       } // of vector::
     } // of fixed_size::

@@ -30,7 +30,6 @@ namespace utk
     {
       namespace vector
       {
-
 	//euklidian norm
 	template< class T, size_t Size >
 	T l2norm( const interface< T, Size >& v )

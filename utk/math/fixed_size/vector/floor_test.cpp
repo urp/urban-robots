@@ -18,7 +18,7 @@
 # include "utk/math/fixed_size/vector/floor.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE fixed_size::vector floor test
+#define BOOST_TEST_MODULE fixed_size::vector floor
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math::fixed_size::vector;

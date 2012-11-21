@@ -16,10 +16,6 @@
 
 # pragma once
 
-# include <cmath>
-# include <type_traits>
-
-# include "utk/math/fixed_size/vector/interface.hpp"
 # include "utk/math/fixed_size/vector/operators.hpp"
 # include "utk/math/fixed_size/vector/length.hpp"
 

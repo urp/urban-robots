@@ -20,7 +20,7 @@
 # include "utk/math/fixed_size/vector/normal.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE fixed_size::vector normal/normalize test
+#define BOOST_TEST_MODULE fixed_size::vector normal/normalize
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math::fixed_size::vector;

@@ -35,11 +35,7 @@ namespace utk
 	array< T, Size > ceil( const interface< T, Size >& v )
 	{
 	  array< T, Size > res;
-	  std::transform( v.begin(), v.end(), res.begin()
-			, //std::function<T(const T&)>(
-			  []( const T& x ){ return std::ceil( x ); }
-			  //)
-			);
+	  std::transform( v.begin(), v.end(), res.begin(), []( const T& x ){ return std::ceil( x ); } );
 	  return res;
 	}
 

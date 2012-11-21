@@ -1,4 +1,4 @@
-/*  bla.cpp - Copyright Peter Urban 2009
+/*  sgn_test.cpp - Copyright Peter Urban 2009
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

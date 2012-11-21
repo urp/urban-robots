@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  tensor.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -17,17 +17,20 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor_interface.hpp"
+# include "utk/math/fixed_size/tensor_array.hpp"
+# include "utk/math/fixed_size/tensor_functions.hpp"
+# include "utk/math/fixed_size/tensor_interface.hpp"
 
 namespace utk
 {
   namespace math
   {
- 	namespace fixed_size
-	{
+    namespace fixed_size
+    {
+      namespace tensor
+      {
 
-
-
-
-	} // of fixed_size::
+      } // of tensor::
+    } // of fixed_size::
   } // of math::
 } // of utk::

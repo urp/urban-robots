@@ -17,7 +17,7 @@
 # include "utk/math/fixed_size/vector/distance.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE fixed_size::vector distance test
+#define BOOST_TEST_MODULE fixed_size::vector distance
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::math::fixed_size::vector;

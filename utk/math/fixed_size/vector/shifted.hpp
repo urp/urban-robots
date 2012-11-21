@@ -27,7 +27,7 @@ namespace utk
       namespace vector
       {
 
-	template< ptrdiff_t N, size_t ResultSize, typename T, size_t Size>
+	template< ptrdiff_t N, size_t ResultSize, typename T, size_type Size>
 	interface< T, ResultSize > shifted( const interface< T, Size >& v )
 	{
 	  return interface< T , ResultSize >( v.ptr() + N );
