@@ -29,10 +29,22 @@ namespace utk
 	template< typename Interface, typename NewLayout >
 	struct change_layout { /* unspecified */ };
 
+	// general
+	template< typename ValueType
+		, typename OldLayout
+		, template< typename, typename > class Interface
+		, typename NewLayout
+		>
+	struct change_layout< Interface< ValueType, OldLayout >, NewLayout >
+	{
+	  typedef Interface< ValueType, NewLayout > type;
+	};
+
 	// instance
 
 	template< typename Interface, typename NewLayout >
-	typename change_layout< Interface, NewLayout >::type use_layout( const Interface& t )
+	auto use_layout( const Interface& t )
+	-> typename change_layout< Interface, NewLayout >::type
 	{
 	  static_assert( NewLayout::total_size == Interface::layout::total_size
 		       , "NewLayout::total_size must fit to original layout"

@@ -36,7 +36,7 @@ namespace utk
 	  // header
 	  os << "utk::math::fixed_size::tensor\t|" << std::endl
 	     << " value_type " << typeid(ValueType).name() << std::endl
-	     ;//<< " layout : " << Layout() << std::endl;
+	  //   << " layout : " << Layout() << std::endl;
 	  // content
 	  return print_components( os, t );
 	}
@@ -60,57 +60,34 @@ namespace utk
 	  return os << ")";
 	}
 
+	// 2d +
 	template< typename ValueType, typename Layout >
 	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
-	-> typename std::enable_if< Layout::order == 2, std::ostream& >::type
+	-> typename std::enable_if< (Layout::order > 1), std::ostream& >::type
 	{
 	  typedef interface< ValueType, Layout > tensor_interface;
 
-	  typedef tensor_interface::template const_iterator<0> cit0;
+	  constexpr size_type size0 = meta::integral::pop_front< typename Layout::sizes >::value;
 
-	  static_assert( cit0::value_type::order == 1, "something is strange here" );
+	  os << " <"
+	     << boost::lexical_cast< std::string >( size0 );
 
-	  print_components( os, *t.template begin<0>() );
-	  /*
 	  std::for_each( t.template begin<0>(), t.template end<0>()
-		       , [&os] (typename tensor_interface::template const_iterator<0>& it )
-			 {
-			   auto tensor1d( *it );
-			   print_components1( os, tensor1d );
-			   os << std::endl;
-			 }
-		       );*/
-	  return os << "end (tensor components)" << std::endl;
+		       , [&os] (const typename tensor_interface::template const_iterator<0>::value_type& small_tensor )
+			 { print_components( os, small_tensor ); }
+		       );
+	  return os << "> ";
 	}
-/*
-	template< typename Tensor >
-	struct TensorIndex2dOutput
-	{
-	  typedef typename Tensor::value_type value_type;
 
-	  std::ostream& output_stream;
-	  const Tensor& output_tensor;
-
-	  auto default_format() -> std::ostream& { }
-
-	  TensorIndexOutput( std::ostream& os, const Tensor& t )
-
-	  template< typename IndexVector >
-	  void apply()
-	  {
-	    output_stream << print_components(output_tensor.at<IndexVector>()) << value_delimiter;
-	  }
-	};
-
-	template< typename ValueType, typename Layout, typename VarianceVector >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout, VarianceVector >& t )
-	-> std::enable_if< typename Layout::order > 2, std::ostream& >::type
+	/* 3d++
+	template< typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
+	-> typename std::enable_if< typename Layout::order > 2, std::ostream& >::type
 	{
 	  typedef meta::pop_back< typename meta::pop_back< typename Layout::sizes >::tail >::tail sizes_2d;
 	  typedef index_range< sizes_2d >::type indices;
 	  meta::apply< indices, TensorIndex2dOutput >
-	}
-*/
+	}*/
 
 
 

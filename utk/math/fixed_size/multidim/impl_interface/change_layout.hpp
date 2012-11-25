@@ -31,12 +31,6 @@ namespace utk
       namespace multidim
       {
 
-	template< typename ValueType, typename OldLayout, typename NewLayout >
-	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
-	{
-	  typedef interface< ValueType, NewLayout > type;
-	};
-
       } // of multidim::
     } // of fixed_size::
   } // of math::

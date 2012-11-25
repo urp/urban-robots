@@ -30,6 +30,10 @@ struct fixture
 {
   int data[6];
 
+  typedef typename make_layout< size_vector< 1,2,3 >, contravariant_tag >::type layout123;
+  typedef interface< int, layout123 > type123;
+  type123 tensor123;
+
   typedef typename make_layout< size_vector< 1,2 >, contravariant_tag >::type layout12;
   typedef interface< int, layout12 > type12;
   type12 tensor12;
@@ -43,7 +47,7 @@ struct fixture
   typedef interface< int, layout_ > type_;
   type_  tensor_;
 
-  fixture() : data{ 1,2,3,4,5,6 }, tensor12(data), tensor1(data), tensor_(data) {}
+  fixture() : data{ 1,2,3,4,5,6 }, tensor123(data), tensor12(data), tensor1(data), tensor_(data) {}
 };
 
 BOOST_FIXTURE_TEST_SUITE( check_io, fixture )
@@ -57,6 +61,11 @@ BOOST_FIXTURE_TEST_SUITE( check_io, fixture )
   BOOST_AUTO_TEST_CASE( check_2d )
   {
     BOOST_TEST_MESSAGE( tensor12 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_3d )
+  {
+    BOOST_TEST_MESSAGE( tensor123 );
   }
 
 BOOST_AUTO_TEST_SUITE_END()
