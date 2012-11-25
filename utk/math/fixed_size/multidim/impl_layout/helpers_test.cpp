@@ -1,4 +1,4 @@
-/*  bla.cpp - Copyright Peter Urban 2009
+/*  helpers_test.cpp - Copyright Peter Urban 2009
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,14 +14,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/multidim_layout_helpers.hpp"
+# include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim layout helpers
+#define BOOST_TEST_MODULE multidim::layout helpers
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_CASE( strides_sequence_helper )
 {

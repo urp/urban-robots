@@ -1,4 +1,4 @@
-/*  layout.hpp - Copyright Peter Urban 2012
+/*  specialized_functions.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,21 +16,32 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_iterator/iterator_base.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/static_iterator.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/dynamic_iterator.hpp"
-
 namespace utk
 {
   namespace math
   {
     namespace fixed_size
     {
-      namespace multidim
+      namespace tensor
       {
+	// type
 
+	template< typename Interface, typename NewLayout >
+	struct change_layout { /* unspecified */ };
 
-      } // of multidim::
+	// instance
+
+	template< typename Interface, typename NewLayout >
+	typename change_layout< Interface, NewLayout >::type use_layout( const Interface& t )
+	{
+	  static_assert( NewLayout::total_size == Interface::layout::total_size
+		       , "NewLayout::total_size must fit to original layout"
+		       );
+	  typedef typename change_layout< Interface, NewLayout >::type type;
+	  return type( t );
+	};
+
+      } // of tensor::
     } // of fixed_size::
   } // of math::
 } // of utk::

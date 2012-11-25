@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  product_layout.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,9 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+//# include "utk/math/fixed_size/multidim/impl_layout/product_layout.hpp"
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 namespace utk
 {
@@ -26,22 +26,23 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| product_layout
-
-      // TODO: specify for all layout types (manage index attribs)
-      //       vector x vector, vector x tensor and tensor x vector
-      template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
-
-      template< index_type...IndicesA, size_type...SizesA, index_type...IndicesB, size_type...SizesB >
-      struct product_layout< multidim_layout< meta::integral::vector< index_type, IndicesA... >, meta::integral::vector< size_type, SizesA... > >
-                           , multidim_layout< meta::integral::vector< index_type, IndicesB... >, meta::integral::vector< size_type, SizesB... > >
-                           >
+      namespace multidim
       {
-        typedef multidim_slice_layout< index_vector< IndicesA..., IndicesB... >
-                                     , size_vector< SizesA..., SizesB... >
-                                     > type;
-      };
+        // TODO: specify for all layout types (manage index attribs)
+        //       vector x vector, vector x tensor and tensor x vector
+        // TODO: tests
+        //template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
+
+        template< typename...AttributesA, typename...AttributesB >
+        struct product_layout< slice_layout< AttributesA... >, slice_layout< AttributesB... > >
+        {
+          //typedef typename product_layout<
+          //typedef layout< index_vector< IndicesA..., IndicesB... >
+          //                             , size_vector< SizesA..., SizesB... >
+          //                             > type;
+        };
+
+      }
     }
   }
 }

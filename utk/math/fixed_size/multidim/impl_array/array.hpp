@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  array.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,8 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_interface.hpp"
-# include "utk/math/fixed_size/vector_array.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/vector/array.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -27,27 +27,28 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //-----| multidim_array
-
-      template < typename T, typename Layout >
-      struct multidim_array
-      : public multidim_interface< T, Layout >
+      namespace multidim
       {
-	typedef multidim_interface < T, Layout > interface;
 
-	typedef vector_array< T, interface::layout::total_size > storage_array;
+	template < typename T, typename Layout >
+	struct array
+	: public interface< T, Layout >
+	{
+	  typedef interface < T, Layout > interface;
 
-	//---| data storage
+	  typedef vector::array< T, interface::layout::total_size > storage_array;
 
-	storage_array data;
+	  //---| data storage
 
-	//---| constructor (create with uninitialized data)
+	  storage_array data;
 
-	explicit multidim_array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
+	  //---| constructor (create with uninitialized data)
 
-      };
+	  explicit array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
 
+	};
+
+      } // of multidim
     } // of fixed_size::
   } // of math::
 } // of utk::

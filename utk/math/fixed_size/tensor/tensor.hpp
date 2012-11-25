@@ -16,10 +16,13 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/tensor_interface.hpp"
-# include "utk/math/fixed_size/tensor_array.hpp"
-# include "utk/math/fixed_size/tensor_functions.hpp"
-# include "utk/math/fixed_size/tensor_interface.hpp"
+# include "utk/math/fixed_size/tensor/interface.hpp"
+# include "utk/math/fixed_size/tensor/make_interface.hpp"
+# include "utk/math/fixed_size/tensor/remove_index.hpp"
+
+# include "utk/math/fixed_size/tensor/array.hpp"
+# include "utk/math/fixed_size/tensor/product.hpp"
+
 
 namespace utk
 {

@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  remove_index.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/meta/vector_transform.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
 
 namespace utk
 {
@@ -24,28 +26,28 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| remove_index
-      //-----returns a new multidim_layout with Index fixed (to Value)
-      // TODO: tests
-      template< typename Layout, index_type Index >
-      struct remove_index { /* unspecified */ };
-
-      template< typename SizeVector, typename StrideVector, typename...MoreAttributes, index_type Index>
-      struct remove_index< multidim_layout< SizeVector, StrideVector, MoreAttributes... >, Index >
+      namespace multidim
       {
-        typedef multidim_layout< SizeVector, StrideVector, MoreAttributes... > old_layout;
+        //---| remove_index
+        //-----returns a new layout with Index fixed (to Value)
+        template< typename Layout, index_type Index >
+        struct remove_index { /* unspecified */ };
 
-        static_assert( Index < old_layout::order, "Index greater or equal than multidim order");
+        template< typename SizeVector, typename StrideVector, typename...MoreAttributes, index_type Index>
+        struct remove_index< layout< SizeVector, StrideVector, MoreAttributes... >, Index >
+        {
+          typedef layout< SizeVector, StrideVector, MoreAttributes... > old_layout;
 
-        template< typename Vector >
-        using remove_attrib = meta::integral::remove_at< Vector, Index >;
+          static_assert( Index < old_layout::order, "Index greater or equal than multidim order");
 
-        typedef typename meta::transform< typename old_layout::attributes , meta::function<remove_attrib> >::type new_attributes;
+          template< typename Vector >
+          using remove_attrib = meta::integral::remove_at< Vector, Index >;
 
-        typedef typename make_multidim_layout< new_attributes >::type type;
-      };
+          typedef typename meta::transform< typename old_layout::attributes , meta::function<remove_attrib> >::type new_attributes;
 
-    }
-  }
-}
+          typedef typename make_layout< new_attributes >::type type;
+        };
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

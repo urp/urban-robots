@@ -1,4 +1,4 @@
-/*  bla.cpp - Copyright Peter Urban 2009
+/*  product_layout_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,11 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/multidim_layout_functions.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/product_layout.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim layout functions
+#define BOOST_TEST_MODULE multidim::slice_layout product_layout
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::multidim;

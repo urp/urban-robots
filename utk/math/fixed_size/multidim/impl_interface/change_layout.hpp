@@ -1,4 +1,4 @@
-/*  tensor_interface_test.cpp - Copyright Peter Urban 2012
+/*  change_layout.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,23 +14,30 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor_array.hpp"
+# pragma once
 
-#define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE tensor array
-#include <boost/test/unit_test.hpp>
+# include "utk/meta/integral/integral.hpp"
 
-using namespace utk;
-using namespace utk::math::fixed_size;
+# include "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
 
-BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )
+# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+
+namespace utk
 {
-  typedef multidim_layout< size_vector<1,2,3> > layout;
-  typedef variance_vector< covariant, covariant, covariant > variances;
-  typedef tensor_array< double, layout, variances > tensor;
-  tensor test_tensor;
+  namespace math
+  {
+    namespace fixed_size
+    {
+      namespace multidim
+      {
 
-  test_tensor.at( 0,0,0 ) = 1.;
+	template< typename ValueType, typename OldLayout, typename NewLayout >
+	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
+	{
+	  typedef interface< ValueType, NewLayout > type;
+	};
 
-  BOOST_CHECK_EQUAL( test_tensor.at( 0,0,0 ), 1. );
-}
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

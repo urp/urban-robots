@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  add_attribute.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+// # include "utk/math/fixed_size/multidim/impl_layout/add_attributes.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 namespace utk
 {
@@ -24,18 +26,17 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| add_attributes
-
-      //template< typename Layout, typename...NewAttributes > struct add_attributes { /* unspecified */ };
-
-      template< typename FullLayout, typename FullIndexMask, typename...IndexAttributes, typename...NewIndexAttributes >
-      struct add_attributes< multidim_slice_layout< FullLayout, FullIndexMask, IndexAttributes... >, NewIndexAttributes... >
+      namespace multidim
       {
-        typedef multidim_slice_layout< FullLayout, FullIndexMask, IndexAttributes..., NewIndexAttributes... > type;
-      };
+        //---| add_attributes
 
+        template< typename FullLayout, typename FullIndexMask, typename...IndexAttributes, typename...NewIndexAttributes >
+        struct add_attributes< slice_layout< FullLayout, FullIndexMask, IndexAttributes... >, NewIndexAttributes... >
+        {
+          typedef slice_layout< FullLayout, FullIndexMask, IndexAttributes..., NewIndexAttributes... > type;
+        };
 
-    }
-  }
-}
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

@@ -1,4 +1,4 @@
-/*  layout.hpp - Copyright Peter Urban 2012
+/*  array.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,9 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_iterator/iterator_base.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/static_iterator.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/dynamic_iterator.hpp"
+# include "utk/math/fixed_size/multidim/impl_array/array.hpp"
 
 namespace utk
 {

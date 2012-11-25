@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  add_attributes.h - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
 
 namespace utk
 {
@@ -24,18 +24,19 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| add_attributes
-
-      template< typename Layout, typename...NewAttributes > struct add_attributes { /* unspecified */ };
-
-      template< typename...Attributes, typename...NewIndexAttributes >
-      struct add_attributes< multidim_layout< Attributes... >, NewIndexAttributes... >
+      namespace multidim
       {
-        typedef multidim_layout< Attributes..., NewIndexAttributes... > type;
-      };
+        //---| add_attributes
 
+        template< typename Layout, typename...NewAttributes > struct add_attributes { /* unspecified */ };
 
-    }
-  }
-}
+        template< typename...Attributes, typename...NewIndexAttributes >
+        struct add_attributes< layout< Attributes... >, NewIndexAttributes... >
+        {
+          typedef layout< Attributes..., NewIndexAttributes... > type;
+        };
+
+      } // of multidim::
+    } // of fixed_size
+  } // of math::
+} // of utk::

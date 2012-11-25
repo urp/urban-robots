@@ -1,4 +1,4 @@
-/*  multidim_slice_fix_index.h - Copyright Peter Urban 2012
+/*  release_index.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,31 +16,33 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
-# include "utk/math/fixed_size/multidim_slice_fix_index.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/fix_index.hpp"
+
 namespace utk
 {
   namespace math
   {
     namespace fixed_size
     {
-      //---| release_index
-      //-----returns a new multidim_slice_layout with Index released.
-
-      template< typename, index_type >
-      struct release_index { /* unspecified */ };
-
-      template< typename FullLayout, typename FullIndexMask, typename...NewAttributes, index_type UnmaskedIndex >
-      class release_index< multidim_slice_layout< FullLayout, FullIndexMask, NewAttributes... >, UnmaskedIndex >
+      namespace multidim
       {
-          typedef multidim_slice_layout< FullLayout, FullIndexMask, NewAttributes... > old_layout; // FullLayout == old_layout::full_layout
-          static_assert( UnmaskedIndex < old_layout::full_layout::order, "Index greater or equal than multidim order");
-          static const index_type index_size = meta::integral::at< typename old_layout::full_layout::sizes, UnmaskedIndex >::value;
-        public:
-          typedef typename fix_unmasked_index< old_layout, UnmaskedIndex, index_size >::type type;
-      };
+        //---| release_index
+        //-----returns a new slice_layout with Index released.
 
+        template< typename, index_type >
+        struct release_index { /* unspecified */ };
 
-    }
-  }
-}
+        template< typename FullLayout, typename FullIndexMask, typename...NewAttributes, index_type UnmaskedIndex >
+        class release_index< slice_layout< FullLayout, FullIndexMask, NewAttributes... >, UnmaskedIndex >
+        {
+            typedef slice_layout< FullLayout, FullIndexMask, NewAttributes... > old_layout; // FullLayout == old_layout::full_layout
+            static_assert( UnmaskedIndex < old_layout::full_layout::order, "Index greater or equal than multidim order");
+            static const index_type index_size = meta::integral::at< typename old_layout::full_layout::sizes, UnmaskedIndex >::value;
+          public:
+            typedef typename fix_unmasked_index< old_layout, UnmaskedIndex, index_size >::type type;
+        };
+
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

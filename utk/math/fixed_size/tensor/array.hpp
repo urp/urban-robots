@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  array.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,10 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/tensor_interface.hpp"
-# include "utk/math/fixed_size/vector_array.hpp"
-
-# pragma GCC visibility push(default)
+# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
 
 namespace utk
 {
@@ -27,29 +24,10 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //-----| tensor_array
-
-      template < typename T, typename Layout, typename VarianceVector >
-      struct tensor_array
-      : public tensor_interface< T, Layout, VarianceVector >
+      namespace tensor
       {
-	typedef tensor_interface < T, Layout, VarianceVector > interface;
 
-	typedef vector_array< T, interface::layout::total_size > storage_array;
-
-	//---| data storage
-
-	storage_array data;
-
-	//---| constructor (create with uninitialized data)
-
-	explicit tensor_array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
-
-      };
-
+      } // of tensor::
     } // of fixed_size::
   } // of math::
 } // of utk::
-
-# pragma GCC visibility pop

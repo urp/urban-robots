@@ -1,0 +1,7 @@
+project utk/math/fixed_size/multidim/impl_layout ;
+
+run helpers_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run layout_test.cpp 									/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run remove_index_test.cpp 						/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run product_layout_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run add_attributes_test.cpp 					/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;

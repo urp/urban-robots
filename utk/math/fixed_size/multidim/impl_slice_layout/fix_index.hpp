@@ -1,4 +1,4 @@
-/*  multidim_slice_fix_index.h - Copyright Peter Urban 2012
+/*  fix_index.h - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 namespace utk
 {
@@ -24,55 +24,57 @@ namespace utk
   {
     namespace fixed_size
     {
-      //---| fix_index
-
-      template< typename Layout, index_type FullIndex, index_type Value >
-      class fix_unmasked_index { /* unspecified */ };
-
-
-      //-----returns a new multidim_slice_layout with Index (referring to FullLayout) fixed (to Value)
-      template< typename...SliceAttributes, index_type FullIndex, index_type Value >
-      class fix_unmasked_index< multidim_slice_layout< SliceAttributes... >, FullIndex, Value >
+      namespace multidim
       {
-          typedef multidim_slice_layout< SliceAttributes... > slice_layout;
 
-          static_assert( FullIndex < slice_layout::full_layout::order, "Index greater or equal than multidim order" );
+        //---| fix_index
 
-          typedef typename meta::integral::assign< typename slice_layout::full_index_mask, FullIndex, meta::integral::constant< index_type, Value > >::type new_index_mask;
-        public:
-          typedef multidim_slice_layout< typename slice_layout::full_layout, new_index_mask > type;
-      };
+        template< typename Layout, index_type FullIndex, index_type Value >
+        class fix_unmasked_index { /* unspecified */ };
 
-      //---| fix_index
+        //-----returns a new slice_layout with Index (referring to FullLayout) fixed (to Value)
+        template< typename...SliceAttributes, index_type FullIndex, index_type Value >
+        class fix_unmasked_index< slice_layout< SliceAttributes... >, FullIndex, Value >
+        {
+            typedef slice_layout< SliceAttributes... > slice;
 
-      template< typename Layout, index_type FullIndex, index_type Value >
-      class fix_index { /* unspecified */ };
+            static_assert( FullIndex < slice::full_layout::order, "Index greater or equal than multidim order" );
 
-      //-----returns a new multidim_slice_layout with Index (referring to SliceLayout) fixed (to Value)
-      template< typename...SliceAttributes, index_type MaskedIndex, index_type Value >
-      class fix_index< multidim_slice_layout< SliceAttributes... >, MaskedIndex, Value >
-      {
-          typedef multidim_slice_layout< SliceAttributes... > old_layout;
+            typedef typename meta::integral::assign< typename slice::full_index_mask, FullIndex, meta::integral::constant< index_type, Value > >::type new_index_mask;
+          public:
+            typedef slice_layout< typename slice::full_layout, new_index_mask > type;
+        };
 
-          static constexpr index_type unmasked_index = helpers::unmask_index< typename old_layout::visibility_mask, MaskedIndex >::value;
+        //---| fix_index
 
-        public:
-          typedef typename fix_unmasked_index< old_layout, unmasked_index, Value >::type type;
-      };
+        template< typename Layout, index_type FullIndex, index_type Value >
+        class fix_index { /* unspecified */ };
 
-      //-----returns a new multidim_slice_layout with Index (referring to multidim_layout) fixed (to Value)
-      template< typename...Attributes, index_type Index, index_type Value >
-      class fix_index< multidim_layout< Attributes... >, Index, Value >
-      {
-          typedef multidim_layout< Attributes... > old_layout;
+        //-----returns a new slice_layout with Index (referring to SliceLayout) fixed (to Value)
+        template< typename...SliceAttributes, index_type MaskedIndex, index_type Value >
+        class fix_index< slice_layout< SliceAttributes... >, MaskedIndex, Value >
+        {
+            typedef slice_layout< SliceAttributes... > old_layout;
 
-          typedef typename meta::integral::make_vector< index_type, typename old_layout::sizes >::type default_index_mask;
-          typedef multidim_slice_layout< old_layout, default_index_mask > slice_layout;
-        public:
-          typedef typename fix_unmasked_index< slice_layout, Index, Value >::type type;
-      };
+            static constexpr index_type unmasked_index = helpers::unmask_index< typename old_layout::visibility_mask, MaskedIndex >::value;
 
+          public:
+            typedef typename fix_unmasked_index< old_layout, unmasked_index, Value >::type type;
+        };
 
-    }
-  }
-}
+        //-----returns a new slice_layout with Index (referring to layout) fixed (to Value)
+        template< typename...Attributes, index_type Index, index_type Value >
+        class fix_index< layout< Attributes... >, Index, Value >
+        {
+            typedef layout< Attributes... > old_layout;
+
+            typedef typename meta::integral::make_vector< index_type, typename old_layout::sizes >::type default_index_mask;
+            typedef slice_layout< old_layout, default_index_mask > slice_layout;
+          public:
+            typedef typename fix_unmasked_index< slice_layout, Index, Value >::type type;
+        };
+
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

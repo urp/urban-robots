@@ -16,9 +16,8 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_iterator/iterator_base.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/static_iterator.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterator/dynamic_iterator.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
 namespace utk
 {

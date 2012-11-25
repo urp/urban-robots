@@ -16,7 +16,10 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_layout.hpp"
+# include "utk/meta/vector_push_front.hpp"
+# include "utk/meta/vector_transform.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
 
 namespace utk
 {
@@ -24,45 +27,45 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| product_layout
-
-      // TODO: specify for vector x vector, vector x tensor and tensor x vector
-      // TODO: specialize for multidim_slice_layout
-      template< typename LayoutA, typename LayoutB > struct product_layout { /* unspecified */ };
-
-      template< typename SizeA, typename StrideA, typename...AttributesA, typename SizeB, typename StrideB, typename...AttributesB >
-      struct product_layout< multidim_layout< SizeA, StrideA, AttributesA... >
-                           , multidim_layout< SizeB, StrideB, AttributesB... > >
+      namespace multidim
       {
-        typedef typename meta::integral::concatinate< SizeA, SizeB >::type new_sizes;
-        typedef typename helpers::stride_sequence< new_sizes >::type new_strides;
 
-        typedef typename meta::binary_transform< meta::vector< AttributesA... >
-                                               , meta::vector< AttributesB... >
-                                               , meta::function< meta::integral::concatinate >
-                                               >::type product_attributes;
+        // TODO: specify for vector x vector, vector x tensor and tensor x vector ?
+        template< typename LayoutA, typename LayoutB >
+        struct product_layout { /* unspecified */ };
 
-        typedef typename meta::push_front< typename meta::push_front< product_attributes, new_strides >::type, new_sizes >::type new_attributes;
+        template< typename SizeA, typename StrideA, typename...AttributesA, typename SizeB, typename StrideB, typename...AttributesB >
+        struct product_layout< layout< SizeA, StrideA, AttributesA... >
+                             , layout< SizeB, StrideB, AttributesB... > >
+        {
+          typedef typename meta::integral::concatinate< SizeA, SizeB >::type new_sizes;
+          typedef typename helpers::stride_sequence< new_sizes >::type new_strides;
 
-        typedef typename make_multidim_layout< new_attributes >::type type;
-      };
+          typedef typename meta::binary_transform< meta::vector< AttributesA... >
+                                                 , meta::vector< AttributesB... >
+                                                 , meta::function< meta::integral::concatinate >
+                                                 >::type product_attributes;
 
-      //---| lazy_product_layout
+          typedef typename meta::push_front< typename meta::push_front< product_attributes, new_strides >::type, new_sizes >::type new_attributes;
 
-      template< typename LayoutA, typename LayoutB > struct lazy_product_layout { /* unspecified */ };
+          typedef typename make_layout< new_attributes >::type type;
+        };
 
-      template< typename...AttributesA, typename...AttributesB >
-      struct lazy_product_layout< multidim_layout< AttributesA... >, multidim_layout< AttributesB... > >
-      {
-        typedef typename meta::binary_transform< meta::vector< AttributesA... >
-                                               , meta::vector< AttributesB... >
-                                               , meta::function< meta::integral::concatinate >
-                                               >::type product_attributes;
-        typedef typename make_multidim_layout< product_attributes >::type type;
-      };
+        //---| lazy_product_layout prototype
 
+        template< typename LayoutA, typename LayoutB > struct lazy_product_layout { /* unspecified */ };
 
+        template< typename...AttributesA, typename...AttributesB >
+        struct lazy_product_layout< layout< AttributesA... >, layout< AttributesB... > >
+        {
+          typedef typename meta::binary_transform< meta::vector< AttributesA... >
+                                                 , meta::vector< AttributesB... >
+                                                 , meta::function< meta::integral::concatinate >
+                                                 >::type product_attributes;
+          typedef typename make_layout< product_attributes >::type type;
+        };
+
+      }
     }
   }
 }

@@ -17,8 +17,8 @@
 # pragma once
 
 // TODO: really include this vvv
-# include "utk/math/fixed_size/multidim/impl_slice_layout/helpers.hpp"
-# include "utk/math/fixed_size/multidim/impl_slice_layout/layout.hpp"
+//# include "utk/math/fixed_size/multidim/impl_slice_layout/helpers.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_slice_layout/fix_index.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/release_index.hpp"

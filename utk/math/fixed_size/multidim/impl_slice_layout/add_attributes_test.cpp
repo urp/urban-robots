@@ -1,4 +1,4 @@
-/*  bla.cpp - Copyright Peter Urban 2009
+/*  add_attribute_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,21 +16,20 @@
 
 # include "utk/meta/vector_at.hpp"
 
-# include "utk/math/fixed_size/multidim_layout.hpp"
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
-# include "utk/math/fixed_size/multidim_slice_fix_index.hpp"
-# include "utk/math/fixed_size/multidim_slice_add_attributes.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/fix_index.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/add_attributes.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim_slice_layout add_attributes
+#define BOOST_TEST_MODULE multidim::slice_layout add_attributes
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::multidim;
 
 struct slice_with_new_attributes
 {
-  typedef multidim_layout< size_vector< 2,3,4 > > old_layout;
+  typedef layout< size_vector< 2,3,4 > > old_layout;
   typedef typename fix_index< old_layout, 1, 2 >::type slice_layout;
   typedef typename add_attributes< slice_layout, meta::integral::vector< bool, true, false > >::type new_layout;
 };

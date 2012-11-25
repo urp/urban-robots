@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  remove_index.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim_slice_layout.hpp"
+//# include "utk/math/fixed_size/multidim/impl_layout/remove_index.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 namespace utk
 {
@@ -24,32 +26,34 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      //---| remove_index
-      //-----returns a new multidim_slice_layout with Index removed
-      // TODO: Well defined place for vvv
-      //template< typename Layout, index_type Index >
-      //struct remove_index { /*unspecified*/ };
-
-      template< typename...Attributes, index_type MaskedIndex >
-      class remove_index< multidim_slice_layout< Attributes... >, MaskedIndex >
+      namespace multidim
       {
-          typedef multidim_slice_layout< Attributes... > old_layout;
-          static_assert( MaskedIndex < old_layout::order, "Index greater or equal than multidim order");
+        //---| remove_index
+        //-----returns a new multidim_slice_layout with Index removed
+        // TODO: Well defined place for vvv
+        //template< typename Layout, index_type Index >
+        //struct remove_index { /*unspecified*/ };
 
-          // find index in full_layout corresponding to MaskedIndex
-          static constexpr index_type full_layout_index = helpers::unmask_index< typename old_layout::visibility_mask, MaskedIndex >::value;
+        template< typename...Attributes, index_type MaskedIndex >
+        class remove_index< slice_layout< Attributes... >, MaskedIndex >
+        {
+            typedef slice_layout< Attributes... > old_layout;
+            static_assert( MaskedIndex < old_layout::order, "Index greater or equal than multidim order");
 
-        public:
+            // find index in full_layout corresponding to MaskedIndex
+            static constexpr index_type full_layout_index = helpers::unmask_index< typename old_layout::visibility_mask, MaskedIndex >::value;
 
-          //:::| assamble result
+          public:
 
-          typedef typename remove_index< typename old_layout::full_layout, full_layout_index >::type new_full_layout;
-          typedef typename meta::integral::remove_at< typename old_layout::full_index_mask, full_layout_index >::type new_index_mask;
+            //:::| assamble result
 
-          typedef multidim_slice_layout< new_full_layout, new_index_mask > type;
-      };
+            typedef typename remove_index< typename old_layout::full_layout, full_layout_index >::type new_full_layout;
+            typedef typename meta::integral::remove_at< typename old_layout::full_index_mask, full_layout_index >::type new_index_mask;
 
-    }
-  }
-}
+            typedef slice_layout< new_full_layout, new_index_mask > type;
+        };
+
+      } // of multidim::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

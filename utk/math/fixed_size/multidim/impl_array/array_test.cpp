@@ -1,4 +1,4 @@
-/*  multidim_interface_test.cpp - Copyright Peter Urban 2012
+/*  array_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,20 +14,20 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/multidim_array.hpp"
+# include "utk/math/fixed_size/multidim/impl_array/array.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim array
+#define BOOST_TEST_MODULE multidim::array
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )
 {
-  typedef multidim_layout< size_vector<1,2,3> > layout;
-  typedef multidim_array< double, layout > multidim;
-  multidim test_multidim;
+  typedef layout< size_vector<1,2,3> > layout123;
+  typedef array< double, layout123 > multidim123;
+  multidim123 test_multidim;
 
   test_multidim.at( 0,0,0 ) = 1.;
 
