@@ -30,20 +30,20 @@ namespace utk
       {
 	//:::| type |::::::::::::::::::::::::::::::::::::::::::::::::::/
 
-	template< typename ValueType, typename OldLayout, typename VarianceVector, typename NewLayout >
-	struct change_layout< interface< ValueType, OldLayout, VarianceVector >, NewLayout >
+	template< typename ValueType, typename OldLayout, typename NewLayout >
+	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
 	{
-	  typedef interface< ValueType, NewLayout, VarianceVector > type;
+	  typedef interface< ValueType, NewLayout > type;
 	};
 
       } // of tensor::
 
       namespace multidim
       {
-	template< typename ValueType, typename OldLayout, typename VarianceVector, typename NewLayout >
-	struct change_layout< tensor::interface< ValueType, OldLayout, VarianceVector >, NewLayout >
+	template< typename ValueType, typename OldLayout, typename NewLayout >
+	struct change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >
 	{
-	  typedef typename tensor::change_layout< tensor::interface< ValueType, OldLayout, VarianceVector >, NewLayout >::type type;
+	  typedef typename tensor::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
 	};
       }
     } // of fixed_size::

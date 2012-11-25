@@ -17,7 +17,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/make_interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/product.hpp"
 

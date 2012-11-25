@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor/impl_interface/make_interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 
 #define BOOST_TEST_DYN_LINK
@@ -27,8 +27,8 @@ using namespace utk::math::fixed_size::tensor;
 
 struct fixture
 {
-  typedef multidim::layout< multidim::size_vector< 1,2,3 > > layout123;
-  typedef typename make_non_mixed_interface< int, layout123, contravariant >::type type123;
+  typedef typename make_layout< size_vector< 1,2,3 >, contravariant_tag >::type layout123;
+  typedef interface< int, layout123 > type123;
   int data[6];
   type123 tensor123;
 
@@ -39,7 +39,7 @@ BOOST_FIXTURE_TEST_SUITE( check_change_layout, fixture )
 
 BOOST_AUTO_TEST_CASE( check_change_to_1d )
 {
-  typedef multidim::layout< multidim::size_vector< 6 > > layout6;
+  typedef typename make_layout< size_vector< 6 >, contravariant_tag >::type layout6;
 
   auto tensor6 = tensor::use_layout< type123, layout6 >( tensor123 );
 

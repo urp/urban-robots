@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor/impl_interface/make_interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
 
@@ -30,17 +30,17 @@ struct fixture
 {
   int data[6];
 
-  typedef multidim::layout< multidim::size_vector< 1,2 > > layout12;
-  typedef typename make_non_mixed_interface< int, layout12, contravariant >::type type12;
+  typedef typename make_layout< size_vector< 1,2 >, contravariant_tag >::type layout12;
+  typedef interface< int, layout12 > type12;
   type12 tensor12;
 
-  typedef multidim::layout< multidim::size_vector< 1 > > layout1;
-  typedef typename make_non_mixed_interface< int, layout1, contravariant >::type type1;
+  typedef typename make_layout< size_vector< 1 >, contravariant_tag >::type layout1;
+  typedef interface< int, layout1 > type1;
   type1  tensor1;
 
 
-  typedef multidim::layout< multidim::size_vector< > > layout_;
-  typedef typename make_non_mixed_interface< int, layout_, contravariant >::type type_;
+  typedef typename make_layout< size_vector< >, contravariant_tag >::type layout_;
+  typedef interface< int, layout_ > type_;
   type_  tensor_;
 
   fixture() : data{ 1,2,3,4,5,6 }, tensor12(data), tensor1(data), tensor_(data) {}

@@ -40,43 +40,22 @@ namespace utk
 	template< variance_type... Variances >
 	using variance_vector = meta::integral::vector< variance_type, Variances... >;
 
-	namespace
-	{
-	  template < typename ValueType, typename Layout, typename VarianceVector >
-	  class make_multidim_interface
-	  {
-		typedef typename meta::pop_back< typename Layout::attributes >::type::value_type last_attrib_value_type;
-
-		// check if variance attribute is already included in Layout
-		// TODO: test/investigate
-		static_assert(  not std::is_same< last_attrib_value_type, variance_type >::value
-			     || VarianceVector::size == Layout::order
-			     , "size of variance index attribute must agree with tensor order." );
-
-		typedef typename std::conditional< std::is_same< last_attrib_value_type, variance_type >::value
-						 , Layout
-						 , typename multidim::add_attributes< Layout, VarianceVector >::type
-						 >::type new_layout;
-
-	      public:
-		typedef multidim::interface< ValueType, new_layout > type;
-	  };
-
-	} // <anonymous>::
-
 	//---| interface
 
-	template < typename ValueType, typename Layout, typename VarianceVector >
+	template < typename ValueType, typename Layout >
 	class interface
-	: public make_multidim_interface< ValueType, Layout, VarianceVector >::type
+	: public multidim::interface< ValueType, Layout >
 	{
-	    typedef interface< ValueType, Layout, VarianceVector > type;
+	    typedef interface< ValueType, Layout > type;
 
 	  public:
 
-	    typedef typename make_multidim_interface< ValueType, Layout, VarianceVector >::type multidim_interface;
+	    typedef multidim::interface< ValueType, Layout > multidim_interface;
 
-	    typedef VarianceVector variances;
+	    typedef typename meta::pop_back< typename Layout::attributes >::type variances;
+
+	    static_assert( std::is_same< typename variances::value_type, variance_type >::value
+			 , "no variance index-attribute specified. Ought to be the last element in Layout::attributes" );
 
 	    //---| constructor with storage pointer
 

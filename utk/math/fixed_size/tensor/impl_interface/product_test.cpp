@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor/impl_interface/make_interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/product.hpp"
 
@@ -26,22 +26,25 @@ using namespace utk;
 using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::tensor;
 
-BOOST_AUTO_TEST_SUITE( tensor_product_test )
+struct product_fixture
+{
+  typedef multidim::layout< size_vector<2> > layout;
+  typedef interface< double, typename make_layout< layout, contravariant_tag >::type > tensor_a;
+  typedef interface< double, typename make_layout< layout, covariant_tag     >::type > tensor_b;
 
-  BOOST_AUTO_TEST_CASE( check_product_array )
+  typedef typename product_array< tensor_a, tensor_b >::type product_ab;
+};
+
+BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
+
+  BOOST_AUTO_TEST_CASE( check_type )
   {
-    typedef multidim::layout< multidim::size_vector<3> > layout3;
-    typedef typename make_non_mixed_interface< double, layout3, contravariant >::type tensor_a;
-    typedef typename make_non_mixed_interface< double, layout3, covariant >::type tensor_b;
-
-    typedef typename product_array< tensor_a, tensor_b >::type product;
-
     //order
-    const index_type order = product::order;
+    const index_type order = product_ab::order;
     BOOST_CHECK_EQUAL( order, 2 );
 
     // variances
-    typedef typename product::variances variances;
+    typedef typename product_ab::variances variances;
 
     const bool dim_0_contravariant = meta::integral::at< variances, 0 >::value == contravariant;
     BOOST_CHECK_EQUAL( dim_0_contravariant, true );
@@ -50,18 +53,14 @@ BOOST_AUTO_TEST_SUITE( tensor_product_test )
     BOOST_CHECK_EQUAL( dim_1_covariant, true );
   }
 
-  BOOST_AUTO_TEST_CASE( check_product )
+  BOOST_AUTO_TEST_CASE( check_components )
   {
-    typedef multidim::layout< multidim::size_vector<2> > layout2;
     double data[] = { 1.,2.,3.,4. };
-    typedef typename make_non_mixed_interface< double, layout2, contravariant >::type tensor_a_type;
-    typedef typename make_non_mixed_interface< double, layout2, covariant >::type tensor_b_type;
-    typedef typename product_array< tensor_a_type, tensor_b_type >::type product_type;
 
-    tensor_a_type tensor_a( data );
-    tensor_b_type tensor_b( data+2 );
+    tensor_a t_a( data );
+    tensor_b t_b( data+2 );
 
-    product_type prod = product( tensor_a, tensor_b );
+    product_ab prod = product( t_a, t_b );
 
     const double p00 = prod.at(0,0);
     BOOST_CHECK_EQUAL( p00, 3 );

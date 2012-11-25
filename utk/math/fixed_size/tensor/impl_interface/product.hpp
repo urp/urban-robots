@@ -32,31 +32,26 @@ namespace utk
 	template< typename TensorA, typename TensorB >
 	struct product_array { /* unspecified */ };
 
-	template< typename T, typename LayoutA, typename VariancesA, typename LayoutB, typename VariancesB >
-	struct product_array< interface<T, LayoutA, VariancesA >
-			    , interface<T, LayoutB, VariancesB >
+	template< typename T, typename LayoutA, typename LayoutB >
+	struct product_array< interface<T, LayoutA >
+			    , interface<T, LayoutB >
 			    >
 	{
 	  typedef array< T
 		       , typename multidim::product_layout< LayoutA, LayoutB >::type
-		       , typename meta::integral::concatinate< VariancesA, VariancesB >::type
 		       > type;
 	};
 
 	// product
 
-	template< typename T, typename LayoutA, typename LayoutB, typename VariancesA, typename VariancesB >
-	auto product( const interface<T, LayoutA, VariancesA >& a
-		    , const interface<T, LayoutB, VariancesB >& b
+	template< typename T, typename LayoutA, typename LayoutB >
+	auto product( const interface<T, LayoutA >& a
+		    , const interface<T, LayoutB >& b
 		    )
-	-> typename product_array< interface<T, LayoutA, VariancesA >
-				 , interface<T, LayoutB, VariancesB >
-				 >::type
+	-> typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type
 	{
-	  typedef typename product_array< interface<T, LayoutA, VariancesA >
-				        , interface<T, LayoutB, VariancesB >
-				        >::type array_type;
-	  array_type result;
+	  typedef typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type type;
+	  type result;
 
 	  //result
 

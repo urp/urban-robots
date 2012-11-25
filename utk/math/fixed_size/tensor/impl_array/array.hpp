@@ -31,11 +31,11 @@ namespace utk
       {
 	//-----| array
 
-	template < typename T, typename Layout, typename VarianceVector >
+	template < typename T, typename Layout >
 	struct array
-	: public interface< T, Layout, VarianceVector >
+	: public interface< T, Layout >
 	{
-	  typedef interface < T, Layout, VarianceVector > interface;
+	  typedef interface < T, Layout > interface;
 
 	  typedef vector::array< T, interface::layout::total_size > storage_array;
 

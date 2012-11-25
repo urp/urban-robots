@@ -30,8 +30,8 @@ namespace utk
       namespace tensor
       {
 
-	template< typename ValueType, typename Layout, typename VarianceVector >
-	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout, VarianceVector >& t )
+	template< typename ValueType, typename Layout >
+	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout >& t )
 	{
 	  // header
 	  os << "utk::math::fixed_size::tensor\t|" << std::endl
@@ -41,15 +41,15 @@ namespace utk
 	  return print_components( os, t );
 	}
 
-	template< typename ValueType, typename Layout, typename VarianceVector >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout, VarianceVector >& t )
+	template< typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
 	{
 	  return os << t.at() << std::endl;
 	}
 
-	template< typename ValueType, typename Layout, typename VarianceVector >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout, VarianceVector >& t )
+	template< typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 1,	std::ostream& >::type
 	{
 	  os << "( ";
@@ -60,11 +60,11 @@ namespace utk
 	  return os << ")";
 	}
 
-	template< typename ValueType, typename Layout, typename VarianceVector >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout, VarianceVector >& t )
+	template< typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 2, std::ostream& >::type
 	{
-	  typedef interface< ValueType, Layout, VarianceVector > tensor_interface;
+	  typedef interface< ValueType, Layout > tensor_interface;
 
 	  typedef tensor_interface::template const_iterator<0> cit0;
 
