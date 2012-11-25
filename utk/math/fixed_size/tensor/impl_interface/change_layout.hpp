@@ -16,7 +16,7 @@
 
 # pragma once
 
-# include "utk/meta/integral/integral.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 
@@ -26,6 +26,19 @@ namespace utk
   {
     namespace fixed_size
     {
+
+      namespace multidim
+      {
+	/* same as in  "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
+
+	template< typename ValueType, typename OldLayout, typename NewLayout >
+	struct change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >
+	{
+	  typedef typename tensor::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
+	};*/
+      }
+
+
       namespace tensor
       {
 	//:::| type |::::::::::::::::::::::::::::::::::::::::::::::::::/
@@ -33,19 +46,11 @@ namespace utk
 	template< typename ValueType, typename OldLayout, typename NewLayout >
 	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
 	{
-	  typedef interface< ValueType, NewLayout > type;
+	  typedef typename multidim::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
 	};
 
       } // of tensor::
 
-      namespace multidim
-      {
-	template< typename ValueType, typename OldLayout, typename NewLayout >
-	struct change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >
-	{
-	  typedef typename tensor::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
-	};
-      }
     } // of fixed_size::
   } // of math::
 } // of utk::

@@ -92,7 +92,6 @@ namespace utk
 	  using const_static_iterator_end = const static_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
 
 	  //---| begin
-	  //---| TODO: test iterator interface
 	  template< index_type Index >
 	  static_iterator_begin<Index> static_begin() { return static_iterator_begin< Index >( *this ); }
 
@@ -111,7 +110,6 @@ namespace utk
 
 	  //:::::| declare iterators
 
-	  // TODO: !!! these aliases make gcc-4.7 crash
 
 	  template< index_type Index >
 	  using iterator = const dynamic_iterator< type, Index >;
@@ -120,7 +118,6 @@ namespace utk
 	  using const_iterator = const dynamic_iterator< type, Index >;
 
 	  //---| begin
-	  //---| TODO: test iterator interface
 	  template< index_type Index >
 	  iterator<Index> begin() { return iterator< Index >( *this, 0 ); }
 

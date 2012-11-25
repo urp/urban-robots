@@ -35,7 +35,7 @@ namespace utk
 	{
 	  // header
 	  os << "utk::math::fixed_size::tensor\t|" << std::endl
-	     << " value_type " << typeid(ValueType).name() << std::endl
+	     << " value_type " << typeid(ValueType).name() << std::endl;
 	  //   << " layout : " << Layout() << std::endl;
 	  // content
 	  return print_components( os, t );

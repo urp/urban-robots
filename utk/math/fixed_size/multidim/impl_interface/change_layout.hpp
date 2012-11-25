@@ -30,7 +30,13 @@ namespace utk
     {
       namespace multidim
       {
-
+/* same as in  "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
+	template< typename ValueType, typename OldLayout, typename NewLayout >
+	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
+	{
+	  typedef interface< ValueType, NewLayout > type;
+	};
+*/
       } // of multidim::
     } // of fixed_size::
   } // of math::
