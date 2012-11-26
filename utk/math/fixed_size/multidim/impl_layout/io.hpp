@@ -18,8 +18,8 @@
 
 # include "utk/meta/integral/integral.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
 namespace utk
 {
@@ -27,22 +27,30 @@ namespace utk
   {
     namespace fixed_size
     {
-      namespace tensor
+      namespace multidim
       {
 
-	template< typename ValueType, typename Layout >
-	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout >& t )
+	template< typename...Attributes >
+	std::ostream& operator<< ( std::ostream& os, const layout< Attributes... >& l )
 	{
+	  typedef layout< Attributes... > type;
+
 	  // header
 	  os
-	     << "utk::math::fixed_size::tensor\t|" << std::endl
-	     //<< "  typeid " <<< typeid(interface< ValueType, Layout >).name() << std::endl // requires <typeinfo>
-	     << "  value_type " << typeid(ValueType).name() << std::endl
-	     << "  layout : " << Layout() << std::endl;
-	  // content
-	  return print_components( os, t );
+	     << "fixed_size::multidim::layout\t|" << std::endl
+	     //<< "  typeid " <<< typeid(type).name() << std::endl // requires <typeinfo>
+	     << "  size_vector\t" << typename type::sizes() << std::endl
+	     << "  stride_vector\t" << typename type::strides() << std::endl
+	     << "  "
+	     << ( sizeof...(Attributes) > 2
+		  ? boost::lexical_cast<std::string>( sizeof...(Attributes) - 2 )
+		    + " more attribute vectors!!! "
+		  : ""
+		)
+	     << std::endl;
+	  return os;
 	}
-
+	/*
 	template< typename ValueType, typename Layout >
 	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
@@ -79,7 +87,7 @@ namespace utk
 			 { print_components( os, small_tensor ); }
 		       );
 	  return os << "> ";
-	}
+	}*/
 
 	/* 3d++
 	template< typename ValueType, typename Layout >

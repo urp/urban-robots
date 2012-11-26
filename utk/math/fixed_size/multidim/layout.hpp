@@ -24,6 +24,8 @@
 # include "utk/math/fixed_size/multidim/impl_layout/remove_index.hpp"
 # include "utk/math/fixed_size/multidim/impl_layout/product_layout.hpp"
 
+# include "utk/math/fixed_size/multidim/impl_layout/io.hpp"
+
 namespace utk
 {
   namespace math

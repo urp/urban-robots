@@ -133,8 +133,7 @@ namespace utk
       struct make_array< vector< T, Values... > >
       {
 	typedef std::array< T, sizeof...(Values) > value_type;
-
-	constexpr static value_type value = value_type{ {Values...} };
+	static constexpr value_type value{{ Values... }};
       };
 
       //:::| element access
@@ -192,12 +191,15 @@ namespace utk
 
 
       //---| io-stream insertion operator
-
+      //---| TODO: BUG: shows some adress as last element
       template< typename T, T...Values >
       std::ostream& operator<<( std::ostream& os, const vector< T, Values... >& vec )
       {
 	std::array< T, sizeof...(Values) > arr = make_array< vector< T, Values... > >::value;
 	os << '{' << utk::io::sequence_to_stream( os, arr.begin(), arr.end(), "," ) << '}' << std::endl;
+	/*os << "{ ";
+	os << Values...;
+	os << '}' << std::endl;*/
 	return os;
       }
 

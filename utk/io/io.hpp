@@ -24,8 +24,6 @@
 # include <string>
 # include <limits>
 
-//# pragma GCC visibility push(default)
-
 namespace utk
 {
   namespace io
@@ -92,5 +90,3 @@ namespace utk
     }
   }
 }
-
-//#pragma GCC visibility pop
