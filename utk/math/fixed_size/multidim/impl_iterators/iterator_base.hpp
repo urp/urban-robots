@@ -18,6 +18,8 @@
 
 # include "utk/math/fixed_size/multidim/impl_layout/remove_index.hpp"
 
+# include "utk/math/fixed_size/multidim/impl_slice_layout/fix_index.hpp"
+
 # pragma GCC visibility push(default)
 
 namespace utk
@@ -38,15 +40,6 @@ namespace utk
 	  typedef typename parent_interface::layout parent_layout;
 	  typedef typename parent_interface::storage_interface parent_storage_interface;
 
-	  //:::| value interface
-
-	  typedef typename remove_index< parent_layout, Index >::type value_layout;
-	  typedef typename change_layout< parent_interface, value_layout >::type value_interface;
-	  typedef typename value_interface::storage_interface value_storage_interface;
-
-	  //:::| container and value types
-
-	  typedef value_interface	value_type;
 
 	  //:::| storage interface
 

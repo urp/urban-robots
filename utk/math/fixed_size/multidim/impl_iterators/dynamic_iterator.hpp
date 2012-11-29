@@ -28,14 +28,26 @@ namespace utk
     {
       namespace multidim
       {
-	//-----| interface
 
+	// iterates over an index
 	template< typename Interface, index_type Index >
 	class dynamic_iterator : public iterator_base< Interface, Index >
 	{
 	    typedef dynamic_iterator< Interface, Index > type;
 	    typedef iterator_base< Interface, Index >    base;
+
+	    //:::| dynamic value interface
+
+	    typedef typename remove_index< typename base::parent_layout, Index >::type value_layout;
+	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
+	    typedef typename value_interface::storage_interface value_storage_interface;
+
 	  public:
+
+	    //:::| container and value types
+
+	    typedef value_interface value_type;
+
 
 	    //:::| iteration information
 
@@ -56,11 +68,11 @@ namespace utk
 
 	    //---| dereference operators
 	    // TODO: ask layout for offset?!!!
-	    typename base::value_interface operator*()
-	    { return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+	    value_interface operator*()
+	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 	    // TODO: ask layout for offset?!!!
-	    const typename base::value_interface operator*() const
-	    { return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+	    const value_interface operator*() const
+	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
 	    //---| increment iterators
 

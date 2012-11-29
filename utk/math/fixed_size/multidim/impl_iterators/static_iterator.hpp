@@ -32,50 +32,69 @@ namespace utk
       namespace multidim
       {
 	//-----| interface
-	// TODO: cleanup and unify with dynamic_iterator
 	template < typename Interface, index_type Index, ptrdiff_t IndexValue = 0 >
-	struct static_iterator : public iterator_base< Interface, Index >
+	class static_iterator : public iterator_base< Interface, Index >
 	{
-	  typedef iterator_base< Interface, Index > base;
+	    typedef iterator_base< Interface, Index > base;
 
-	  //:::| iterator types
+    	    //:::| static value interface |::::::::::::::::::::::::::::/
 
-	  typedef static_iterator< Interface , Index, IndexValue + 1 > increment_iterator;
-	  typedef static_iterator< Interface , Index, IndexValue - 1 > decrement_iterator;
+	    typedef typename fix_index< typename base::parent_layout, Index, IndexValue >::type value_layout;
+	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
+	    typedef typename value_interface::storage_interface value_storage_interface;
 
-	  //:::| iteration information
+	  public:
 
-	  static constexpr ptrdiff_t index_value = IndexValue;
+	    //:::| container and value types |:::::::::::::::::::::::::/
 
-	  //---| constructor with storage_interface
+	    typedef value_interface value_type;
 
-	  static_iterator( const Interface& interface )
-	  : base( interface )  { }
+	    //:::| iteration information |:::::::::::::::::::::::::::::/
 
-	  //---| copy constuctor
-	  template< ptrdiff_t OtherIndexValue >
-	  static_iterator( const static_iterator< Interface, Index, OtherIndexValue >& other )
-	  : base( other )  { }
+	    static constexpr ptrdiff_t index_value = IndexValue;
 
-	  //:::| iterator interface
-	  // TODO: ask layout for offset
-	  typename base::value_interface operator*()
-	  { return typename base::value_interface( typename base::value_storage_interface( base::storage.ptr() + index_value * ptrdiff_t( base::index_stride ) ) ); }
+	    //:::| iterator types |::::::::::::::::::::::::::::::::::::/
 
-	  increment_iterator increment() const
-	  { return increment_iterator( *this ); }
+	    //---| random access iterator
+	    template< index_type NewIndexValue >
+	    using random_access_iterator = static_iterator< Interface , Index, NewIndexValue >;
 
-	  // TODO: !!! CHECK for underrun ( mark rend() )
-	  decrement_iterator decrement() const
-	  { return decrement_iterator( *this ); }
+	    //---| forward iterator
+	    typedef random_access_iterator< IndexValue + 1 > forward_iterator;
 
-	  template< typename OtherLayout, ptrdiff_t OtherIndexValue >
-	  bool operator==( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
-	  { return OtherIndexValue == IndexValue && base::operator==(other); }
+	    //---| reverse iterator
+	    typedef random_access_iterator< IndexValue - 1 > reverse_iterator;
 
-	  template< typename OtherLayout, ptrdiff_t OtherIndexValue >
-	  bool operator!=( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
-	  { return not operator==( other ); }
+	    //:::| constructors |::::::::::::::::::::::::::::::::::::::/
+
+	    //---| constructor with storage_interface
+	    static_iterator( const Interface& interface )
+	    : base( interface )  { }
+
+	    //---| copy constuctor
+	    template< ptrdiff_t OtherIndexValue >
+	    static_iterator( const static_iterator< Interface, Index, OtherIndexValue >& other )
+	    : base( other )  { }
+
+	    //:::| iterator interface
+	    // TODO: ask layout for offset
+	    value_interface operator*()
+	    { return value_interface( value_storage_interface( base::storage.ptr() + index_value * ptrdiff_t( base::index_stride ) ) ); }
+
+	    forward_iterator increment() const
+	    { return forward_iterator( *this ); }
+
+	    // TODO: !!! CHECK for underrun ( mark rend() )
+	    reverse_iterator decrement() const
+	    { return reverse_iterator( *this ); }
+
+	    template< typename OtherLayout, ptrdiff_t OtherIndexValue >
+	    bool operator==( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
+	    { return OtherIndexValue == IndexValue && base::operator==(other); }
+
+	    template< typename OtherLayout, ptrdiff_t OtherIndexValue >
+	    bool operator!=( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
+	    { return not operator==( other ); }
 
 	}; // of static_iterator<>
       } // of multidim::

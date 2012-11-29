@@ -1,4 +1,4 @@
-/*  vector_at.hpp - Copyright Peter Urban 2012
+/*  vector_pop_front.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,9 +30,9 @@ namespace utk
     template< typename Unpacked, typename...Pack >
     struct pop_front< vector< Unpacked, Pack... > >
     {
-    typedef Unpacked type;
+      typedef Unpacked type;
 
-    typedef vector< Pack... > tail;
+      typedef vector< Pack... > tail;
     };
 
   } // of meta::

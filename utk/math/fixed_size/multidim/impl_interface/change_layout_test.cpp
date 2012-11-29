@@ -41,7 +41,6 @@ BOOST_FIXTURE_TEST_SUITE( check_change_layout, interface_fixture )
     typedef multidim::layout< multidim::size_vector< 6 > > layout6;
 
     auto multidim6 = multidim::use_layout<type123,layout6>( multidim123 );
-    // works -> auto multidim6 = multidim::use_layout( multidim123, layout6 );
 
     BOOST_CHECK_EQUAL( multidim6.at(0), 1 );
     BOOST_CHECK_EQUAL( multidim6.at(1), 2 );

@@ -1,4 +1,4 @@
-/*  vector_at_test.cpp - Copyright Peter Urban 2009
+/*  vector_pop_front_test.cpp - Copyright Peter Urban 2009
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -19,7 +19,7 @@
 # include "utk/meta/vector_pop_front.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE meta::vector at
+#define BOOST_TEST_MODULE meta::vector pop_front
 #include <boost/test/unit_test.hpp>
 
 using namespace utk::meta;

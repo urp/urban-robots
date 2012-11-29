@@ -14,10 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+//# include "utk/meta/integral/vector.hpp"
 
-# include "utk/meta/integral/vector.hpp"
-
-# include "utk/meta/vector.hpp"
 # include "utk/meta/vector_at.hpp"
 
 # include "utk/meta/zip_view.hpp"
@@ -29,11 +27,18 @@
 using namespace utk;
 using namespace utk::meta;
 
+struct fixture
+{
+  typedef typename integral::vector< int, 1,2 >::meta_vector vec12;
+  typedef typename integral::vector< int, 3,4 >::meta_vector vec34;
+  typedef typename integral::vector< int, 5,6 >::meta_vector vec56;
+};
+
+BOOST_FIXTURE_TEST_SUITE( check_zip_view, fixture )
+
 BOOST_AUTO_TEST_CASE( two )
 {
-  typedef typename zip_view< 2
-                           , typename integral::vector< int, 1,2 >::meta_vector
-                           , typename integral::vector< int, 3,4 >::meta_vector >::type zip;
+  typedef typename zip_view< 2, vec12, vec34 >::type zip;
 
   const size_type zip_size = zip::size;
   BOOST_CHECK_EQUAL( zip_size, 2 );
@@ -50,10 +55,7 @@ BOOST_AUTO_TEST_CASE( two )
 
 BOOST_AUTO_TEST_CASE( three )
 {
-  typedef typename zip_view< 2
-                           , typename integral::vector< int, 1,2 >::meta_vector
-                           , typename integral::vector< int, 3,4 >::meta_vector
-                           , typename integral::vector< int, 5,6 >::meta_vector >::type zip;
+  typedef typename zip_view< 2, vec12, vec34, vec56 >::type zip;
 
   const size_type zip_size = zip::size;
   BOOST_CHECK_EQUAL( zip_size, 2 );
@@ -71,3 +73,5 @@ BOOST_AUTO_TEST_CASE( three )
   const int z12 = at< typename at< zip, 1 >::type, 2 >::type::value;
   BOOST_CHECK_EQUAL( z12, 6 );
 }
+
+BOOST_AUTO_TEST_SUITE_END()

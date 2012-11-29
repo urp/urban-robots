@@ -39,9 +39,12 @@ BOOST_FIXTURE_TEST_SUITE( check_change_layout, fixture )
 
 BOOST_AUTO_TEST_CASE( check_change_to_1d )
 {
-  typedef typename make_layout< size_vector< 6 >, contravariant_tag >::type layout6;
+  typedef typename make_layout< size_vector< 6 >, covariant_tag >::type layout6;
 
   auto tensor6 = tensor::use_layout< type123, layout6 >( tensor123 );
+
+  constexpr variance_type var1 = meta::integral::at< type123::variances, 1 >::value;
+  BOOST_CHECK_EQUAL( var1, covariant );
 
   BOOST_CHECK_EQUAL( tensor6.at(0), 1 );
   BOOST_CHECK_EQUAL( tensor6.at(1), 2 );

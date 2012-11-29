@@ -53,7 +53,7 @@ namespace utk
 	  typedef typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type type;
 	  type result;
 
-	  //result
+
 
 	  return result;
 	}

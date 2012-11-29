@@ -36,7 +36,7 @@ BOOST_AUTO_TEST_CASE( check_layout3 )
   it0_type it0( multidim );
   BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
 
-  typedef typename it0_type::increment_iterator it1_type;
+  typedef typename it0_type::forward_iterator it1_type;
   it1_type it1 = it0.increment();
   BOOST_CHECK_EQUAL( (*it1).at() , 1. );
 

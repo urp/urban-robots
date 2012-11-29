@@ -16,8 +16,6 @@
 
 # pragma once
 
-# include "utk/meta/integral/integral.hpp"
-
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 
@@ -34,8 +32,7 @@ namespace utk
 	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout >& t )
 	{
 	  // header
-	  os
-	     << "utk::math::fixed_size::tensor\t|" << std::endl
+	  os << "fixed_size::tensor\t|" << std::endl
 	     //<< "  typeid " <<< typeid(interface< ValueType, Layout >).name() << std::endl // requires <typeinfo>
 	     << "  value_type " << typeid(ValueType).name() << std::endl
 	     << "  layout : " << Layout() << std::endl;
