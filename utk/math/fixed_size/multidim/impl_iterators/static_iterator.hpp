@@ -79,7 +79,7 @@ namespace utk
 	    //:::| iterator interface
 	    // TODO: ask layout for offset
 	    value_interface operator*()
-	    { return value_interface( value_storage_interface( base::storage.ptr() + index_value * ptrdiff_t( base::index_stride ) ) ); }
+	    { return value_interface( value_storage_interface( base::storage.ptr() ) ); }
 
 	    forward_iterator increment() const
 	    { return forward_iterator( *this ); }

@@ -34,7 +34,7 @@ BOOST_AUTO_TEST_CASE( layout_1d )
 
   typedef dynamic_iterator< type, 0 > it0_type;
 
-  BOOST_CHECK_EQUAL( it0_type::value_interface::order, 0. );
+  BOOST_CHECK_EQUAL( it0_type::value_type::order, 0. );
 
   it0_type it0( multidim3 );
 
@@ -68,7 +68,7 @@ BOOST_FIXTURE_TEST_SUITE( check_iterator23, layout23_fixture )
   BOOST_AUTO_TEST_CASE( iterate_and_access )
   {
 
-    BOOST_CHECK_EQUAL( it1_type::value_interface::order, 1. );
+    BOOST_CHECK_EQUAL( it1_type::value_type::order, 1. );
 
     BOOST_MESSAGE( "it0.storage = " << it1.storage );
 
