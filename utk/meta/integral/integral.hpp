@@ -18,8 +18,13 @@
 
 # include "utk/meta/integral/constant.hpp"
 # include "utk/meta/integral/vector.hpp"
+
 # include "utk/meta/integral/vector_functions.hpp"
 # include "utk/meta/integral/vector_algorithms.hpp"
+
+# include "utk/meta/integral/vector_make_vector.hpp"
+# include "utk/meta/integral/vector_remove.hpp"
+
 
 namespace utk
 {

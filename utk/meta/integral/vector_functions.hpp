@@ -92,38 +92,6 @@ namespace utk
 	  typedef typename push_front< typename popped::tail, constant< T, Unpacked > >::type tail;
       };
 
-      //:::| vector creators
-
-      //---| make_vector
-
-
-      template< typename T, typename Vector >
-      struct make_vector { /* uspecified */ };
-
-      template< typename T, typename T2, T2...Values >
-      struct make_vector< T, vector< T2, Values... > >
-      {
-	typedef vector< T, T(Values)... > type;
-      };
-
-
-      //---| make_uniform_vector
-
-      //---| make_uniform_vector
-
-      template< typename T, index_type ElementsLeft, T Value >
-      struct make_uniform_vector
-      {
-	typedef typename push_back< typename make_uniform_vector< T, ElementsLeft-1 , Value >::type
-				  , constant< T, Value >
-				  >::type type;
-      };
-
-      template< typename T, T Value >
-      struct make_uniform_vector< T, 0, Value >
-      {
-	typedef vector< T > type;
-      };
 
       //---| make_array
 

@@ -140,47 +140,6 @@ BOOST_AUTO_TEST_SUITE( sequence_manipulators )
 
 BOOST_AUTO_TEST_SUITE_END()
 
-BOOST_AUTO_TEST_SUITE( vector_create_functions )
-
-  BOOST_AUTO_TEST_CASE( make_vector_test )
-  {
-    typedef typename make_vector< int, vector< unsigned, 1,2,3 > >::type  ints;
-
-    const int size = ints::size;
-    BOOST_CHECK_EQUAL( size, 3 );
-
-    const bool is_target_type = std::is_same< typename ints::value_type, int >::value;
-    BOOST_CHECK( is_target_type );
-
-    const int i0 = at< ints, 0 >::value;
-    BOOST_CHECK_EQUAL( i0, 1 );
-    const int i1 = at< ints, 1 >::value;
-    BOOST_CHECK_EQUAL( i1, 2 );
-    const int i2 = at< ints, 2 >::value;
-    BOOST_CHECK_EQUAL( i2, 3 );
-
-  }
-
-
-  BOOST_AUTO_TEST_CASE( make_uniform_vector_test )
-  {
-    typedef typename make_uniform_vector< int, 3,2 >::type  ints;
-
-    const int size = ints::size;
-    BOOST_CHECK_EQUAL( size, 3 );
-
-    const int i0 = at< ints, 0 >::value;
-    BOOST_CHECK_EQUAL( i0, 2 );
-    const int i1 = at< ints, 1 >::value;
-    BOOST_CHECK_EQUAL( i1, 2 );
-    const int i2 = at< ints, 2 >::value;
-    BOOST_CHECK_EQUAL( i2, 2 );
-
-  }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-
 BOOST_AUTO_TEST_SUITE( vector_instance_operators )
 
   BOOST_AUTO_TEST_CASE( stream_insertion )

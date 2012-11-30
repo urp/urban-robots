@@ -1,8 +1,9 @@
 project utk/meta/integral
 : requirements <use>/utk/io//io ;
 
-run constant_test.cpp /robots//boost-unit-test : --log_level=test_suite :  ;
-run vector_test.cpp   /robots//boost-unit-test : --log_level=test_suite :  ;
-run vector_functions_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run vector_algorithms_test.cpp /utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-
+run constant_test.cpp 							/robots//boost-unit-test : --log_level=test_suite :  ;
+run vector_test.cpp   							/robots//boost-unit-test : --log_level=test_suite :  ;
+run vector_functions_test.cpp 			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run vector_algorithms_test.cpp 			/robots//boost-unit-test : --log_level=test_suite :  ;
+run vector_make_vector_test.cpp 		/robots//boost-unit-test : --log_level=test_suite :  ;
+run vector_remove_test.cpp			 		/robots//boost-unit-test : --log_level=test_suite :  ;

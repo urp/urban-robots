@@ -29,22 +29,37 @@ namespace utk
     {
       namespace multidim
       {
-	namespace
+
+	namespace helpers
 	{
-	  //---| make_position_index_vector
+	  //---| unmask_indices
+	  //-----return a list of 'visible' indices
 
-	  template< typename T, size_type Size >
-	  class make_position_index_vector
+	  template< typename VisibilityMask >
+	  class unmask_indices
 	  {
-	      typedef typename meta::integral::make_uniform_vector< T, Size-1, 1 >::type ones;
-
+	      typedef typename meta::integral::make_position_index_vector< index_type, VisibilityMask::size >::type index_positions;
 	    public:
-
-	      typedef typename meta::integral::accumulate< ones, meta::integral::add< index_type, index_type >, 0 >::type type;
+	      typedef typename meta::integral::remove_false< index_positions, VisibilityMask >::type type;
 	  };
 
-	  //---| remove_indices
+	  //---| unmask_indiex
+	  //-----find index in full_layout corresponding to MaskedIndex
 
+	  template< typename VisibilityMask, index_type MaskedIndex >
+	  class unmask_index
+	  {
+	      typedef typename unmask_indices< VisibilityMask >::type visible_index_positions;
+	    public:
+	      static constexpr index_type value = meta::integral::at< visible_index_positions, MaskedIndex >::value;
+	  };
+	} // of helpers::
+
+
+	namespace
+	{
+	  //---| remove_indices
+	  //-----remove a list of indices from FullLayout
 	  template< typename, typename > struct remove_indices { /* unspecified */ };
 
 	  // terminate
@@ -65,43 +80,22 @@ namespace utk
 	  };
 
 	  //---| make_slice_layout
+	  //-----remove hidden indices from FullLayout, add NewAttributes to new layout (type)
 
 	  template< typename FullLayout, typename FullIndexMask, typename...NewIndexAttributes >
-	  class make_slice_layout
+	  struct make_slice_layout
 	  {
-	    // remove hidden indices
-	      typedef typename make_position_index_vector< index_type, FullLayout::order >::type index_positions;
-	    public:
-
 	      typedef typename meta::integral::equal< typename FullLayout::sizes, FullIndexMask >::type visibility_mask;
 	      typedef typename meta::integral::transform< visibility_mask , meta::integral::negate<bool> >::type hidden_mask;
-
-	      typedef typename meta::integral::remove_false< index_positions, hidden_mask >::type hidden_indices;
+	      typedef typename helpers::unmask_indices< hidden_mask >::type hidden_indices;
 
 	      typedef typename remove_indices< FullLayout, hidden_indices >::type slice_layout;
 	    // add attributes
 
 	      typedef typename add_attributes< slice_layout, NewIndexAttributes... >::type type;
 	  };
+
 	} // of <anonymous>::
-
-	namespace helpers
-	{
-
-	  //---| unmask_index
-
-	  template< typename VisibilityMask, index_type MaskedIndex >
-	  class unmask_index
-	  {
-	      // find index in full_layout corresponding to MaskedIndex
-	      typedef typename make_position_index_vector< index_type, VisibilityMask::size >::type index_positions;
-	      typedef typename meta::integral::remove_false< index_positions, VisibilityMask >::type visible_index_positions;
-	    public:
-	      static constexpr index_type value = meta::integral::at< visible_index_positions, MaskedIndex >::value;
-
-	  };
-	} // of helpers::
-
 
 	//--------------------------
 	//---| slice layout
