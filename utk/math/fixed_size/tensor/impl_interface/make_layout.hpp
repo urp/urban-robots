@@ -39,7 +39,7 @@ namespace utk
 	using mixed_tag = meta::integral::constant< index_type, ContravariantIndices >;
 
 
-	template< typename SizeVector, typename VarianceSpecifier >
+	template< typename, typename VarianceSpecifier >
 	struct make_layout { /* unspecified */ };
 
 	// add variance attribute to Layout

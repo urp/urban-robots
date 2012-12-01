@@ -37,7 +37,7 @@ BOOST_AUTO_TEST_SUITE( unary_transforms )
 
   }
 
-  BOOST_AUTO_TEST_CASE( vector_is_true )
+  BOOST_AUTO_TEST_CASE( check_all )
   {
     typedef vector< bool, true,false,true > bools;
     typedef typename is_true< bools >::type  result;

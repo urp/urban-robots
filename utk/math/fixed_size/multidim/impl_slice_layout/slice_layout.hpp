@@ -129,7 +129,7 @@ namespace utk
 	    typedef FullLayout full_layout;
 
 	    //---| total_size
-	    //-----query size (number of scalars)
+	    //-----number of Values (memory-)managed by the layout
 	    //-----note: empty layout has total_size=1
 	    static constexpr size_type total_size = full_layout::total_size;
 

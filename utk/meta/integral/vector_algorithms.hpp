@@ -252,7 +252,7 @@ namespace utk
       {	};
 
 
-      //:::::| comparison operators
+      //:::| comparison operators |::::::::::::::::::::::::::::::::::::/
 
       //---| equal ( scalar x scalar -> scalar )
 

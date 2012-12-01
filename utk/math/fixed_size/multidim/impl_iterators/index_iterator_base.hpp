@@ -1,4 +1,4 @@
-/*  iterator_base.hpp - Copyright Peter Urban 2012
+/*  index_iterator_base.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -32,7 +32,7 @@ namespace utk
       {
 
 	template< typename Interface, index_type Index >
-	struct iterator_base
+	struct index_iterator_base
 	{
 	  //:::| parent interface
 
@@ -54,20 +54,20 @@ namespace utk
 
 	  //---| constructor with storage_interface
 
-	  iterator_base( const Interface& interface )
+	  index_iterator_base( const Interface& interface )
 	  : storage( interface ) { }
 
 	  //---| copy constuctor
 
-	  iterator_base( const iterator_base< Interface, Index >& other )
+	  index_iterator_base( const index_iterator_base< Interface, Index >& other )
 	  : storage( other.storage ) { }
 
 	  //:::| iterator interface
 
-	  bool operator==( const iterator_base< Interface, Index >& other ) const
+	  bool operator==( const index_iterator_base< Interface, Index >& other ) const
 	  { return storage.ptr() == other.storage.ptr(); }
 
-	}; // of iterator_base<>
+	}; // of index_iterator_base<>
       }
     } // of fixed_size::
   } // of math::

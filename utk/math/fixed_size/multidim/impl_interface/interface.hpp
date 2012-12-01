@@ -73,38 +73,38 @@ namespace utk
 
 	  //:::| static iterator interface |:::::::::::::::::::::::::::/
 
-	  //:::::| prepare static_iterator_begin
+	  //:::::| prepare static_index_iterator_begin
 
 	  // TODO: !!! these aliases make gcc-4.7 crash
 
 	  template< index_type Index >
-	  using static_iterator_begin = static_iterator< type, Index, 0 >;
+	  using static_index_iterator_begin = static_index_iterator< type, Index, 0 >;
 
 	  template< index_type Index >
-	  using const_static_iterator_begin = const static_iterator< type, Index, 0 >;
+	  using const_static_index_iterator_begin = const static_index_iterator< type, Index, 0 >;
 
-	  //:::::| prepare static_iterator_end
-
-	  template< index_type Index >
-	  using static_iterator_end = static_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
+	  //:::::| prepare static_index_iterator_end
 
 	  template< index_type Index >
-	  using const_static_iterator_end = const static_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
+	  using static_index_iterator_end = static_index_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
+
+	  template< index_type Index >
+	  using const_static_index_iterator_end = const static_index_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
 
 	  //---| begin
 	  template< index_type Index >
-	  static_iterator_begin<Index> static_begin() { return static_iterator_begin< Index >( *this ); }
+	  static_index_iterator_begin<Index> static_begin() { return static_index_iterator_begin< Index >( *this ); }
 
 	  template< index_type Index >
-	  const_static_iterator_begin<Index> static_begin() const { return const_static_iterator_begin< Index >( *this ); }
+	  const_static_index_iterator_begin<Index> static_begin() const { return const_static_index_iterator_begin< Index >( *this ); }
 
 	  //---| end
 
 	  template< index_type Index >
-	  static_iterator_end<Index> static_end() { return static_iterator_end< Index >( *this ); }
+	  static_index_iterator_end<Index> static_end() { return static_index_iterator_end< Index >( *this ); }
 
 	  template< index_type Index >
-	  const_static_iterator_end<Index> static_end() const { return const_static_iterator_end< Index >( *this ); }
+	  const_static_index_iterator_end<Index> static_end() const { return const_static_index_iterator_end< Index >( *this ); }
 
 	  //:::| dynamic iterator interface |::::::::::::::::::::::::::/
 
@@ -112,10 +112,10 @@ namespace utk
 
 
 	  template< index_type Index >
-	  using iterator = const dynamic_iterator< type, Index >;
+	  using iterator = const dynamic_index_iterator< type, Index >;
 
 	  template< index_type Index >
-	  using const_iterator = const dynamic_iterator< type, Index >;
+	  using const_iterator = const dynamic_index_iterator< type, Index >;
 
 	  //---| begin
 	  template< index_type Index >

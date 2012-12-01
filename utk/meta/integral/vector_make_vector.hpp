@@ -16,6 +16,7 @@
 
 # pragma once
 
+# include "utk/meta/vector.hpp"
 # include "utk/meta/integral/vector.hpp"
 # include "utk/meta/integral/vector_algorithms.hpp"
 
@@ -28,7 +29,7 @@ namespace utk
     {
       //:::| vector creation |:::::::::::::::::::::::::::::::::::::::::/
 
-      //---| make_vector
+      //---| make_vector (convert value type)
 
       template< typename T, typename Vector >
       struct make_vector { /* uspecified */ };
@@ -37,6 +38,16 @@ namespace utk
       struct make_vector< T, vector< T2, Values... > >
       {
 	typedef vector< T, T(Values)... > type;
+      };
+
+      //---| make_vector
+      //-----(convert from meta::vector)
+      //-----expects static constexpr ::value in every vector element
+
+      template< typename T, typename...Types >
+      struct make_vector< T, meta::vector< Types... > >
+      {
+	typedef vector< T, T(Types::value)... > type;
       };
 
       //---| make_uniform_vector

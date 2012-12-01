@@ -41,10 +41,13 @@ BOOST_AUTO_TEST_CASE( check_change_to_1d )
 {
   typedef typename make_layout< size_vector< 6 >, covariant_tag >::type layout6;
 
+  constexpr variance_type lvar1 = meta::integral::at< typename meta::pop_back< typename layout6::attributes >::type, 0 >::value;
+  BOOST_CHECK_EQUAL( lvar1, covariant );
+
   auto tensor6 = tensor::use_layout< type123, layout6 >( tensor123 );
 
-  constexpr variance_type var1 = meta::integral::at< type123::variances, 1 >::value;
-  BOOST_CHECK_EQUAL( var1, covariant );
+  constexpr variance_type var1 = meta::integral::at< typename decltype(tensor6)::variances, 0 >::value;
+  BOOST_CHECK_EQUAL( var1, lvar1 );
 
   BOOST_CHECK_EQUAL( tensor6.at(0), 1 );
   BOOST_CHECK_EQUAL( tensor6.at(1), 2 );

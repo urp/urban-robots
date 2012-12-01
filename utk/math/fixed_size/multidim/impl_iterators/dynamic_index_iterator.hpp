@@ -1,4 +1,4 @@
-/*  dynamic_iterator.hpp - Copyright Peter Urban 2012
+/*  dynamic_index_iterator.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,7 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_iterators/iterator_base.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/index_iterator_base.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -31,10 +31,10 @@ namespace utk
 
 	// iterates over an index
 	template< typename Interface, index_type Index >
-	class dynamic_iterator : public iterator_base< Interface, Index >
+	class dynamic_index_iterator : public index_iterator_base< Interface, Index >
 	{
-	    typedef dynamic_iterator< Interface, Index > type;
-	    typedef iterator_base< Interface, Index >    base;
+	    typedef dynamic_index_iterator< Interface, Index > type;
+	    typedef index_iterator_base< Interface, Index >    base;
 
 	    //:::| dynamic value interface
 
@@ -56,12 +56,12 @@ namespace utk
 	    //---| constructor with storage_interface
 
 	    explicit
-	    dynamic_iterator( const Interface& interface, ptrdiff_t index_value = 0 )
+	    dynamic_index_iterator( const Interface& interface, ptrdiff_t index_value = 0 )
 	    : base( interface ), index_value( index_value )  { }
 
 	    //---| copy constuctor
 
-	    dynamic_iterator( const type& other )
+	    dynamic_index_iterator( const type& other )
 	    : base( other ), index_value( other.index_value )  { }
 
 	    //:::| iterator interface
@@ -126,7 +126,7 @@ namespace utk
 	    bool operator!=( const type& other ) const
 	    { return not operator==( other ); }
 
-	}; // of dynamic_iterator<>
+	}; // of dynamic_index_iterator<>
 
       } // of multidim::
     } // of fixed_size::

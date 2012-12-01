@@ -18,7 +18,11 @@
 
 # pragma once
 
+#include <type_traits>
+
 # include "utk/meta/integral/integral.hpp"
+# include "utk/meta/vector_transform.hpp"
+
 
 # include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
 
@@ -33,33 +37,48 @@ namespace utk
       namespace multidim
       {
 
-	template< typename SizeVector >
-	struct default_iteration_index_vectors	{ /* unspecified */ };
+	//!!!TODO: create mask layout use code fragments from below
 
-	template< size_type...Sizes >
-	struct default_iteration_index_vectors< meta::integral::vector< size_type, Sizes... > >
+
+	namespace /* <anonymous> */
 	{
-	  typedef meta::vector< typename meta::integral::make_position_index_vector< index_type, Sizes >::type... > type;
-	};
+	  template< typename SizeVector >
+	  struct default_iteration_index_vectors	{ /* unspecified */ };
+
+	  template< size_type...Sizes >
+	  struct default_iteration_index_vectors< meta::integral::vector< size_type, Sizes... > >
+	  {
+	    typedef meta::vector< typename meta::integral::make_position_index_vector< index_type, Sizes >::type... > type;
+	  };
+
+	  template< typename IterationIndexVectors >
+	  struct make_iteration_mask
+	  {
+	    // find empty vectors
+	    template< typename IntegralVector >
+	    using is_empty_vector = std::is_same< IntegralVector, meta::integral::vector< index_type > >;
+	    typedef typename meta::transform< IterationIndexVectors, meta::function<is_empty_vector> >::type iteration_mask;
+	    // convert to meta::integral::vector<bool,...>
+	    typedef typename meta::integral::make_vector< bool, iteration_mask >::type type ;
+	  };
+
+	} // of <anonymous>::
 
 	//---| static_mask_iterator
 
-	template < typename Interface, typename IterationIndexVectors = typename default_iteration_index_vectors< typename Interface::sizes >::type >
+	template < typename Interface
+		 , typename CurrentIterationIndices
+		 , typename IterationIndices = typename default_iteration_index_vectors< typename Interface::sizes >::type >
 	class static_mask_iterator
 	{
-	    template< typename IntegralVector >
-	    using is_empty_vector = meta::function< std::is_same< IntegralVector, meta::integral::vector< index_type > > >;
-
-	    typedef meta::transform< IterationIndexVectors, is_empty_vector >::type iteration_mask;
-
-
+	    typedef typename make_iteration_mask< IterationIndexVectors >::type iteration_mask;
 
 	    /*:::| static value interface |::::::::::::::::::::::::::::/
 
 	    typedef typename fix_index< typename base::parent_layout, Index, IndexValue >::type value_layout;
 	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
 	    typedef typename value_interface::storage_interface value_storage_interface;
-*/
+	    */
 	  public:
 
 	    //:::| container and value types |:::::::::::::::::::::::::/

@@ -1,4 +1,4 @@
-/*  dynamic_iterator_test.cpp - Copyright Peter Urban 2012
+/*  dynamic_index_iterator_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,10 +16,10 @@
 
 # include "utk/math/fixed_size/vector/operators.hpp"
 # include "utk/math/fixed_size/multidim/interface.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterators/dynamic_iterator.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/dynamic_index_iterator.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE multidim::dynamic_iterator
+#define BOOST_TEST_MODULE multidim::dynamic_index_iterator
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
@@ -32,7 +32,7 @@ BOOST_AUTO_TEST_CASE( layout_1d )
   double  data[ layout3::total_size ] = { 0.,1.,2. };
   type multidim3( data );
 
-  typedef dynamic_iterator< type, 0 > it0_type;
+  typedef dynamic_index_iterator< type, 0 > it0_type;
 
   BOOST_CHECK_EQUAL( it0_type::value_type::order, 0. );
 
@@ -56,7 +56,7 @@ struct layout23_fixture
   double  data[ layout23::total_size ];
   type multidim23;
 
-  typedef dynamic_iterator< type, 1 > it1_type;
+  typedef dynamic_index_iterator< type, 1 > it1_type;
   it1_type it1;
 
   layout23_fixture()

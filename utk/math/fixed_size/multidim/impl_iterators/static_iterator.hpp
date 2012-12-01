@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  static_permutation_iterator.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,8 +18,13 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterators/iterator_base.hpp"
+#include <type_traits>
+
+# include "utk/meta/integral/integral.hpp"
+# include "utk/meta/vector_transform.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -31,55 +36,150 @@ namespace utk
     {
       namespace multidim
       {
-	//-----| interface
-	template < typename Interface, index_type Index, ptrdiff_t IndexValue = 0 >
-	class static_iterator : public iterator_base< Interface, Index >
+
+	namespace helpers
 	{
-	    typedef iterator_base< Interface, Index > base;
 
-    	    //:::| static value interface |::::::::::::::::::::::::::::/
+	  typedef enum { forward,backward } direction_type;
 
-	    typedef typename fix_index< typename base::parent_layout, Index, IndexValue >::type value_layout;
-	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
+	  namespace // <anonymous>
+	  {
+	    // TODO: use index (+/- difference) -> indices
+
+	    template < typename IndexVector, typename SizeVector, index_type Difference, direction_type Direction = (Difference >= 0 ? forward : backward) >
+	    struct advance_digits_lsb { /* unspecified */ };
+
+	    template < index_type Difference, direction_type Direction >
+	    struct advance_digits_lsb< meta::integral::vector< index_type >
+				     , meta::integral::vector<  size_type >
+				     , Difference
+				     , Direction
+				     >
+	    { typedef index_vector< > type; };
+
+	    //:::| forward |:::::::::::::::::::::::::::::::::::::::::::::/
+
+	    // carry forward
+	    template < index_type...Indices, size_type FirstSize, size_type...Sizes >
+	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstSize-1, Indices... >
+				     , meta::integral::vector<  size_type, FirstSize  , Sizes... >
+				     , 1
+				     >
+	    {
+	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, 1, forward >::type tail;
+	      typedef typename meta::integral::push_back< tail, meta::integral::constant< index_type, 0 > >::type type;
+	    };
+
+	    // increment
+	    template < index_type FirstIndex, index_type...Indices, size_type FirstSize, size_type...Sizes >
+	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstIndex, Indices... >
+				     , meta::integral::vector<  size_type, FirstSize ,   Sizes... >
+				     , 1, forward
+				     >
+	    {
+	      typedef index_vector< FirstIndex+1, Indices... > type;
+	    };
+
+	    //:::| backward |::::::::::::::::::::::::::::::::::::::::::::/
+
+	    // carry backward
+	    template < index_type...Indices, size_type FirstSize, size_type...Sizes >
+	    struct advance_digits_lsb< meta::integral::vector< index_type, 0, Indices... >
+				     , meta::integral::vector<  size_type, FirstSize  , Sizes... >
+				     , -1, backward
+				     >
+	    {
+	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, -1, backward >::type tail;
+	      typedef typename meta::integral::push_back< tail, meta::integral::constant< index_type, 0 > >::type type;
+	    };
+
+	    // backward
+	    template < index_type FirstIndex, index_type...Indices, size_type FirstSize, size_type...Sizes >
+	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstIndex, Indices... >
+				     , meta::integral::vector<  size_type, FirstSize ,   Sizes... >
+				     , -1, backward
+				     >
+	    {
+	      typedef index_vector< FirstIndex-1, Indices... > type;
+	    };
+
+	  } // of <anonymous>::
+
+ 	  template < typename IndexVector, typename SizeVector, index_type Difference, direction_type Forward = (Difference >= 0 ? forward : backward) >
+	  class advance_digits
+	  {
+	      typedef typename meta::integral::reverse< IndexVector >::type rev_indices;
+	      typedef typename meta::integral::reverse< SizeVector >::type rev_sizes;
+	      typedef typename advance_digits_lsb< rev_indices, rev_sizes, Difference, Forward >::type rev_result;
+	    public:
+	      typedef typename meta::integral::reverse< rev_result >::type type;
+	  };
+
+	} // of helpers
+
+	//---| static_iterator
+	//---| use slice_layout
+
+	template < typename Interface
+		 , typename CurrentIndexVector = typename meta::integral::make_uniform_vector< index_type, Interface::layout::order, 0 >::type
+		 >
+	class static_iterator
+	{
+
+	    //:::| static value interface |::::::::::::::::::::::::::::/
+
+	    typedef slice_layout< typename Interface::layout, CurrentIndexVector  > value_layout;
+	    typedef typename change_layout< Interface, value_layout >::type value_interface;
 	    typedef typename value_interface::storage_interface value_storage_interface;
 
 	  public:
+
+	    //:::| iteration information |:::::::::::::::::::::::::::::/
+
+	    typedef CurrentIndexVector current_indices;
 
 	    //:::| container and value types |:::::::::::::::::::::::::/
 
 	    typedef value_interface value_type;
 
-	    //:::| iteration information |:::::::::::::::::::::::::::::/
-
-	    static constexpr ptrdiff_t index_value = IndexValue;
-
 	    //:::| iterator types |::::::::::::::::::::::::::::::::::::/
 
 	    //---| random access iterator
-	    template< index_type NewIndexValue >
-	    using random_access_iterator = static_iterator< Interface , Index, NewIndexValue >;
+	    template< index_type IndexDelta >
+	    using random_access_iterator = static_iterator< Interface
+							  , // TODO: !!! reverse vector
+							    typename helpers::advance_digits< current_indices
+											     , typename Interface::layout::sizes
+											     , IndexDelta
+											     >::type
+							  >;
 
 	    //---| forward iterator
-	    typedef random_access_iterator< IndexValue + 1 > forward_iterator;
+	    typedef random_access_iterator<  1 > forward_iterator;
 
 	    //---| reverse iterator
-	    typedef random_access_iterator< IndexValue - 1 > reverse_iterator;
+	    typedef random_access_iterator< -1 > reverse_iterator;
+
+
+	    //:::| storage interface
+
+	    typename value_interface::storage_interface storage;
 
 	    //:::| constructors |::::::::::::::::::::::::::::::::::::::/
 
 	    //---| constructor with storage_interface
 	    static_iterator( const Interface& interface )
-	    : base( interface )  { }
+	    : storage( interface )  { }
 
 	    //---| copy constuctor
-	    template< ptrdiff_t OtherIndexValue >
-	    static_iterator( const static_iterator< Interface, Index, OtherIndexValue >& other )
-	    : base( other )  { }
+	    template< typename OtherInterface, typename OtherIndexVector >
+	    static_iterator( const static_iterator< OtherInterface, OtherIndexVector >& other )
+	    : storage( other.storage )  { }
 
 	    //:::| iterator interface
 	    // TODO: ask layout for offset
 	    value_interface operator*()
-	    { return value_interface( value_storage_interface( base::storage.ptr() ) ); }
+	    { return value_interface( value_storage_interface( storage.ptr() ) ); }
 
 	    forward_iterator increment() const
 	    { return forward_iterator( *this ); }
@@ -88,12 +188,15 @@ namespace utk
 	    reverse_iterator decrement() const
 	    { return reverse_iterator( *this ); }
 
-	    template< typename OtherLayout, ptrdiff_t OtherIndexValue >
-	    bool operator==( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
-	    { return OtherIndexValue == IndexValue && base::operator==(other); }
+	    template< typename OtherInterface, typename OtherIndexVector >
+	    bool operator==( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
+	    {
+	      assert( storage.ptr() == other.storage.ptr() );
+	      return meta::integral::all< typename meta::integral::equal< OtherIndexVector, CurrentIndexVector >::type >::value;
+	    }
 
-	    template< typename OtherLayout, ptrdiff_t OtherIndexValue >
-	    bool operator!=( const static_iterator< OtherLayout, Index, OtherIndexValue >& other ) const
+	    template< typename OtherInterface, typename OtherIndexVector >
+	    bool operator!=( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
 	    { return not operator==( other ); }
 
 	}; // of static_iterator<>

@@ -1,4 +1,4 @@
-/*  vector_functions_test.cpp - Copyright Peter Urban 2009
+/*  vector_make_uniform_vector_test.cpp - Copyright Peter Urban 2009
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

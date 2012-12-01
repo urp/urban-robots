@@ -22,9 +22,9 @@
 
 using namespace utk::meta::integral;
 
-BOOST_AUTO_TEST_SUITE( check_make_functions )
+BOOST_AUTO_TEST_SUITE( check_make_vector )
 
-  BOOST_AUTO_TEST_CASE( checK_make_vector )
+  BOOST_AUTO_TEST_CASE( check_convert_value_type )
   {
     typedef typename make_vector< int, vector< unsigned, 1,2,3 > >::type  ints;
 
@@ -40,10 +40,32 @@ BOOST_AUTO_TEST_SUITE( check_make_functions )
     BOOST_CHECK_EQUAL( i1, 2 );
     const int i2 = at< ints, 2 >::value;
     BOOST_CHECK_EQUAL( i2, 3 );
-
   }
 
-  BOOST_AUTO_TEST_CASE( check_make_uniform_vector )
+  BOOST_AUTO_TEST_CASE( check_integral_from_meta_vector )
+  {
+    typedef typename make_vector< int, meta::vector< 1,2,3 > >::type  ints;
+
+    const int size = ints::size;
+    BOOST_CHECK_EQUAL( size, 3 );
+
+    const bool is_target_type = std::is_same< typename ints::value_type, int >::value;
+    BOOST_CHECK( is_target_type );
+
+    const int i0 = at< ints, 0 >::value;
+    BOOST_CHECK_EQUAL( i0, 1 );
+    const int i1 = at< ints, 1 >::value;
+    BOOST_CHECK_EQUAL( i1, 2 );
+    const int i2 = at< ints, 2 >::value;
+    BOOST_CHECK_EQUAL( i2, 3 );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+BOOST_AUTO_TEST_SUITE( check_make_uniform_vector )
+
+  BOOST_AUTO_TEST_CASE( check_uniform )
   {
     typedef typename make_uniform_vector< int, 3,2 >::type  ints;
 

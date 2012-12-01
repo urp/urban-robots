@@ -69,7 +69,7 @@ namespace utk
 	    };
 
 	    //---| total_size
-	    //-----query size (number of scalars)
+	    //-----number of Values (memory-)managed by the layout
 	    //-----note: empty layout represents a scalar
 	    static constexpr size_type total_size = helpers::total_size< sizes, strides >::value;
 

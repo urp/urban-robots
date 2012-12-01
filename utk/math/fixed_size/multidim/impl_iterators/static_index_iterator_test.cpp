@@ -1,4 +1,4 @@
-/*  static_iterator_test.cpp - Copyright Peter Urban 2012
+/*  interface_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,14 +14,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
-//# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/static_index_iterator.hpp"
 
-# include "utk/math/fixed_size/multidim/impl_iterators/static_iterator.hpp"
-
-# define BOOST_TEST_DYN_LINK
-# define BOOST_TEST_MODULE multidim::static_iterator
-# include <boost/test/unit_test.hpp>
+#define BOOST_TEST_DYN_LINK
+#define BOOST_TEST_MODULE multidim::static_index_iterator
+#include <boost/test/unit_test.hpp>
 
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
@@ -33,7 +32,7 @@ BOOST_AUTO_TEST_CASE( check_layout3 )
   double  data[ layout3::total_size ] = { 0.,1.,2. };
   type multidim( data );
 
-  typedef static_iterator< type > it0_type;
+  typedef static_index_iterator< type, 0 > it0_type;
   it0_type it0( multidim );
   BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
 
@@ -52,7 +51,7 @@ struct layout23_fixture
   double  data[ layout23::total_size ];
   type multidim23;
 
-  typedef static_iterator< type > it0_type;
+  typedef static_index_iterator< type, 1 > it0_type;
   it0_type it0;
 
   layout23_fixture()
@@ -64,32 +63,32 @@ BOOST_FIXTURE_TEST_SUITE( check_layout23, layout23_fixture )
   BOOST_AUTO_TEST_CASE( increment_and_access )
   {
 
-    BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 3. );
+    BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
+    BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
 
     auto it1 = it0.increment();
-    BOOST_CHECK_EQUAL( (*it1).at() , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at() , 4. );
+    BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
+    BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
 
     auto it2 = it1.increment();
-    BOOST_CHECK_EQUAL( (*it2).at() , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at() , 5. );
+    BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
+    BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
   }
 
   BOOST_AUTO_TEST_CASE( compare_iterators )
   {
-    typedef static_iterator< type > it0_type;
+    typedef static_index_iterator< type, 1 > it0_type;
     it0_type it0( multidim23 );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 3. );
+    BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
+    BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
 
     auto it1 = it0.increment();
-    BOOST_CHECK_EQUAL( (*it1).at() , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at() , 4. );
+    BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
+    BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
 
     auto it2 = it1.increment();
-    BOOST_CHECK_EQUAL( (*it2).at() , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at() , 5. );
+    BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
+    BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
 
     auto it1_id = it2.decrement();
     BOOST_CHECK_EQUAL( it1_id == it1, true );

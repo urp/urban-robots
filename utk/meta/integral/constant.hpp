@@ -27,7 +27,7 @@ namespace utk
 
       //---| constant
       //-----stores an meta/integral constant value
-
+      // TODO: use std::integral_constant
       template<typename T, T Value>
       struct constant
       {

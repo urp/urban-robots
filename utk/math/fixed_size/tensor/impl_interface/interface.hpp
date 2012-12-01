@@ -68,19 +68,8 @@ namespace utk
 	    { }
 
 
-	    /*template< index_type Index >
-	    change_basis( const interface< ValueType
-						   , initial_layout< meta::integral::at< sizes, Index >::value
-								   , meta::integral::at< sizes, Index >::value
-								   >
-						   , variance_vector< contravariant
-								    , covariant
-								    >
-						   >& matrix_transform
-			)
-	    {
-	      std::
-	    }*/
+	    //template< index_type Index >
+	    //change_basis( const interface< ValueType
 
 	    //:::| dynamic iterator interface |::::::::::::::::::::::::::/
 
@@ -88,10 +77,10 @@ namespace utk
 
 
 	    template< index_type Index >
-	    using iterator = const multidim::dynamic_iterator< type, Index >;
+	    using iterator = const multidim::dynamic_index_iterator< type, Index >;
 
 	    template< index_type Index >
-	    using const_iterator = const multidim::dynamic_iterator< type, Index >;
+	    using const_iterator = const multidim::dynamic_index_iterator< type, Index >;
 
 	    //---| begin
 	    template< index_type Index >
