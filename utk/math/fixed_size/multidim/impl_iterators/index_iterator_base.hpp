@@ -34,18 +34,18 @@ namespace utk
 	template< typename Interface, index_type Index >
 	struct index_iterator_base
 	{
-	  //:::| parent interface
+	  //:::| parent interface |::::::::::::::::::::::::::::::::::::/
 
 	  typedef Interface parent_interface;
 	  typedef typename parent_interface::layout parent_layout;
 	  typedef typename parent_interface::storage_interface parent_storage_interface;
 
 
-	  //:::| storage interface
+	  //:::| storage interface |:::::::::::::::::::::::::::::::::::/
 
 	  parent_storage_interface storage;
 
-	  //:::| iteration information
+	  //:::| iteration information |:::::::::::::::::::::::::::::::/
 
 	  static constexpr index_type index = Index;
 
@@ -62,7 +62,7 @@ namespace utk
 	  index_iterator_base( const index_iterator_base< Interface, Index >& other )
 	  : storage( other.storage ) { }
 
-	  //:::| iterator interface
+	  //:::| comparison operators |::::::::::::::::::::::::::::::/
 
 	  bool operator==( const index_iterator_base< Interface, Index >& other ) const
 	  { return storage.ptr() == other.storage.ptr(); }

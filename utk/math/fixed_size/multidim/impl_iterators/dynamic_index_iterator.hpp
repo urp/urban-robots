@@ -36,7 +36,7 @@ namespace utk
 	    typedef dynamic_index_iterator< Interface, Index > type;
 	    typedef index_iterator_base< Interface, Index >    base;
 
-	    //:::| dynamic value interface
+	    //:::| dynamic value interface |:::::::::::::::::::::::::::/
 
 	    typedef typename remove_index< typename base::parent_layout, Index >::type value_layout;
 	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
@@ -44,12 +44,12 @@ namespace utk
 
 	  public:
 
-	    //:::| container and value types
+	    //:::| container and value types |:::::::::::::::::::::::::/
 
 	    typedef value_interface value_type;
 
 
-	    //:::| iteration information
+	    //:::| iteration information |:::::::::::::::::::::::::::::/
 
 	    mutable ptrdiff_t index_value;
 
@@ -64,7 +64,7 @@ namespace utk
 	    dynamic_index_iterator( const type& other )
 	    : base( other ), index_value( other.index_value )  { }
 
-	    //:::| iterator interface
+	    //:::| dereference operator |::::::::::::::::::::::::::::::/
 
 	    //---| dereference operators
 	    // TODO: ask layout for offset?!!!
@@ -74,7 +74,7 @@ namespace utk
 	    const value_interface operator*() const
 	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
-	    //---| increment iterators
+	    //:::| increment operators |:::::::::::::::::::::::::::::::/
 
 	    type& operator++()
 	    {
@@ -88,7 +88,7 @@ namespace utk
 	      return *this;
 	    }
 
-	    // post_increment
+	    //---| post increment
 	    type operator++(int) const
 	    {
 	      type old_self( *this );
@@ -96,7 +96,7 @@ namespace utk
 	      return old_self;
 	    }
 
-	    //---| decrement iterators
+	    //:::| decrement operators |:::::::::::::::::::::::::::::::/
 
 	    type& operator--()
 	    {
@@ -110,7 +110,7 @@ namespace utk
 	      return *this;
 	    }
 
-	    // post_increment
+	    //---| post decrement
 	    type operator--(int) const
 	    {
 	      type old_self( *this );
@@ -118,7 +118,7 @@ namespace utk
 	      return old_self;
 	    }
 
-	    //:::| comparison operators
+	    //:::| comparison operators |::::::::::::::::::::::::::::::/
 
 	    bool operator==( const type& other ) const
 	    { return index_value == other.index_value and base::operator==( other ); }

@@ -31,7 +31,7 @@ namespace utk
     {
       namespace multidim
       {
-	//-----| interface
+
 	template < typename Interface, index_type Index, ptrdiff_t IndexValue = 0 >
 	class static_index_iterator : public index_iterator_base< Interface, Index >
 	{
@@ -76,17 +76,23 @@ namespace utk
 	    static_index_iterator( const static_index_iterator< Interface, Index, OtherIndexValue >& other )
 	    : base( other )  { }
 
-	    //:::| iterator interface
-	    // TODO: ask layout for offset
+	    //:::| dereference operator |::::::::::::::::::::::::::::::/
+
 	    value_interface operator*()
 	    { return value_interface( value_storage_interface( base::storage.ptr() ) ); }
+
+	    //:::| increment operator |::::::::::::::::::::::::::::::::/
 
 	    forward_iterator increment() const
 	    { return forward_iterator( *this ); }
 
+	    //:::| decrement operator |::::::::::::::::::::::::::::::::/
 	    // TODO: !!! CHECK for underrun ( mark rend() )
+
 	    reverse_iterator decrement() const
 	    { return reverse_iterator( *this ); }
+
+	    //:::| comparison operators |::::::::::::::::::::::::::::::/
 
 	    template< typename OtherLayout, ptrdiff_t OtherIndexValue >
 	    bool operator==( const static_index_iterator< OtherLayout, Index, OtherIndexValue >& other ) const

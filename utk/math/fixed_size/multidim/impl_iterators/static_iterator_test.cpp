@@ -26,6 +26,18 @@
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
 
+
+BOOST_AUTO_TEST_CASE( check_advance_digits )
+{
+  typedef index_vector< 0,0 > i0;
+  typedef size_vector< 2,2 > s23;
+  typedef typename helpers::advance_digits< i0, s23, 1 >::type i1;
+  BOOST_TEST_MESSAGE( "(" << i0() << ")++ -> "<< i1() );
+  typedef typename helpers::advance_digits< i1, s23, 1 >::type i2;
+  BOOST_TEST_MESSAGE( "(" << i1() << ")++ -> " << i2() );
+}
+
+
 BOOST_AUTO_TEST_CASE( check_layout3 )
 {
   typedef layout< size_vector<3> > layout3;
@@ -65,31 +77,35 @@ BOOST_FIXTURE_TEST_SUITE( check_layout23, layout23_fixture )
   {
 
     BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 3. );
-
     auto it1 = it0.increment();
     BOOST_CHECK_EQUAL( (*it1).at() , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at() , 4. );
-
     auto it2 = it1.increment();
     BOOST_CHECK_EQUAL( (*it2).at() , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at() , 5. );
+
+    auto it3 = it2.increment();
+    BOOST_CHECK_EQUAL(  (*it3).at(), 3. );
+    auto it4 = it3.increment();
+    BOOST_CHECK_EQUAL( (*it4).at() , 4. );
+    auto it5 = it4.increment();
+    BOOST_CHECK_EQUAL( (*it5).at() , 5. );
   }
 
   BOOST_AUTO_TEST_CASE( compare_iterators )
   {
     typedef static_iterator< type > it0_type;
     it0_type it0( multidim23 );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(), 3. );
-
+    BOOST_CHECK_EQUAL( (*it0).at(), 0. );
     auto it1 = it0.increment();
-    BOOST_CHECK_EQUAL( (*it1).at() , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at() , 4. );
-
+    BOOST_CHECK_EQUAL( (*it1).at(), 1. );
     auto it2 = it1.increment();
-    BOOST_CHECK_EQUAL( (*it2).at() , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at() , 5. );
+    BOOST_CHECK_EQUAL( (*it2).at(), 2. );
+
+    auto it3 = it2.increment();
+    BOOST_CHECK_EQUAL( (*it3).at(), 3. );
+    auto it4 = it3.increment();
+    BOOST_CHECK_EQUAL( (*it4).at(), 4. );
+    auto it5 = it4.increment();
+    BOOST_CHECK_EQUAL( (*it5).at(), 5. );
 
     auto it1_id = it2.decrement();
     BOOST_CHECK_EQUAL( it1_id == it1, true );

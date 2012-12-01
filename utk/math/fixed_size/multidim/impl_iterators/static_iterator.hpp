@@ -67,7 +67,7 @@ namespace utk
 				     >
 	    {
 	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, 1, forward >::type tail;
-	      typedef typename meta::integral::push_back< tail, meta::integral::constant< index_type, 0 > >::type type;
+	      typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, 0 > >::type type;
 	    };
 
 	    // increment
@@ -90,7 +90,7 @@ namespace utk
 				     >
 	    {
 	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, -1, backward >::type tail;
-	      typedef typename meta::integral::push_back< tail, meta::integral::constant< index_type, 0 > >::type type;
+	      typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, FirstSize-1 > >::type type;
 	    };
 
 	    // backward
@@ -161,7 +161,7 @@ namespace utk
 	    typedef random_access_iterator< -1 > reverse_iterator;
 
 
-	    //:::| storage interface
+	    //:::| storage interface |:::::::::::::::::::::::::::::::::/
 
 	    typename value_interface::storage_interface storage;
 
@@ -176,17 +176,23 @@ namespace utk
 	    static_iterator( const static_iterator< OtherInterface, OtherIndexVector >& other )
 	    : storage( other.storage )  { }
 
-	    //:::| iterator interface
-	    // TODO: ask layout for offset
+	    //:::| dereference operator |::::::::::::::::::::::::::::::/
+
 	    value_interface operator*()
 	    { return value_interface( value_storage_interface( storage.ptr() ) ); }
+
+	    //:::| increment operator |::::::::::::::::::::::::::::::::/
 
 	    forward_iterator increment() const
 	    { return forward_iterator( *this ); }
 
+	    //:::| decrement operator |::::::::::::::::::::::::::::::::/
 	    // TODO: !!! CHECK for underrun ( mark rend() )
+
 	    reverse_iterator decrement() const
 	    { return reverse_iterator( *this ); }
+
+	    //:::| comparison operators |::::::::::::::::::::::::::::::/
 
 	    template< typename OtherInterface, typename OtherIndexVector >
 	    bool operator==( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
