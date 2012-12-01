@@ -26,16 +26,60 @@
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
 
+BOOST_AUTO_TEST_SUITE( index_indices_mapping )
 
-BOOST_AUTO_TEST_CASE( check_advance_digits )
-{
-  typedef index_vector< 0,0 > i0;
-  typedef size_vector< 2,2 > s23;
-  typedef typename helpers::advance_digits< i0, s23, 1 >::type i1;
-  BOOST_TEST_MESSAGE( "(" << i0() << ")++ -> "<< i1() );
-  typedef typename helpers::advance_digits< i1, s23, 1 >::type i2;
-  BOOST_TEST_MESSAGE( "(" << i1() << ")++ -> " << i2() );
-}
+  BOOST_AUTO_TEST_CASE( indces_from_index )
+  {
+    typedef index_vector< 0,0 > i0;
+    typedef stride_vector< 2,1 > str2; // coresponding to sizes (x,2)
+
+    // first element -> coords (0,0)
+    typedef typename helpers::indices_from_index< str2, 0 >::type i0;
+    constexpr index_type i0_0 = meta::integral::at< i0, 0 >::value;
+    BOOST_CHECK_EQUAL( i0_0, 0 );
+    constexpr index_type i0_1 = meta::integral::at< i0, 1 >::value;
+    BOOST_CHECK_EQUAL( i0_1, 0 );
+    // second element -> coords (0,1)
+    typedef typename helpers::indices_from_index< str2, 1 >::type i1;
+    constexpr index_type i1_0 = meta::integral::at< i1, 0 >::value;
+    BOOST_CHECK_EQUAL( i1_0, 0 );
+    constexpr index_type i1_1 = meta::integral::at< i1, 1 >::value;
+    BOOST_CHECK_EQUAL( i1_1, 1 );
+
+    typedef typename helpers::indices_from_index< str2, 2 >::type i2;
+    constexpr index_type i2_0 = meta::integral::at< i2, 0 >::value;
+    BOOST_CHECK_EQUAL( i2_0, 1 );
+    constexpr index_type i2_1 = meta::integral::at< i2, 1 >::value;
+    BOOST_CHECK_EQUAL( i2_1, 0 );
+
+    typedef typename helpers::indices_from_index< str2, 3 >::type i3;
+    constexpr index_type i3_0 = meta::integral::at< i3, 0 >::value;
+    BOOST_CHECK_EQUAL( i3_0, 1 );
+    constexpr index_type i3_1 = meta::integral::at< i3, 1 >::value;
+    BOOST_CHECK_EQUAL( i3_1, 1 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_advance_digits )
+  {
+    typedef index_vector< 0,0 > i0;
+    typedef size_vector< 2,2 > s23;
+
+    // indices (0,0) -> (0,1)
+    typedef typename helpers::advance_digits< i0, s23, 1 >::type i1;
+    constexpr index_type i1_0 = meta::integral::at< i1, 0 >::value;
+    BOOST_CHECK_EQUAL( i1_0, 0 );
+    constexpr index_type i1_1 = meta::integral::at< i1, 1 >::value;
+    BOOST_CHECK_EQUAL( i1_1, 1 );
+
+    // indices (0,1) -> (1,0)
+    typedef typename helpers::advance_digits< i1, s23, 1 >::type i2;
+    constexpr index_type i2_0 = meta::integral::at< i2, 0 >::value;
+    BOOST_CHECK_EQUAL( i2_0, 1 );
+    constexpr index_type i2_1 = meta::integral::at< i2, 1 >::value;
+    BOOST_CHECK_EQUAL( i2_1, 0 );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
 
 
 BOOST_AUTO_TEST_CASE( check_layout3 )
@@ -50,10 +94,10 @@ BOOST_AUTO_TEST_CASE( check_layout3 )
   BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
 
   typedef typename it0_type::forward_iterator it1_type;
-  it1_type it1 = it0.increment();
+  it1_type it1 = it0.next();
   BOOST_CHECK_EQUAL( (*it1).at() , 1. );
 
-  auto it2 = it1.increment();
+  auto it2 = it1.next();
   BOOST_CHECK_EQUAL( (*it2).at() , 2. );
 }
 
@@ -77,16 +121,16 @@ BOOST_FIXTURE_TEST_SUITE( check_layout23, layout23_fixture )
   {
 
     BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
-    auto it1 = it0.increment();
+    auto it1 = it0.next();
     BOOST_CHECK_EQUAL( (*it1).at() , 1. );
-    auto it2 = it1.increment();
+    auto it2 = it1.next();
     BOOST_CHECK_EQUAL( (*it2).at() , 2. );
 
-    auto it3 = it2.increment();
+    auto it3 = it2.next();
     BOOST_CHECK_EQUAL(  (*it3).at(), 3. );
-    auto it4 = it3.increment();
+    auto it4 = it3.next();
     BOOST_CHECK_EQUAL( (*it4).at() , 4. );
-    auto it5 = it4.increment();
+    auto it5 = it4.next();
     BOOST_CHECK_EQUAL( (*it5).at() , 5. );
   }
 
@@ -95,19 +139,19 @@ BOOST_FIXTURE_TEST_SUITE( check_layout23, layout23_fixture )
     typedef static_iterator< type > it0_type;
     it0_type it0( multidim23 );
     BOOST_CHECK_EQUAL( (*it0).at(), 0. );
-    auto it1 = it0.increment();
+    auto it1 = it0.next();
     BOOST_CHECK_EQUAL( (*it1).at(), 1. );
-    auto it2 = it1.increment();
+    auto it2 = it1.next();
     BOOST_CHECK_EQUAL( (*it2).at(), 2. );
 
-    auto it3 = it2.increment();
+    auto it3 = it2.next();
     BOOST_CHECK_EQUAL( (*it3).at(), 3. );
-    auto it4 = it3.increment();
+    auto it4 = it3.next();
     BOOST_CHECK_EQUAL( (*it4).at(), 4. );
-    auto it5 = it4.increment();
+    auto it5 = it4.next();
     BOOST_CHECK_EQUAL( (*it5).at(), 5. );
 
-    auto it1_id = it2.decrement();
+    auto it1_id = it2.previous();
     BOOST_CHECK_EQUAL( it1_id == it1, true );
     BOOST_CHECK_EQUAL( it0 != it1, true );
   }

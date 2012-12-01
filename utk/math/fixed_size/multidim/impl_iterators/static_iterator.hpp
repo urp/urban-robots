@@ -44,6 +44,40 @@ namespace utk
 
 	  namespace // <anonymous>
 	  {
+	    //---| indices_from_index
+
+	    template< typename StrideVector, index_type Index >
+	    struct indices_from_index { /* unspecified */ };
+
+	    template< /*stride_type LargestStride, stride_type...StrideVector, index_type Index*/ >
+	    struct indices_from_index< meta::integral::vector< stride_type >, 0 >
+	    {
+	      typedef index_vector< > type;
+	    };
+
+	    // TODO: might be layout dependent
+	    template< stride_type LargestStride, stride_type...StrideTail, index_type Index >
+	    class indices_from_index< meta::integral::vector< stride_type, LargestStride, StrideTail... >, Index >
+	    {
+		typedef meta::integral::vector< stride_type, StrideTail... > stride_tail;
+		/*static_assert( LargestStride > ( meta::integral::pop_front< stride_tail >::value )
+			     , "Strides must be sorted - this is a limitation of the implementation"
+			     );*/
+
+		constexpr static index_type index_digit = Index / LargestStride;
+
+		typedef typename indices_from_index< stride_tail
+						   , Index - index_digit * LargestStride // TODO: might be layout dependent
+						   >::type tail;
+
+	      public:
+
+		typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, index_digit > >::type type;
+
+	    };
+
+	    //---| advance_digits
+
 	    // TODO: use index (+/- difference) -> indices
 
 	    template < typename IndexVector, typename SizeVector, index_type Difference, direction_type Direction = (Difference >= 0 ? forward : backward) >
@@ -183,13 +217,13 @@ namespace utk
 
 	    //:::| increment operator |::::::::::::::::::::::::::::::::/
 
-	    forward_iterator increment() const
+	    forward_iterator next() const
 	    { return forward_iterator( *this ); }
 
 	    //:::| decrement operator |::::::::::::::::::::::::::::::::/
 	    // TODO: !!! CHECK for underrun ( mark rend() )
 
-	    reverse_iterator decrement() const
+	    reverse_iterator previous() const
 	    { return reverse_iterator( *this ); }
 
 	    //:::| comparison operators |::::::::::::::::::::::::::::::/
