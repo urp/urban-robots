@@ -1,4 +1,4 @@
-/*  change_layout.hpp - Copyright Peter Urban 2012
+/*  interface.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,12 +16,6 @@
 
 # pragma once
 
-# include "utk/meta/integral/integral.hpp"
-
-# include "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
-
-# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
-
 namespace utk
 {
   namespace math
@@ -30,13 +24,38 @@ namespace utk
     {
       namespace multidim
       {
-/* same as in  "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
-	template< typename ValueType, typename OldLayout, typename NewLayout >
-	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
+
+	//:::| modify interface layout |:::::::::::::::::::::::::::::::/
+
+	//---| change_layout (type)
+
+	template< typename Interface, typename NewLayout >
+	struct change_layout { /* unspecified */ };
+
+	// general
+	template< typename ValueType
+		, typename OldLayout
+		, template< typename, typename > class Interface
+		, typename NewLayout
+		>
+	struct change_layout< Interface< ValueType, OldLayout >, NewLayout >
 	{
-	  typedef interface< ValueType, NewLayout > type;
+	  typedef Interface< ValueType, NewLayout > type;
 	};
-*/
+
+	//---| use_layout (instance)
+
+	template< typename Interface, typename NewLayout >
+	auto use_layout( const Interface& t )
+	-> typename change_layout< Interface, NewLayout >::type
+	{
+	  static_assert( NewLayout::total_size == Interface::layout::total_size
+		       , "NewLayout::total_size must fit to original layout"
+		       );
+	  typedef typename change_layout< Interface, NewLayout >::type type;
+	  return type( t.storage );
+	};
+
       } // of multidim::
     } // of fixed_size::
   } // of math::

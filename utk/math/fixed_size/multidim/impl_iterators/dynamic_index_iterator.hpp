@@ -67,11 +67,13 @@ namespace utk
 	    //:::| dereference operator |::::::::::::::::::::::::::::::/
 
 	    //---| dereference operators
+
 	    // TODO: ask layout for offset?!!!
-	    value_interface operator*()
+	    auto operator*() -> value_interface
 	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+
 	    // TODO: ask layout for offset?!!!
-	    const value_interface operator*() const
+	    auto operator*() const -> const value_interface
 	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
 	    //:::| increment operators |:::::::::::::::::::::::::::::::/

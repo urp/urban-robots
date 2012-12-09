@@ -16,9 +16,10 @@
 
 # pragma once
 
-//# include "utk/math/fixed_size/interface.hpp"
+# include "utk/math/fixed_size/multidim/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_array/array.hpp"
-# include "utk/math/fixed_size/multidim/layout.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
 
 namespace utk
 {
@@ -42,7 +43,23 @@ namespace utk
 		       > type;
 	};
 
-	// product
+	//---| assign_product
+
+	template< typename ItA, typename ItEndA, typename B, typename Result >
+	auto assign_product( Result& result, const ItA& ita, const ItEndA& itenda, const B& b )
+	-> void
+	{
+	  at( result, typename ItA::current_indices() ) =  b * typename Result::value_type(*ita) ;
+	  assign_product( result, ita.next(), itenda, b ) ;
+	}
+
+	template< typename ItEndA, typename B, typename Result >
+	auto assign_product( Result& result, const ItEndA& ita, const ItEndA& itenda, const B& b )
+	-> void
+	{ }
+
+
+	//---| product
 
 	template< typename T, typename LayoutA, typename LayoutB >
 	auto product( const interface<T, LayoutA >& a
@@ -53,7 +70,7 @@ namespace utk
 	  typedef typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type type;
 	  type result;
 
-
+	  assign_product( result, a.begin(), a.end(), b );
 
 	  return result;
 	}

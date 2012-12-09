@@ -19,8 +19,12 @@
 # include "utk/meta/vector_pop_back.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/add_attributes.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/specialized_functions.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
+
+
 
 # include "utk/math/fixed_size/multidim/interface.hpp"
 
@@ -48,9 +52,13 @@ namespace utk
 	{
 	    typedef interface< ValueType, Layout > type;
 
+	    typedef multidim::interface< ValueType, Layout > multidim_interface;
+
 	  public:
 
-	    typedef multidim::interface< ValueType, Layout > multidim_interface;
+	    typedef Layout layout;
+
+	    typedef typename multidim_interface::storage_interface storage_interface;
 
 	    typedef typename meta::pop_back< typename Layout::attributes >::type variances;
 
@@ -60,51 +68,24 @@ namespace utk
 	    //---| constructor with storage pointer
 
 	    explicit
-	    interface( const typename multidim_interface::storage_interface::pointer_type pointer )
-	    : multidim_interface( pointer )  {	}
+	    interface( const typename storage_interface::pointer_type pointer )
+	    : multidim_interface( pointer )  { }
 
 	    explicit
-	    interface( const typename multidim_interface::storage_interface& storage ) : multidim_interface( storage )
-	    { }
+	    interface( const storage_interface& storage )
+	    : multidim_interface( storage )  { }
 
 
 	    //template< index_type Index >
 	    //change_basis( const interface< ValueType
 
-	    //:::| dynamic iterator interface |::::::::::::::::::::::::::/
+	    //:::| assignment operator |:::::::::::::::::::::::::::::::/
 
-	    //:::::| declare iterators
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface, ValueType, Layout )
 
+	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::/
 
-	    template< index_type Index >
-	    using iterator = const multidim::dynamic_index_iterator< type, Index >;
-
-	    template< index_type Index >
-	    using const_iterator = const multidim::dynamic_index_iterator< type, Index >;
-
-	    //---| begin
-	    template< index_type Index >
-	    iterator<Index> begin() { return iterator< Index >( *this, 0 ); }
-
-	    template< index_type Index >
-	    const_iterator<Index> begin() const { return const_iterator< Index >( *this, 0 ); }
-
-	    //---| end
-
-	    template< index_type Index >
-	    auto end( ) -> iterator<Index>
-	    {
-	      constexpr index_type end_index = meta::integral::at< typename Layout::sizes, Index>::value;
-	      return const_iterator< Index >( *this, end_index );
-
-	    }
-
-	    template< index_type Index >
-	    auto end( ) const -> const_iterator<Index>
-	    {
-	      constexpr index_type end_index = meta::integral::at< typename Layout::sizes, Index>::value;
-	      return const_iterator< Index >( *this, end_index );
-	    }
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
 
 	};
 

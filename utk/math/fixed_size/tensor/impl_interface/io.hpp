@@ -40,19 +40,22 @@ namespace utk
 	  return print_components( os, t );
 	}
 
+	// scalar
+
 	template< typename ValueType, typename Layout >
 	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
 	{
-	  return os << t.at() << std::endl;
+	  return os << at( t ) << std::endl;
 	}
 
+	// 1d
 	template< typename ValueType, typename Layout >
 	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 1,	std::ostream& >::type
 	{
 	  os << "( ";
-	  std::for_each( t.template begin<0>(), t.template end<0>()
+	  std::for_each( t.template begin_index<0>(), t.template end_index<0>()
 		       , [&os] (const ValueType& value)
 		       { os << value << "\t"; }
 		       );
@@ -71,8 +74,8 @@ namespace utk
 	  os << " <"
 	     << boost::lexical_cast< std::string >( size0 );
 
-	  std::for_each( t.template begin<0>(), t.template end<0>()
-		       , [&os] (const typename tensor_interface::template const_iterator<0>::value_type& small_tensor )
+	  std::for_each( t.template begin_index<0>(), t.template end_index<0>()
+		       , [&os] (const typename tensor_interface::template const_index_iterator<0>::value_type& small_tensor )
 			 { print_components( os, small_tensor ); }
 		       );
 	  return os << "> ";

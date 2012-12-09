@@ -45,6 +45,27 @@ namespace utk
 
       //:::| unary operators
 
+      //---| minus ( scalar - scalar -> scalar )
+
+      template< typename T, T NegativeDifference >
+      struct minus
+      {
+	typedef decltype( T() - T() ) value_type;
+
+	template< T Value >
+	struct apply
+	{ static constexpr value_type value = Value - NegativeDifference; };
+
+      };
+
+      //---| minus ( vector - scalar -> vector )
+
+      template< typename T, T...Values, T NegativeDifference >
+      struct minus< vector< T, Values... >, NegativeDifference >
+      : public transform< vector< T, Values... >, minus< T, NegativeDifference > >
+      {	};
+
+
       //---| negate ( scalar -> scalar )
 
       template< typename T >
@@ -78,7 +99,7 @@ namespace utk
 
       };
 
-      //---| negate ( vector -> vector )
+      //---| is_true ( vector -> vector )
 
       template< typename T, T...Values >
       struct is_true< vector< T, Values... > >

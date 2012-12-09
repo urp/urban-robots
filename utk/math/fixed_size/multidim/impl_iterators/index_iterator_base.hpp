@@ -55,7 +55,7 @@ namespace utk
 	  //---| constructor with storage_interface
 
 	  index_iterator_base( const Interface& interface )
-	  : storage( interface ) { }
+	  : storage( interface.storage ) { }
 
 	  //---| copy constuctor
 

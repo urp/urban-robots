@@ -24,6 +24,19 @@ using namespace utk::meta::integral;
 
 BOOST_AUTO_TEST_SUITE( unary_transforms )
 
+  BOOST_AUTO_TEST_CASE( vector_minus )
+  {
+    typedef vector< int, 1,2,3 > ints;
+    typedef typename minus< ints, 1 >::type  result;
+    static const int r0 = at< result, 0 >::value;
+    BOOST_CHECK_EQUAL( r0,  0 );
+    static const int r1 = at< result, 1 >::value;
+    BOOST_CHECK_EQUAL( r1,  1 );
+    static const int r2 = at< result, 2 >::value;
+    BOOST_CHECK_EQUAL( r2,  2 );
+
+  }
+
   BOOST_AUTO_TEST_CASE( vector_negate )
   {
     typedef vector< bool, true,false,true > bools;

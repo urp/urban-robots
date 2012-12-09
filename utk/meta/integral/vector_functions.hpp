@@ -164,10 +164,9 @@ namespace utk
       std::ostream& operator<<( std::ostream& os, const vector< T, Values... >& vec )
       {
 	std::array< T, sizeof...(Values) > arr = make_array< vector< T, Values... > >::value;
-	os << '{' << utk::io::sequence_to_stream( os, arr.begin(), arr.end(), "," ) << '}' << std::endl;
-	/*os << "{ ";
-	os << Values...;
-	os << '}' << std::endl;*/
+	os << "{ ";
+	std::for_each( arr.begin(), arr.end(), [&os]( const T& v ){ os << v << " "; } );
+	os<< '}';
 	return os;
       }
 

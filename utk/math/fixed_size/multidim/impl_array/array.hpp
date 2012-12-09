@@ -40,11 +40,15 @@ namespace utk
 
 	  //---| data storage
 
-	  storage_array data;
+	  storage_array storage;
 
 	  //---| constructor (create with uninitialized data)
 
-	  explicit array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
+	  explicit array() : interface( nullptr ), storage() { interface::storage.ref( storage.ptr() ); }
+
+	  //---| constructor (copy)
+
+	  explicit array( const typename interface::storage_interface& s ) : interface( nullptr ), storage(s) { interface::storage.ref( storage.ptr() ); }
 
 	};
 

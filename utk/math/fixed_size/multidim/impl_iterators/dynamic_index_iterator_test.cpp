@@ -41,11 +41,11 @@ BOOST_AUTO_TEST_CASE( layout_1d )
   BOOST_MESSAGE( "it0.storage = " << it0.storage );
 
   BOOST_CHECK_EQUAL( *it0, 0. );
-  BOOST_CHECK_EQUAL( (*it0).at(), 0. );
+  BOOST_CHECK_EQUAL( at(*it0), 0. );
 
-  BOOST_CHECK_EQUAL( (*it0++).at(), 0. );
+  BOOST_CHECK_EQUAL( (*it0++), 0. );
   BOOST_CHECK_EQUAL( (*it0++), 1. );
-  BOOST_CHECK_EQUAL( (*it0).at() , 2. );
+  BOOST_CHECK_EQUAL( (*it0)  , 2. );
 
 }
 
@@ -72,28 +72,28 @@ BOOST_FIXTURE_TEST_SUITE( check_iterator23, layout23_fixture )
 
     BOOST_MESSAGE( "it0.storage = " << it1.storage );
 
-    BOOST_CHECK_EQUAL( (*it1).at(0), 0. );
-    BOOST_CHECK_EQUAL( (*it1).at(1), 3. );
+    BOOST_CHECK_EQUAL( at( *it1, 0 ), 0. );
+    BOOST_CHECK_EQUAL( at( *it1, 1 ), 3. );
 
-    BOOST_CHECK_EQUAL( (*(++it1)).at(0), 1. );
-    BOOST_CHECK_EQUAL( (*it1++).at(1), 4. );
+    BOOST_CHECK_EQUAL( at( *(++it1), 0 ), 1. );
+    BOOST_CHECK_EQUAL( at( *it1++  , 1 ), 4. );
 
-    BOOST_CHECK_EQUAL( (*it1).at(0) , 2. );
-    BOOST_CHECK_EQUAL( (*it1).at(1) , 5. );
+    BOOST_CHECK_EQUAL( at(*it1, 0 ) , 2. );
+    BOOST_CHECK_EQUAL( at(*it1, 1 ) , 5. );
   }
 
   BOOST_AUTO_TEST_CASE( compare_iterators )
   {
-    BOOST_CHECK_EQUAL(  (*it1).at(0), 0. );
-    BOOST_CHECK_EQUAL(  (*it1).at(1), 3. );
+    BOOST_CHECK_EQUAL( at( *it1, 0 ), 0. );
+    BOOST_CHECK_EQUAL( at( *it1, 1 ), 3. );
 
-    BOOST_CHECK_EQUAL( (*++it1).at(0) , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
+    BOOST_CHECK_EQUAL( at( *++it1, 0 ) , 1. );
+    BOOST_CHECK_EQUAL( at(   *it1, 1   ) , 4. );
 
     auto it1_1 = it1;
 
-    BOOST_CHECK_EQUAL( (*++it1).at(0) , 2. );
-    BOOST_CHECK_EQUAL( (*it1).at(1) , 5. );
+    BOOST_CHECK_EQUAL( at( *++it1, 0 ) , 2. );
+    BOOST_CHECK_EQUAL( at(   *it1, 1) , 5. );
 
     BOOST_CHECK_EQUAL( (--it1).index_value, it1_1.index_value );
     BOOST_CHECK_EQUAL( it1.storage.ptr(), it1_1.storage.ptr() );

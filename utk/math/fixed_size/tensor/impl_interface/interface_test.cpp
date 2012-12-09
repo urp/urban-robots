@@ -41,12 +41,12 @@ BOOST_FIXTURE_TEST_SUITE( check_fixture123, fixture123 )
 
   BOOST_AUTO_TEST_CASE( with_layout )
   {
-    BOOST_CHECK_EQUAL( tensor123.at( 0,0,0 ) , 0. );
-    BOOST_CHECK_EQUAL( tensor123.at( 0,0,1 ) , 1. );
-    BOOST_CHECK_EQUAL( tensor123.at( 0,0,2 ) , 2. );
-    BOOST_CHECK_EQUAL( tensor123.at( 0,1,0 ) , 3. );
-    BOOST_CHECK_EQUAL( tensor123.at( 0,1,1 ) , 4. );
-    BOOST_CHECK_EQUAL( tensor123.at( 0,1,2 ) , 5. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,0,0 ) , 0. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,0,1 ) , 1. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,0,2 ) , 2. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,1,0 ) , 3. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,1,1 ) , 4. );
+    BOOST_CHECK_EQUAL( at( tensor123, 0,1,2 ) , 5. );
   }
 
 BOOST_AUTO_TEST_SUITE_END()
@@ -65,11 +65,11 @@ BOOST_AUTO_TEST_CASE( with_slice_layout )
   type   tensor32( data );
 
   //right
-  BOOST_CHECK_EQUAL( tensor32.at( 0,0 ) , 2. );
-  BOOST_CHECK_EQUAL( tensor32.at( 0,1 ) , 5. );
-  BOOST_CHECK_EQUAL( tensor32.at( 1,0 ) , 8. );
-  BOOST_CHECK_EQUAL( tensor32.at( 1,1 ) , 11. );
-  BOOST_CHECK_EQUAL( tensor32.at( 2,0 ) , 14. );
-  BOOST_CHECK_EQUAL( tensor32.at( 2,1 ) , 17. );
+  BOOST_CHECK_EQUAL( at( tensor32, 0,0 ) , 2. );
+  BOOST_CHECK_EQUAL( at( tensor32, 0,1 ) , 5. );
+  BOOST_CHECK_EQUAL( at( tensor32, 1,0 ) , 8. );
+  BOOST_CHECK_EQUAL( at( tensor32, 1,1 ) , 11. );
+  BOOST_CHECK_EQUAL( at( tensor32, 2,0 ) , 14. );
+  BOOST_CHECK_EQUAL( at( tensor32, 2,1 ) , 17. );
 
 }

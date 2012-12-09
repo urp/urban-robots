@@ -16,9 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+//# include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 
 namespace utk
 {
@@ -29,25 +29,13 @@ namespace utk
 
       namespace multidim
       {
-	/* same as in  "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
-
-	template< typename ValueType, typename OldLayout, typename NewLayout >
-	struct change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >
-	{
-	  typedef typename tensor::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
-	};*/
       }
-
 
       namespace tensor
       {
-	//:::| type |::::::::::::::::::::::::::::::::::::::::::::::::::/
 
-	template< typename ValueType, typename OldLayout, typename NewLayout >
-	struct change_layout< interface< ValueType, OldLayout >, NewLayout >
-	{
-	  typedef typename multidim::change_layout< tensor::interface< ValueType, OldLayout >, NewLayout >::type type;
-	};
+	using multidim::change_layout;
+	using multidim::use_layout;
 
       } // of tensor::
 

@@ -14,6 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/multidim/impl_array/array.hpp"
 
 #define BOOST_TEST_DYN_LINK
@@ -29,7 +32,7 @@ BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )
   typedef array< double, layout123 > multidim123;
   multidim123 test_multidim;
 
-  test_multidim.at( 0,0,0 ) = 1.;
+  at( test_multidim, 0,0,0 ) = 1.;
 
-  BOOST_CHECK_EQUAL( test_multidim.at( 0,0,0 ), 1. );
+  BOOST_CHECK_EQUAL( at( test_multidim, 0,0,0 ), 1. );
 }

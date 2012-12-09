@@ -81,7 +81,6 @@ namespace utk
 	    static const stride_type index_offset( CoordinateTypes... coords )
 	    {
 	      static_assert( sizeof...(CoordinateTypes) <= order, "number of provided coordinates and indices must agree." );
-
 	      return meta::integral::inner_product_with_arguments< strides >( coords... );
 	    }
 

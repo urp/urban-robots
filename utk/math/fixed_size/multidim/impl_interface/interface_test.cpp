@@ -15,6 +15,8 @@
 */
 
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
+
 # include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/fix_index.hpp"
 
@@ -25,70 +27,55 @@
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
 
-BOOST_AUTO_TEST_CASE( construct_with_initial_layout )
+
+struct fixture
 {
-  typedef layout< size_vector<1,2,3> > layout;
-  typedef interface< double, layout > multidim;
-  multidim test_multidim( nullptr );
-}
+  typedef layout< size_vector<1,2,3> > layout123;
+  typedef interface< double, layout123 > type123;
+  double  data6[ layout123::total_size ];
+  type123    multidim123;
 
-BOOST_AUTO_TEST_CASE( at_with_free_dimensions )
-{
-  typedef layout< size_vector<1,2,3> > layout;
-  typedef interface< double, layout > type;
-  double  data[ layout::total_size ] = { 0.,1.,2.,3.,4.,5. };
-  type   multidim( data );
+  fixture() : data6{ 0.,1.,2.,3.,4.,5. }, multidim123( data6 ) { }
+};
 
-  //right
-  BOOST_CHECK_EQUAL( multidim.at( 0,0,0 ) , 0. );
-  BOOST_CHECK_EQUAL( multidim.at( 0,0,1 ) , 1. );
-  BOOST_CHECK_EQUAL( multidim.at( 0,0,2 ) , 2. );
-  BOOST_CHECK_EQUAL( multidim.at( 0,1,0 ) , 3. );
-  BOOST_CHECK_EQUAL( multidim.at( 0,1,1 ) , 4. );
-  BOOST_CHECK_EQUAL( multidim.at( 0,1,2 ) , 5. );
-}
+BOOST_FIXTURE_TEST_SUITE( check_constructors, fixture )
 
-BOOST_AUTO_TEST_CASE( copy )
-{
-  typedef layout< size_vector<1,2,3> > layout;
-  typedef interface< double, layout > type;
-  double  data[ layout::total_size ] = { 0.,1.,2.,3.,4.,5. };
-  type original( data );
+  BOOST_AUTO_TEST_CASE( check_construct_with_nullptr )
+  {
+    typedef layout< size_vector<1,2,3> > layout;
+    typedef interface< double, layout > multidim;
+    multidim test_multidim( nullptr );
+  }
 
-  // check identical copy
-  type id_copy( original );
+  BOOST_AUTO_TEST_CASE( copy )
+  {
+    // check identical copy
+    type123 id_copy( multidim123 );
 
-  BOOST_CHECK_EQUAL( id_copy.at( 0,0,0 ) , 0. );
-  BOOST_CHECK_EQUAL( id_copy.at( 0,0,1 ) , 1. );
-  BOOST_CHECK_EQUAL( id_copy.at( 0,0,2 ) , 2. );
-  BOOST_CHECK_EQUAL( id_copy.at( 0,1,0 ) , 3. );
-  BOOST_CHECK_EQUAL( id_copy.at( 0,1,1 ) , 4. );
-  BOOST_CHECK_EQUAL( id_copy.at( 0,1,2 ) , 5. );
-}
+    BOOST_CHECK_EQUAL( at( id_copy, 0,0,0 ) , 0. );
+    BOOST_CHECK_EQUAL( at( id_copy, 0,0,1 ) , 1. );
+    BOOST_CHECK_EQUAL( at( id_copy, 0,0,2 ) , 2. );
+    BOOST_CHECK_EQUAL( at( id_copy, 0,1,0 ) , 3. );
+    BOOST_CHECK_EQUAL( at( id_copy, 0,1,1 ) , 4. );
+    BOOST_CHECK_EQUAL( at( id_copy, 0,1,2 ) , 5. );
+  }
 
-BOOST_AUTO_TEST_SUITE( sliced_layout_tests )
+BOOST_AUTO_TEST_SUITE_END()
+
+BOOST_FIXTURE_TEST_SUITE( sliced_layout_tests, fixture )
 
   BOOST_AUTO_TEST_CASE( copy_with_other_layout )
   {
-    typedef layout< size_vector<1,2,3> > layout;
-    typedef interface< double, layout > type;
-    double  data[ layout::total_size ] = { 0.,1.,2.,3.,4.,5. };
-    type original( data );
-
     // check general copy
-    typedef interface< double, slice_layout< layout, index_vector<1,0,3> > > fixed_type;
+    typedef interface< double, slice_layout< layout123, index_vector<1,0,3> > > fixed_type;
 
-    fixed_type fixed_copy( original );
-    type copy( fixed_copy );
+    fixed_type fixed_copy( multidim123.storage );
 
-    BOOST_CHECK_EQUAL( copy.at( 0,0,0 ) , 0. );
-    BOOST_CHECK_EQUAL( copy.at( 0,0,1 ) , 1. );
-    BOOST_CHECK_EQUAL( copy.at( 0,0,2 ) , 2. );
-    BOOST_CHECK_EQUAL( copy.at( 0,1,0 ) , 3. );
-    BOOST_CHECK_EQUAL( copy.at( 0,1,1 ) , 4. );
-    BOOST_CHECK_EQUAL( copy.at( 0,1,2 ) , 5. );
+    BOOST_CHECK_EQUAL( at( fixed_copy, 0,0 ) , 0. );
+    BOOST_CHECK_EQUAL( at( fixed_copy, 0,1 ) , 1. );
+    BOOST_CHECK_EQUAL( at( fixed_copy, 0,2 ) , 2. );
+
   }
-
 
   BOOST_AUTO_TEST_CASE( at_with_fixed_dimensions )
   {
@@ -106,12 +93,12 @@ BOOST_AUTO_TEST_SUITE( sliced_layout_tests )
     BOOST_MESSAGE( "unfixed offset: " << unfixed_offset << " fixed offset: "<< layout_offset );
 
     //right
-    BOOST_CHECK_EQUAL( multidim.at( 0,0 ) , 2. );
-    BOOST_CHECK_EQUAL( multidim.at( 0,1 ) , 6. );
-    BOOST_CHECK_EQUAL( multidim.at( 0,2 ) , 10. );
-    BOOST_CHECK_EQUAL( multidim.at( 1,0 ) , 14. );
-    BOOST_CHECK_EQUAL( multidim.at( 1,1 ) , 18. );
-    BOOST_CHECK_EQUAL( multidim.at( 1,2 ) , 22. );
+    BOOST_CHECK_EQUAL( at( multidim, 0,0 ) , 2. );
+    BOOST_CHECK_EQUAL( at( multidim, 0,1 ) , 6. );
+    BOOST_CHECK_EQUAL( at( multidim, 0,2 ) , 10. );
+    BOOST_CHECK_EQUAL( at( multidim, 1,0 ) , 14. );
+    BOOST_CHECK_EQUAL( at( multidim, 1,1 ) , 18. );
+    BOOST_CHECK_EQUAL( at( multidim, 1,2 ) , 22. );
 
   }
 

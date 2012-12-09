@@ -62,16 +62,16 @@ BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
 
     product_ab prod = product( t_a, t_b );
 
-    const double p00 = prod.at(0,0);
+    const double p00 = at( prod, 0,0 );
     BOOST_CHECK_EQUAL( p00, 3 );
 
-    const double p01 = prod.at(0,1);
+    const double p01 = at( prod, 0,1 );
     BOOST_CHECK_EQUAL( p01, 4 );
 
-    const double p10 = prod.at(1,0);
+    const double p10 = at( prod, 1,0 );
     BOOST_CHECK_EQUAL( p10, 6 );
 
-    const double p11 = prod.at(1,1);
+    const double p11 = at( prod, 1,1 );
     BOOST_CHECK_EQUAL( p11, 8 );
   }
 

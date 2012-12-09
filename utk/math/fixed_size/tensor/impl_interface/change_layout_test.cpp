@@ -49,12 +49,12 @@ BOOST_AUTO_TEST_CASE( check_change_to_1d )
   constexpr variance_type var1 = meta::integral::at< typename decltype(tensor6)::variances, 0 >::value;
   BOOST_CHECK_EQUAL( var1, lvar1 );
 
-  BOOST_CHECK_EQUAL( tensor6.at(0), 1 );
-  BOOST_CHECK_EQUAL( tensor6.at(1), 2 );
-  BOOST_CHECK_EQUAL( tensor6.at(2), 3 );
-  BOOST_CHECK_EQUAL( tensor6.at(3), 4 );
-  BOOST_CHECK_EQUAL( tensor6.at(4), 5 );
-  BOOST_CHECK_EQUAL( tensor6.at(5), 6 );
+  BOOST_CHECK_EQUAL( at( tensor6, 0 ), 1 );
+  BOOST_CHECK_EQUAL( at( tensor6, 1 ), 2 );
+  BOOST_CHECK_EQUAL( at( tensor6, 2 ), 3 );
+  BOOST_CHECK_EQUAL( at( tensor6, 3 ), 4 );
+  BOOST_CHECK_EQUAL( at( tensor6, 4 ), 5 );
+  BOOST_CHECK_EQUAL( at( tensor6, 5 ), 6 );
 }
 
 BOOST_AUTO_TEST_SUITE_END()

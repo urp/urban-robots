@@ -83,8 +83,11 @@ namespace utk
 	  //-----remove hidden indices from FullLayout, add NewAttributes to new layout (type)
 
 	  template< typename FullLayout, typename FullIndexMask, typename...NewIndexAttributes >
-	  struct make_slice_layout
+	  struct slice_layout_base
 	  {
+	      static_assert( FullIndexMask::size == FullLayout::order
+			   , "Size of FullIndexMask and FullLayout::order must agree" );
+
 	      typedef typename meta::integral::equal< typename FullLayout::sizes, FullIndexMask >::type visibility_mask;
 	      typedef typename meta::integral::transform< visibility_mask , meta::integral::negate<bool> >::type hidden_mask;
 	      typedef typename helpers::unmask_indices< hidden_mask >::type hidden_indices;
@@ -106,10 +109,10 @@ namespace utk
 		, typename FullIndexMask = typename meta::integral::make_vector< index_type, typename FullLayout::sizes >::type
 		, typename...NewIndexAttributes
 		>
-	class slice_layout : public make_slice_layout< FullLayout, FullIndexMask, NewIndexAttributes... >::type
+	class slice_layout : public slice_layout_base< FullLayout, FullIndexMask, NewIndexAttributes... >::type
 	{
 	    static_assert( FullIndexMask::size == FullLayout::order
-			 , "Size of FullIndexMask and SizeVector must agree"
+			 , "Size of FullIndexMask and FullLayout::order must agree"
 			 );
 	    static_assert( not meta::integral::any< typename meta::integral::equal< typename FullLayout::sizes
 										  , meta::integral::constant< size_type, 0 >
@@ -122,8 +125,8 @@ namespace utk
 
 	    // mask
 
-	    typedef typename make_slice_layout< FullLayout, FullIndexMask >::type 	     layout;
-	    typedef typename make_slice_layout< FullLayout, FullIndexMask >::visibility_mask visibility_mask;
+	    typedef typename slice_layout_base< FullLayout, FullIndexMask >::type 	     layout;
+	    typedef typename slice_layout_base< FullLayout, FullIndexMask >::visibility_mask visibility_mask;
 
 	    typedef FullIndexMask  full_index_mask;
 	    typedef FullLayout full_layout;

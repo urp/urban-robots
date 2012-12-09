@@ -16,10 +16,10 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/impl_iterators/index_iterator_base.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterators/dynamic_index_iterator.hpp"
-# include "utk/math/fixed_size/multidim/impl_iterators/static_index_iterator.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/static_iterator.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/static_index_iterator.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_iterators/dynamic_index_iterator.hpp"
 
 namespace utk
 {

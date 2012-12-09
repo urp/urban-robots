@@ -1,4 +1,4 @@
-/*  integral.hpp - Copyright Peter Urban 2012
+/*  at.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,24 +16,20 @@
 
 # pragma once
 
-# include "utk/meta/integral/constant.hpp"
-# include "utk/meta/integral/vector.hpp"
-
-# include "utk/meta/integral/vector_functions.hpp"
-# include "utk/meta/integral/vector_algorithms.hpp"
-
-# include "utk/meta/integral/vector_make_vector.hpp"
-# include "utk/meta/integral/vector_remove.hpp"
-# include "utk/meta/integral/vector_split.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
 
 namespace utk
 {
-  namespace meta
+  namespace math
   {
-    namespace integral
+    namespace fixed_size
     {
+      namespace tensor
+      {
 
+        using multidim::at;
 
-    }
-  }
-}
+      } // of tensor::
+    } // of fixed_size::
+  } // of math::
+} // of utk::

@@ -18,6 +18,8 @@
 
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
+
 
 namespace utk
 {

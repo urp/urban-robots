@@ -20,7 +20,7 @@
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/product.hpp"
-
+# include "utk/math/fixed_size/tensor/impl_interface/operators/operators.hpp"
 namespace utk
 {
   namespace math

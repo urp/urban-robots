@@ -18,13 +18,12 @@
 
 # pragma once
 
-#include <type_traits>
+# include <type_traits>
 
-# include "utk/meta/integral/integral.hpp"
-# include "utk/meta/vector_transform.hpp"
-
-# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+
+# include "utk/math/fixed_size/multidim/impl_iterators/static_iterator_helpers.hpp"
 
 # pragma GCC visibility push(default)
 
@@ -37,120 +36,6 @@ namespace utk
       namespace multidim
       {
 
-	namespace helpers
-	{
-
-	  typedef enum { forward,backward } direction_type;
-
-	  namespace // <anonymous>
-	  {
-	    //---| indices_from_index
-
-	    template< typename StrideVector, index_type Index >
-	    struct indices_from_index { /* unspecified */ };
-
-	    template< /*stride_type LargestStride, stride_type...StrideVector, index_type Index*/ >
-	    struct indices_from_index< meta::integral::vector< stride_type >, 0 >
-	    {
-	      typedef index_vector< > type;
-	    };
-
-	    // TODO: might be layout dependent
-	    template< stride_type LargestStride, stride_type...StrideTail, index_type Index >
-	    class indices_from_index< meta::integral::vector< stride_type, LargestStride, StrideTail... >, Index >
-	    {
-		typedef meta::integral::vector< stride_type, StrideTail... > stride_tail;
-		/*static_assert( LargestStride > ( meta::integral::pop_front< stride_tail >::value )
-			     , "Strides must be sorted - this is a limitation of the implementation"
-			     );*/
-
-		constexpr static index_type index_digit = Index / LargestStride;
-
-		typedef typename indices_from_index< stride_tail
-						   , Index - index_digit * LargestStride // TODO: might be layout dependent
-						   >::type tail;
-
-	      public:
-
-		typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, index_digit > >::type type;
-
-	    };
-
-	    //---| advance_digits
-
-	    // TODO: use index (+/- difference) -> indices
-
-	    template < typename IndexVector, typename SizeVector, index_type Difference, direction_type Direction = (Difference >= 0 ? forward : backward) >
-	    struct advance_digits_lsb { /* unspecified */ };
-
-	    template < index_type Difference, direction_type Direction >
-	    struct advance_digits_lsb< meta::integral::vector< index_type >
-				     , meta::integral::vector<  size_type >
-				     , Difference
-				     , Direction
-				     >
-	    { typedef index_vector< > type; };
-
-	    //:::| forward |:::::::::::::::::::::::::::::::::::::::::::::/
-
-	    // carry forward
-	    template < index_type...Indices, size_type FirstSize, size_type...Sizes >
-	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstSize-1, Indices... >
-				     , meta::integral::vector<  size_type, FirstSize  , Sizes... >
-				     , 1
-				     >
-	    {
-	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, 1, forward >::type tail;
-	      typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, 0 > >::type type;
-	    };
-
-	    // increment
-	    template < index_type FirstIndex, index_type...Indices, size_type FirstSize, size_type...Sizes >
-	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstIndex, Indices... >
-				     , meta::integral::vector<  size_type, FirstSize ,   Sizes... >
-				     , 1, forward
-				     >
-	    {
-	      typedef index_vector< FirstIndex+1, Indices... > type;
-	    };
-
-	    //:::| backward |::::::::::::::::::::::::::::::::::::::::::::/
-
-	    // carry backward
-	    template < index_type...Indices, size_type FirstSize, size_type...Sizes >
-	    struct advance_digits_lsb< meta::integral::vector< index_type, 0, Indices... >
-				     , meta::integral::vector<  size_type, FirstSize  , Sizes... >
-				     , -1, backward
-				     >
-	    {
-	      typedef typename advance_digits_lsb< index_vector< Indices... >, size_vector< Sizes... >, -1, backward >::type tail;
-	      typedef typename meta::integral::push_front< tail, meta::integral::constant< index_type, FirstSize-1 > >::type type;
-	    };
-
-	    // backward
-	    template < index_type FirstIndex, index_type...Indices, size_type FirstSize, size_type...Sizes >
-	    struct advance_digits_lsb< meta::integral::vector< index_type, FirstIndex, Indices... >
-				     , meta::integral::vector<  size_type, FirstSize ,   Sizes... >
-				     , -1, backward
-				     >
-	    {
-	      typedef index_vector< FirstIndex-1, Indices... > type;
-	    };
-
-	  } // of <anonymous>::
-
- 	  template < typename IndexVector, typename SizeVector, index_type Difference, direction_type Forward = (Difference >= 0 ? forward : backward) >
-	  class advance_digits
-	  {
-	      typedef typename meta::integral::reverse< IndexVector >::type rev_indices;
-	      typedef typename meta::integral::reverse< SizeVector >::type rev_sizes;
-	      typedef typename advance_digits_lsb< rev_indices, rev_sizes, Difference, Forward >::type rev_result;
-	    public:
-	      typedef typename meta::integral::reverse< rev_result >::type type;
-	  };
-
-	} // of helpers
-
 	//---| static_iterator
 	//---| use slice_layout
 
@@ -159,6 +44,9 @@ namespace utk
 		 >
 	class static_iterator
 	{
+	    static_assert( std::is_same< typename CurrentIndexVector::value_type, index_type >::value
+			 , "CurrentIndexVector must contain indices of index_type.");
+
 
 	    //:::| static value interface |::::::::::::::::::::::::::::/
 
@@ -178,15 +66,45 @@ namespace utk
 
 	    //:::| iterator types |::::::::::::::::::::::::::::::::::::/
 
+	    static constexpr bool use_random_access_impl = 0;// TODO: 1 if is_sorted< value_layout::sizes && strides cover managed memory
+
+	    template< index_type IndexDelta, int impl  >
+	    struct random_access_iterator_impl { /* unspecified */ };
+
+	    //---| random access iterator ( general implementation )
+	    //-----!enabled if other impl is not applicable!
+	    //-----directly count through the indices
+
+	    template< index_type IndexDelta >
+	    struct random_access_iterator_impl< IndexDelta, 0 >
+	    {
+	      typedef static_iterator< Interface
+				       // TODO: only implemented for IndexDelta +/-1 and 0
+				     , typename helpers::advance_digits< current_indices
+								       , typename Interface::layout::sizes
+								       , IndexDelta
+								       >::type
+				     > type;
+	    };
+
+	    /*---| random access iterator ( index_to_indices implementation )
+	    //-----!enabled if other impl is not applicable!
+	    //-----directly count through the indices
+
+	    template< index_type IndexDelta >
+	    struct random_access_iterator_impl< IndexDelta, 1 >
+	    {
+	      static constexpr stride_type linear_index = value_layout::static_offset();
+	      typedef static_iterator< Interface
+				     , typename helpers::index_to_indices< typename Interface::layout::strides
+									 , linear_index + IndexDelta
+									 >::type
+				     > type;
+	    };*/
+
 	    //---| random access iterator
 	    template< index_type IndexDelta >
-	    using random_access_iterator = static_iterator< Interface
-							  , // TODO: !!! reverse vector
-							    typename helpers::advance_digits< current_indices
-											     , typename Interface::layout::sizes
-											     , IndexDelta
-											     >::type
-							  >;
+	    using random_access_iterator = typename random_access_iterator_impl< IndexDelta, use_random_access_impl >::type;
 
 	    //---| forward iterator
 	    typedef random_access_iterator<  1 > forward_iterator;
@@ -203,7 +121,7 @@ namespace utk
 
 	    //---| constructor with storage_interface
 	    static_iterator( const Interface& interface )
-	    : storage( interface )  { }
+	    : storage( interface.storage )  { }
 
 	    //---| copy constuctor
 	    template< typename OtherInterface, typename OtherIndexVector >
@@ -212,7 +130,7 @@ namespace utk
 
 	    //:::| dereference operator |::::::::::::::::::::::::::::::/
 
-	    value_interface operator*()
+	    value_interface operator*() const
 	    { return value_interface( value_storage_interface( storage.ptr() ) ); }
 
 	    //:::| increment operator |::::::::::::::::::::::::::::::::/
@@ -240,6 +158,15 @@ namespace utk
 	    { return not operator==( other ); }
 
 	}; // of static_iterator<>
+
+	template< typename Interface >
+	struct make_static_end_iterator
+	{
+	    typedef static_iterator< Interface
+				   , typename helpers::end_iterator_indices< typename Interface::layout::sizes >::type
+				   > type;
+	};
+
       } // of multidim::
     } // of fixed_size::
   } // of math::

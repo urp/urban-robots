@@ -1,4 +1,4 @@
-/*  specialized_functions.hpp - Copyright Peter Urban 2012
+/*  operators.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,6 +16,10 @@
 
 # pragma once
 
+# include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/plus.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
+
 namespace utk
 {
   namespace math
@@ -24,22 +28,7 @@ namespace utk
     {
       namespace tensor
       {
-	// type
 
-	template< typename Interface, typename NewLayout >
-	struct change_layout { /* unspecified */ };
-
-	// instance
-
-	template< typename Interface, typename NewLayout >
-	typename change_layout< Interface, NewLayout >::type use_layout( const Interface& t )
-	{
-	  static_assert( NewLayout::total_size == Interface::layout::total_size
-		       , "NewLayout::total_size must fit to original layout"
-		       );
-	  typedef typename change_layout< Interface, NewLayout >::type type;
-	  return type( t );
-	};
 
       } // of tensor::
     } // of fixed_size::

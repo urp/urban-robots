@@ -78,6 +78,12 @@ namespace utk
 	  typedef typename meta::integral::accumulate< ones, meta::integral::add< index_type, index_type >, 0 >::type type;
       };
 
+      template< typename T >
+      struct make_position_index_vector< T, 0 >
+      {
+	  typedef vector< index_type > type;
+      };
+
     } // of integral::
   } // of meta::
 } // of utk::

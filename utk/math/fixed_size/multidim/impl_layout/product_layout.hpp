@@ -32,17 +32,14 @@ namespace utk
 
         // TODO: specify for vector x vector, vector x tensor and tensor x vector ?
         template< typename LayoutA, typename LayoutB >
-        struct product_layout { /* unspecified */ };
-
-        template< typename SizeA, typename StrideA, typename...AttributesA, typename SizeB, typename StrideB, typename...AttributesB >
-        struct product_layout< layout< SizeA, StrideA, AttributesA... >
-                             , layout< SizeB, StrideB, AttributesB... > >
+        struct product_layout
         {
-          typedef typename meta::integral::concatinate< SizeA, SizeB >::type new_sizes;
+          typedef typename meta::integral::concatinate< typename LayoutA::sizes
+                                                      , typename LayoutB::sizes >::type new_sizes;
           typedef typename helpers::stride_sequence< new_sizes >::type new_strides;
 
-          typedef typename meta::binary_transform< meta::vector< AttributesA... >
-                                                 , meta::vector< AttributesB... >
+          typedef typename meta::binary_transform< typename LayoutA::attributes
+                                                 , typename LayoutB::attributes
                                                  , meta::function< meta::integral::concatinate >
                                                  >::type product_attributes;
 

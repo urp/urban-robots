@@ -15,6 +15,8 @@
 */
 
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
+
 # include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/static_index_iterator.hpp"
 
@@ -34,14 +36,15 @@ BOOST_AUTO_TEST_CASE( check_layout3 )
 
   typedef static_index_iterator< type, 0 > it0_type;
   it0_type it0( multidim );
-  BOOST_CHECK_EQUAL(  (*it0).at(), 0. );
+  double val = (*it0);
+  BOOST_CHECK_EQUAL( val, 0. );
 
   typedef typename it0_type::forward_iterator it1_type;
   it1_type it1 = it0.increment();
-  BOOST_CHECK_EQUAL( (*it1).at() , 1. );
+  BOOST_CHECK_EQUAL( *it1, 1. );
 
   auto it2 = it1.increment();
-  BOOST_CHECK_EQUAL( (*it2).at() , 2. );
+  BOOST_CHECK_EQUAL( *it2, 2. );
 }
 
 struct layout23_fixture
@@ -63,32 +66,22 @@ BOOST_FIXTURE_TEST_SUITE( check_layout23, layout23_fixture )
   BOOST_AUTO_TEST_CASE( increment_and_access )
   {
 
-    BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
+    BOOST_CHECK_EQUAL(  at( *it0, 0 ), 0. );
+    BOOST_CHECK_EQUAL(  at( *it0, 1 ), 3. );
 
     auto it1 = it0.increment();
-    BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
+    BOOST_CHECK_EQUAL(  at( *it1, 0 ), 1. );
+    BOOST_CHECK_EQUAL(  at( *it1, 1 ), 4. );
 
     auto it2 = it1.increment();
-    BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
+    BOOST_CHECK_EQUAL(  at( *it2, 0 ), 2. );
+    BOOST_CHECK_EQUAL(  at( *it2, 1 ), 5. );
   }
 
   BOOST_AUTO_TEST_CASE( compare_iterators )
   {
-    typedef static_index_iterator< type, 1 > it0_type;
-    it0_type it0( multidim23 );
-    BOOST_CHECK_EQUAL(  (*it0).at(0), 0. );
-    BOOST_CHECK_EQUAL(  (*it0).at(1), 3. );
-
     auto it1 = it0.increment();
-    BOOST_CHECK_EQUAL( (*it1).at(0) , 1. );
-    BOOST_CHECK_EQUAL( (*it1).at(1) , 4. );
-
     auto it2 = it1.increment();
-    BOOST_CHECK_EQUAL( (*it2).at(0) , 2. );
-    BOOST_CHECK_EQUAL( (*it2).at(1) , 5. );
 
     auto it1_id = it2.decrement();
     BOOST_CHECK_EQUAL( it1_id == it1, true );

@@ -31,21 +31,32 @@ namespace utk
       {
 	//-----| array
 
-	template < typename T, typename Layout >
+	template < typename ValueType, typename Layout >
 	struct array
-	: public interface< T, Layout >
+	: public interface< ValueType, Layout >
 	{
-	  typedef interface < T, Layout > interface;
+	  typedef array<ValueType, Layout> type;
 
-	  typedef vector::array< T, interface::layout::total_size > storage_array;
+	  typedef interface < ValueType, Layout > interface;
+
+	  typedef vector::array< ValueType, interface::layout::total_size > storage_array;
 
 	  //---| data storage
 
-	  storage_array data;
+	  storage_array storage;
 
 	  //---| constructor (create with uninitialized data)
 
-	  explicit array() : interface( nullptr ), data() { interface::ref( data.ptr() ); }
+	  explicit array() : interface( nullptr ), storage() { this->storage.ref( storage.ptr() ); }
+
+	  //---| constructor (copy)
+
+	  explicit array( const typename interface::storage_interface& s ) : interface( nullptr ), storage(s) { interface::storage.ref( storage.ptr() ); }
+
+
+	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( array, ValueType, Layout )
+
+	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
 
 	};
 

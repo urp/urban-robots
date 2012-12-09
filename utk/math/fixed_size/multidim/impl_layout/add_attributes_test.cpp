@@ -26,13 +26,13 @@
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
 
-struct multidim_layout_with_new_attributes
+struct fixture
 {
   typedef layout< size_vector< 2,3,4 > > old_layout;
   typedef typename add_attributes< old_layout, meta::integral::vector< bool, true, false, true > >::type new_layout;
 };
 
-BOOST_FIXTURE_TEST_SUITE( check_multidim_layout_with_new_attributes, multidim_layout_with_new_attributes )
+BOOST_FIXTURE_TEST_SUITE( check_new_layout_attributes, fixture )
 
   BOOST_AUTO_TEST_CASE( new_attribute )
   {

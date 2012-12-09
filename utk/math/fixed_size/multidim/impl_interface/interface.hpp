@@ -19,10 +19,10 @@
 # include "utk/math/fixed_size/vector/interface.hpp"
 # include "utk/math/fixed_size/vector/at.hpp"
 
-# include "utk/math/fixed_size/multidim/impl_interface/specialized_functions.hpp"
+# include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp" // for index_type, ...
 
-# include "utk/math/fixed_size/multidim/iterators.hpp"
-
+# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"
 
 namespace utk
 {
@@ -35,8 +35,6 @@ namespace utk
 
 	template < typename T, typename Layout >
 	struct interface
-	// TODO: make member
-	: public vector::interface< T, Layout::total_size >
 	{
 	  typedef interface< T, Layout > type;
 
@@ -46,6 +44,11 @@ namespace utk
 
 	  typedef vector::interface< value_type, layout::total_size > storage_interface;
 
+
+	  // storage
+
+	  storage_interface storage;
+
 	  static constexpr index_type order = layout::order;
 
 	  //:::| constructors
@@ -53,113 +56,32 @@ namespace utk
 	  //---| constructor with storage pointer
 
 	  explicit
-	  interface( typename storage_interface::pointer_type pointer ) : storage_interface( pointer )  {	}
+	  interface( typename storage_interface::pointer_type pointer ) : storage( pointer )  {	}
 
 	  explicit
-	  interface( const storage_interface& storage ) : storage_interface( storage )
-	  {
-	    static_assert( storage_interface::size >= Layout::total_size, "given storage is too short." );
-	  }
+	  interface( const storage_interface& s ) : storage( s )
+	  { }
 
-	  /*---| copy constructor
+	  //---| copy constructor - TODO: use iterators
 	  template< typename OtherInterface >
-	  interface( const OtherInterface& other ) : storage_interface( other )
+	  interface( const typename OtherInterface::storage_interface& other ) : storage( other )
 	  {
-	    static_assert( meta::integral::all< typename meta::integral::equal< typename OtherInterface::layout::sizes, typename layout::sizes >::type >::value
-			 , "incompatible layouts!"
-			 );
-	  }*/
-
-
-	  //:::| static iterator interface |:::::::::::::::::::::::::::/
-
-	  //:::::| prepare static_index_iterator_begin
-
-	  // TODO: !!! these aliases make gcc-4.7 crash
-
-	  template< index_type Index >
-	  using static_index_iterator_begin = static_index_iterator< type, Index, 0 >;
-
-	  template< index_type Index >
-	  using const_static_index_iterator_begin = const static_index_iterator< type, Index, 0 >;
-
-	  //:::::| prepare static_index_iterator_end
-
-	  template< index_type Index >
-	  using static_index_iterator_end = static_index_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
-
-	  template< index_type Index >
-	  using const_static_index_iterator_end = const static_index_iterator< type, Index, meta::integral::at< typename layout::sizes, Index >::value >;
-
-	  //---| begin
-	  template< index_type Index >
-	  static_index_iterator_begin<Index> static_begin() { return static_index_iterator_begin< Index >( *this ); }
-
-	  template< index_type Index >
-	  const_static_index_iterator_begin<Index> static_begin() const { return const_static_index_iterator_begin< Index >( *this ); }
-
-	  //---| end
-
-	  template< index_type Index >
-	  static_index_iterator_end<Index> static_end() { return static_index_iterator_end< Index >( *this ); }
-
-	  template< index_type Index >
-	  const_static_index_iterator_end<Index> static_end() const { return const_static_index_iterator_end< Index >( *this ); }
-
-	  //:::| dynamic iterator interface |::::::::::::::::::::::::::/
-
-	  //:::::| declare iterators
-
-
-	  template< index_type Index >
-	  using iterator = const dynamic_index_iterator< type, Index >;
-
-	  template< index_type Index >
-	  using const_iterator = const dynamic_index_iterator< type, Index >;
-
-	  //---| begin
-	  template< index_type Index >
-	  iterator<Index> begin() { return iterator< Index >( *this, 0 ); }
-
-	  template< index_type Index >
-	  const_iterator<Index> begin() const { return const_iterator< Index >( *this, 0 ); }
-
-	  //---| end
-
-	  template< index_type Index >
-	  auto end( ) -> iterator<Index>
-	  {
-	    constexpr index_type end_index = meta::integral::at< typename Layout::sizes, Index>::value;
-	    return const_iterator< Index >( *this, end_index );
-
+	    static_assert( storage_interface::size >= OtherInterface::layout::total_size, "given storage is too short." );
 	  }
 
-	  template< index_type Index >
-	  auto end( ) const -> const_iterator<Index>
-	  {
-    	    constexpr index_type end_index = meta::integral::at< typename Layout::sizes, Index>::value;
-	    return const_iterator< Index >( *this, end_index );
-	  }
+	  //:::| iterators |:::::::::::::::::::::::::::::::::::::::::::/
 
-	  //:::| element access
+	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
 
-	  //---| at
+	  //:::| conversion operators
 
-	  template< typename...CoordTypes >
-	  value_type& at( CoordTypes...coords ) throw( std::out_of_range )
-	  {
-	    //TODO: checks
-	    const size_t storage_index = layout::index_offset( coords... ) + layout::static_offset();
-	    return fixed_size::vector::at( static_cast< storage_interface& >(*this), storage_index );
-	  }
+	  //---| scalar component
 
-	  template< typename...CoordTypes >
-	  const value_type& at( CoordTypes...coords ) const throw( std::out_of_range )
-	  {
-	    //TODO: checks
-	    const size_t storage_index = layout::index_offset( coords... ) + layout::static_offset();
-	    return fixed_size::vector::at( static_cast< const storage_interface& >(*this), storage_index );
-	  }
+	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
+	  operator value_type& () { return at( storage, layout::static_offset() ); }
+
+	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
+	  operator const value_type& () const { return at( storage, layout::static_offset() ); }
 
 	};
 
