@@ -35,28 +35,44 @@ namespace utk
 	struct array
 	: public interface< ValueType, Layout >
 	{
-	  typedef array<ValueType, Layout> type;
+	    typedef array<ValueType, Layout> type;
 
-	  typedef interface < ValueType, Layout > interface;
+	    typedef interface < ValueType, Layout > reference_interface;
 
-	  typedef vector::array< ValueType, interface::layout::total_size > storage_array;
+	    typedef vector::array< ValueType, reference_interface::layout::total_size > storage_array;
 
-	  //---| data storage
+	  private:
 
-	  storage_array storage;
+	    //---| data m_array
+	    storage_array m_array;
 
-	  //---| constructor (create with uninitialized data)
+	  public:
 
-	  explicit array() : interface( nullptr ), storage() { this->storage.ref( storage.ptr() ); }
+	    //---| constructor (create with uninitialized data)
 
-	  //---| constructor (copy)
+	    explicit array()
+	    : reference_interface( nullptr ), m_array()
+	    { reference_interface::storage.ref( m_array.ptr() ); }
 
-	  explicit array( const typename interface::storage_interface& s ) : interface( nullptr ), storage(s) { interface::storage.ref( storage.ptr() ); }
+	    //---| constructor (copy raw data)
+
+	    explicit array( const typename reference_interface::storage_interface::pointer_type& p )
+	    : reference_interface(nullptr), m_array( p, p + reference_interface::layout::total_size )
+	    { reference_interface::storage.ref( m_array.ptr() ); }
+
+	    //---| constructor (copy)
+
+	    explicit array( const typename reference_interface::storage_interface& s )
+	    : reference_interface(nullptr), m_array(s) { reference_interface::storage.ref( m_array.ptr() ); }
 
 
-	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( array, ValueType, Layout )
+	    auto array_data() const -> const storage_array& { return m_array; }
 
-	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( array, ValueType, Layout )
+
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
+
+
 
 	};
 

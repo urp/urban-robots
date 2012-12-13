@@ -17,6 +17,10 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
+
+# include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
+
 
 namespace utk
 {
@@ -34,24 +38,17 @@ namespace utk
 
             // terminate
             template< typename StaticEndIterator >
-            auto multiply_assign_scalar( StaticEndIterator it, StaticEndIterator end, const typename StaticEndIterator::value_type::value_type& scalar ) -> void
+            auto assign_multiply_scalar( StaticEndIterator it, StaticEndIterator end, const typename StaticEndIterator::value_type::value_type& scalar ) -> void
             { }
 
             // general case
             template< typename StaticIterator, typename StaticEndIterator >
-            auto multiply_assign_scalar( StaticIterator it, StaticEndIterator end, const typename StaticIterator::value_type::value_type& scalar ) -> void
+            auto assign_multiply_scalar( StaticIterator it, StaticEndIterator end, const typename StaticIterator::value_type::value_type& scalar ) -> void
             {
-              std::cerr << "utk::math::fixed_size::tensor | " << std::endl
-                        << "  it "  << typename StaticIterator::current_indices()
-                        << " end " << typename StaticEndIterator::current_indices()
-                        << " val " << (*it) << std::endl;
 
               (*it) *= scalar;
-
-              std::cerr << "utk::math::fixed_size::tensor | val (after) "
-                        << std::endl << (*it) << std::endl;
-
-              multiply_assign_scalar( it.next(), end, scalar );
+              std::cerr << "tensor::assign_multiply_scalar| index " << typename StaticIterator::current_indices() << std::endl;
+              assign_multiply_scalar( it.next(), end, scalar );
             }
         }
 
@@ -61,7 +58,9 @@ namespace utk
         -> array< T, Layout >
         {
           array< T, Layout > result( inter.storage );
-          static_impl::multiply_assign_scalar( result.begin(), result.end(), scalar );
+
+          static_impl::assign_multiply_scalar( result.begin(), result.end(), scalar );
+
           return result;
         }
 

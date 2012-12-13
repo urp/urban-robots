@@ -17,7 +17,6 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 
 namespace utk
 {
@@ -32,47 +31,47 @@ namespace utk
 	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout >& t )
 	{
 	  // header
-	  os << "fixed_size::tensor\t|" << std::endl
-	     //<< "  typeid " <<< typeid(interface< ValueType, Layout >).name() << std::endl // requires <typeinfo>
-	     << "  value_type " << typeid(ValueType).name() << std::endl
-	     << "  layout : " << Layout() << std::endl;
+	  os << "fixed_size::tensor::interface\t|" << std::endl
+	     << "  value_type " << typeid(ValueType).name()
+	     << "  data " << t.storage.ptr() << std::endl
+	     << "  layout " << Layout() << std::endl;
 	  // content
-	  return print_components( os, t );
+	  return print_components( os << "  ", t ) << std::endl;
 	}
 
 	// scalar
 
-	template< typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
+	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
 	{
-	  return os << at( t ) << std::endl;
+	  return os << at( t );
 	}
 
 	// 1d
-	template< typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
+	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
 	-> typename std::enable_if< Layout::order == 1,	std::ostream& >::type
 	{
 	  os << "( ";
 	  std::for_each( t.template begin_index<0>(), t.template end_index<0>()
 		       , [&os] (const ValueType& value)
-		       { os << value << "\t"; }
+		       { os << value << " "; }
 		       );
 	  return os << ")";
 	}
 
 	// 2d +
-	template< typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
+	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
+	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
 	-> typename std::enable_if< (Layout::order > 1), std::ostream& >::type
 	{
-	  typedef interface< ValueType, Layout > tensor_interface;
+	  typedef Interface< ValueType, Layout > tensor_interface;
 
 	  constexpr size_type size0 = meta::integral::pop_front< typename Layout::sizes >::value;
 
 	  os << " <"
-	     << boost::lexical_cast< std::string >( size0 );
+	     << boost::lexical_cast< std::string >( size0 ) << " ";
 
 	  std::for_each( t.template begin_index<0>(), t.template end_index<0>()
 		       , [&os] (const typename tensor_interface::template const_index_iterator<0>::value_type& small_tensor )
@@ -80,18 +79,6 @@ namespace utk
 		       );
 	  return os << "> ";
 	}
-
-	/* 3d++
-	template< typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const interface< ValueType, Layout >& t )
-	-> typename std::enable_if< typename Layout::order > 2, std::ostream& >::type
-	{
-	  typedef meta::pop_back< typename meta::pop_back< typename Layout::sizes >::tail >::tail sizes_2d;
-	  typedef index_range< sizes_2d >::type indices;
-	  meta::apply< indices, TensorIndex2dOutput >
-	}*/
-
-
 
       } // of tensor::
     } // of fixed_size::

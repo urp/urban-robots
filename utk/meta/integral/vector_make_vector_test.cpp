@@ -44,7 +44,10 @@ BOOST_AUTO_TEST_SUITE( check_make_vector )
 
   BOOST_AUTO_TEST_CASE( check_integral_from_meta_vector )
   {
-    typedef typename make_vector< int, meta::vector< 1,2,3 > >::type  ints;
+    typedef typename make_vector< int, utk::meta::vector< constant< int, 1 >
+                                                        , constant< int, 2 >
+                                                        , constant< int, 3 >
+                                                        > >::type  ints;
 
     const int size = ints::size;
     BOOST_CHECK_EQUAL( size, 3 );

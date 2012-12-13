@@ -16,10 +16,13 @@
 
 # pragma once
 
-# include "utk/meta/integral/integral.hpp"
+//# include "utk/meta/integral/integral.hpp"
 
-# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_layout/io.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
+
+//# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
+//# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
 namespace utk
 {
@@ -30,22 +33,20 @@ namespace utk
       namespace multidim
       {
 
-	template< typename...Attributes >
-	std::ostream& operator<< ( std::ostream& os, const layout< Attributes... >& l )
+	template< typename FullLayout, typename FullIndexMask, typename...NewIndexAttributes >
+	std::ostream& operator<< ( std::ostream& os, const slice_layout< FullLayout, FullIndexMask >& l )
 	{
-	  typedef layout< Attributes... > type;
+	  typedef slice_layout< FullLayout, FullIndexMask > type;
 
 	  // header
-	  os << "fixed_size::multidim::layout\t|" << std::endl
-	     //<< "  typeid " <<< typeid(type).name() << std::endl // requires <typeinfo>
-	     << "  size " << typename type::sizes()
-	     << "  stride " << typename type::strides()
-	     << "  offset " << type::static_offset() << "  "
-	     << ( sizeof...(Attributes) > 2
-		  ? "  attributes " + boost::lexical_cast<std::string>( sizeof...(Attributes) - 2 )
+	  os << "fixed_size::multidim::slice_layout\t|" << std::endl
+	     << "  full" << FullLayout() << std::endl
+	     << "  mask" << FullIndexMask() << "  offset " << type::static_offset()
+	     << ( sizeof...(NewIndexAttributes) > 0
+		  ? "  new attributes " + boost::lexical_cast<std::string>( sizeof...(NewIndexAttributes) - 2 )
 		  : ""
-		) << std::endl;
-
+		) << std::endl
+	     << "  slice layout " << typename type::layout();
 	  return os;
 	}
 	/*

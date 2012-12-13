@@ -8,4 +8,4 @@ run change_layout_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=
 
 build-project operators ;
 
-run product_test.cpp						/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+#run product_test.cpp						/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;

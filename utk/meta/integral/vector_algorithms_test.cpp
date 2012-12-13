@@ -27,7 +27,7 @@ BOOST_AUTO_TEST_SUITE( unary_transforms )
   BOOST_AUTO_TEST_CASE( vector_minus )
   {
     typedef vector< int, 1,2,3 > ints;
-    typedef typename minus< ints, 1 >::type  result;
+    typedef typename minus< ints, constant< int, 1 > >::type  result;
     static const int r0 = at< result, 0 >::value;
     BOOST_CHECK_EQUAL( r0,  0 );
     static const int r1 = at< result, 1 >::value;
@@ -157,28 +157,6 @@ BOOST_AUTO_TEST_SUITE( binary_transforms )
 
     static const bool AeqA = all< equal< A, A >::type >::value;
     BOOST_CHECK( AeqA );
-  }
-
-BOOST_AUTO_TEST_SUITE_END()
-
-BOOST_AUTO_TEST_SUITE( conditional_remove )
-
-  BOOST_AUTO_TEST_CASE( vector_remove_false )
-  {
-    typedef vector< int, 1,2,3,4,5 >  vec;
-    typedef vector< bool, true,false,true,false,true >  predicates;
-
-    typedef typename remove_false< vec, predicates >::type result;
-
-    static const unsigned nsize = result::size;
-    BOOST_CHECK_EQUAL( nsize, 3 );
-
-    static const int n0 = at< result, 0 >::value;
-    BOOST_CHECK_EQUAL( n0, 1 );
-    static const int n1 = at< result, 1 >::value;
-    BOOST_CHECK_EQUAL( n1, 3 );
-    static const int n2 = at< result, 2 >::value;
-    BOOST_CHECK_EQUAL( n2, 5 );
   }
 
 BOOST_AUTO_TEST_SUITE_END()

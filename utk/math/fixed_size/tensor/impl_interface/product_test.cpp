@@ -62,6 +62,8 @@ BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
 
     product_ab prod = product( t_a, t_b );
 
+    BOOST_CHECK( prod.storage.ptr() != nullptr );
+
     const double p00 = at( prod, 0,0 );
     BOOST_CHECK_EQUAL( p00, 3 );
 

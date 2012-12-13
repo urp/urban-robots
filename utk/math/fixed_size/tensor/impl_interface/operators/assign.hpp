@@ -30,7 +30,21 @@ namespace static_impl
   template< typename ItA, typename ItEndA, typename ItB >
   auto assign_md( ItA ita, const ItEndA& itenda, const ItB& itb) -> void
   {
-    *ita = *itb;
+    typedef typename ItA::value_type::value_type value_typeA;
+    typedef typename ItB::value_type::value_type value_typeB;
+
+    value_typeA& a_comp = *ita;
+    const value_typeB& b_comp = *itb;
+    std::cerr << "static_impl::assign_md\t| before"
+              << " a " << a_comp << "("<< (&a_comp) << ")"
+              << " b " << b_comp << "("<< (&b_comp) << ")" << std::endl;
+
+    a_comp = b_comp;
+
+    std::cerr << "static_impl::assign_md\t| after"
+              << " a " << a_comp << "("<< (&a_comp) << ")"
+              << " b " << b_comp << "("<< (&b_comp) << ")" << std::endl;
+
     assign_md( ita.next(), itenda, itb.next() );
   }
 }
@@ -39,15 +53,15 @@ namespace static_impl
 # define UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface_template, prim_type, layout_type ) 		\
                                                                                                                     \
   template< typename OtherLayout > 								                                                                  \
-  auto operator=( const interface_template< prim_type, OtherLayout >& other)				                                \
-  -> typename std::enable_if< interface_template< prim_type, layout_type >::layout::order == interface_template< prim_type, OtherLayout >::layout::order 	\
-			      and meta::integral::all< typename meta::integral::equal< typename interface_template< prim_type, layout_type >::layout::sizes \
-										     , typename interface_template< prim_type, OtherLayout >::layout::sizes                     \
-										     >::type 	                                                                                  \
+  auto operator=( const tensor::interface< prim_type, OtherLayout >& other) 				                                \
+  -> typename std::enable_if< interface_template< prim_type, layout_type >::layout::order == tensor::interface< prim_type, OtherLayout >::layout::order 	\
+                                and meta::integral::all< typename meta::integral::equal< typename interface_template< prim_type, layout_type >::layout::sizes \
+                                                       , typename tensor::interface< prim_type, OtherLayout >::layout::sizes                     \
+                                                       >::type 	                                                                                  \
 						     >::value 					                                                                                \
 			    , interface_template< prim_type, layout_type >&			                                                      \
 			    >::type 								                                                                                  \
-  { 												                                                                                        \
+  { 			                                                                                                          \
     static_impl::assign_md( begin(), end(), other.begin() ); 					                                              \
     return *this; 										                                                                              \
   }												                                                                                          \

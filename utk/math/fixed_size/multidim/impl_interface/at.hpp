@@ -37,8 +37,10 @@ namespace utk
 	  const size_t storage_index = Interface< T, Layout >::layout::index_offset( coords... ) + Interface< T, Layout >::layout::static_offset();
 
 	  std::cout << "utk::math::fixed_size::multidim::at (dynamic)| "
-		    << " storage_index " << storage_index << " storage "
-		    << inter.storage << std::endl;
+	  	    << " storage_index " << storage_index
+		    << "(" << Interface< T, Layout >::layout::index_offset( coords... )
+		    << ", "<< Interface< T, Layout >::layout::static_offset() << ")"
+		    << " storage "<< inter.storage << std::endl;
 
 	  return at( inter.storage, storage_index );
 	}
@@ -52,10 +54,11 @@ namespace utk
 	  //TODO: checks
 	  const size_t storage_index = Interface< T, Layout >::layout::index_offset( coords... ) + Interface< T, Layout >::layout::static_offset();
 
-	  using namespace utk::math::fixed_size::vector;
-	  std::cout << "utk::math::fixed_size::multidim::at (dynamic const) | "
-		    << " storage_index " << storage_index
-		    << " storage " << inter.storage << std::endl;
+	  std::cout << "utk::math::fixed_size::multidim::at (const dynamic)| "
+	  	    << " storage_index " << storage_index
+		    << "(" << Interface< T, Layout >::layout::index_offset( coords... )
+		    << ", "<< Interface< T, Layout >::layout::static_offset() << ")"
+		    << " storage "<< inter.storage << std::endl;
 
 	  return at( inter.storage, storage_index );
 	}

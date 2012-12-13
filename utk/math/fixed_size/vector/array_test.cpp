@@ -38,6 +38,9 @@ BOOST_FIXTURE_TEST_SUITE( constructors, constructors_fixture )
     BOOST_CHECK( empty.is_valid() );
     auto empty_size = empty.size;
     BOOST_CHECK_EQUAL( empty_size, 4 );
+
+    empty[0] = 1.;
+    BOOST_CHECK_EQUAL( empty[0], 1. );
   }
 
   BOOST_AUTO_TEST_CASE( copy_constructor )

@@ -46,6 +46,23 @@ BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
     BOOST_CHECK_EQUAL( at(multidim123, 0,1,2), 6 );
   }
 
+  BOOST_AUTO_TEST_CASE( check_complete_index_set_assign )
+  {
+    at(multidim123, 0,0,0) = -1;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,0,0), -1 );
+    at(multidim123, 0,0,1) = -2;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,0,1), -2 );
+    at(multidim123, 0,0,2) = -3;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,0,2), -3 );
+    at(multidim123, 0,1,0) = -4;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,1,0), -4 );
+    at(multidim123, 0,1,1) = -5;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,1,1), -5 );
+    at(multidim123, 0,1,2) = -6;
+    BOOST_CHECK_EQUAL( at(multidim123, 0,1,2), -6 );
+  }
+
+
   BOOST_AUTO_TEST_CASE( check_incomplete_index_set )
   {
     auto i00 = multidim::at( multidim123, multidim::index_vector< 0,0 >() );

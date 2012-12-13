@@ -31,24 +31,36 @@ namespace utk
       {
 
 	template < typename T, typename Layout >
-	struct array
+	class array
 	: public interface< T, Layout >
 	{
-	  typedef interface < T, Layout > interface;
+	    typedef interface < T, Layout > reference_interface;
 
-	  typedef vector::array< T, interface::layout::total_size > storage_array;
+	    typedef vector::array< T, reference_interface::layout::total_size > storage_array;
 
-	  //---| data storage
+	  private:
 
-	  storage_array storage;
+	    //---| data storage
 
-	  //---| constructor (create with uninitialized data)
+	    storage_array m_array;
 
-	  explicit array() : interface( nullptr ), storage() { interface::storage.ref( storage.ptr() ); }
+	  public:
 
-	  //---| constructor (copy)
+	    //---| constructor (create with uninitialized data)
 
-	  explicit array( const typename interface::storage_interface& s ) : interface( nullptr ), storage(s) { interface::storage.ref( storage.ptr() ); }
+	    explicit array()
+	    : reference_interface( nullptr ), m_array()
+	    {
+	      reference_interface::storage.ref( m_array.ptr() );
+	    }
+
+	    //---| constructor (copy)
+
+	    explicit array( const typename reference_interface::storage_interface& storage )
+	    : reference_interface( nullptr ), m_array(storage)
+	    {
+	      reference_interface::storage.ref( m_array.ptr() );
+	    }
 
 	};
 

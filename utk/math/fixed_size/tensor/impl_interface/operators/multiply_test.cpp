@@ -14,7 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_array/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
 
@@ -27,7 +31,7 @@ using namespace utk::math::fixed_size;
 
 struct fixture
 {
-  typedef typename tensor::make_layout< tensor::size_vector<1,2,3>, tensor::contravariant_tag >::type contra_layout;
+  typedef typename tensor::make_layout< tensor::size_vector<2,3>, tensor::contravariant_tag >::type contra_layout;
   typedef tensor::interface< int, contra_layout > type123;
   int data[6];
   type123 tensor123;
@@ -41,12 +45,29 @@ BOOST_FIXTURE_TEST_SUITE( check_multiply, fixture )
   {
     auto result = tensor123 * 2;
 
-    BOOST_CHECK_EQUAL( at( result, 0,0,0 ),  2 );
-    BOOST_CHECK_EQUAL( at( result, 0,0,1 ),  4 );
-    BOOST_CHECK_EQUAL( at( result, 0,0,2 ),  6 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,0 ),  8 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,1 ), 10 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,2 ), 12 );
+    BOOST_CHECK_EQUAL( at( result, 0,0 ),  2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ),  4 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ),  6 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ),  8 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 10 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 12 );
   }
+
+  BOOST_AUTO_TEST_CASE( check_multipy_scalar_with_slice_layout )
+  {
+    typedef typename multidim::fix_index< contra_layout, 1, 2 >::type fixed_layout;
+    typedef tensor::interface< int, fixed_layout > type12;
+
+    type12 tensor12(data);
+
+    auto result = tensor12 * 2;
+
+    BOOST_CHECK_EQUAL( tensor12.order,  1 );
+    BOOST_TEST_MESSAGE( "tensor12 * 2 = " << tensor12 );
+
+    BOOST_CHECK_EQUAL( at( result, 0 ),  6 );
+    BOOST_CHECK_EQUAL( at( result, 1 ), 12 );
+  }
+
 
 BOOST_AUTO_TEST_SUITE_END()

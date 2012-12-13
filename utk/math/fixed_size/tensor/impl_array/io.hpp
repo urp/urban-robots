@@ -1,4 +1,4 @@
-/*  array.hpp - Copyright Peter Urban 2012
+/*  io.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@
 
 # pragma once
 
+# include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_array/array.hpp"
-# include "utk/math/fixed_size/tensor/impl_array/io.hpp"
 
 namespace utk
 {
@@ -27,6 +28,17 @@ namespace utk
     {
       namespace tensor
       {
+
+	template< typename ValueType, typename Layout >
+	std::ostream& operator<< ( std::ostream& os, const array< ValueType, Layout >& t )
+	{
+	  // header
+	  os << "fixed_size::tensor::array\t|" << std::endl
+	     << "  array " << t.array_data() << std::endl
+	     << "  interface " << static_cast< const interface< ValueType, Layout >& >(t) << std::endl;
+	  // content
+	  return os << std::endl;
+	}
 
       } // of tensor::
     } // of fixed_size::

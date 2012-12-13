@@ -16,7 +16,7 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/vector/interface.hpp"
+# include "utk/math/fixed_size/vector/vector.hpp"
 # include "utk/math/fixed_size/vector/at.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp" // for index_type, ...
@@ -37,6 +37,8 @@ namespace utk
 	struct interface
 	{
 	  typedef interface< T, Layout > type;
+
+	  typedef type reference_interface;
 
 	  typedef T value_type;
 
@@ -73,15 +75,28 @@ namespace utk
 
 	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
 
-	  //:::| conversion operators
+	  //:::| conversion operators TODO Replace with macro
 
 	  //---| scalar component
 
 	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
-	  operator value_type& () { return at( storage, layout::static_offset() ); }
+	  operator value_type& ()
+	  {
+	    std::cerr << "multidim::interface::operator value_type\t|"
+		      <<" offset  " << layout::static_offset()
+		      <<" storage " << storage << std::endl;
+
+	    return at( storage, layout::static_offset() );
+	  }
 
 	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
-	  operator const value_type& () const { return at( storage, layout::static_offset() ); }
+	  operator const value_type& () const
+	  {
+	    std::cerr << "multidim::interface::operator const value_type\t|"
+		      <<" offset  " << layout::static_offset()
+		      <<" storage " << storage << std::endl;
+	    return at( storage, layout::static_offset() );
+	  }
 
 	};
 

@@ -92,7 +92,9 @@ BOOST_AUTO_TEST_SUITE( check_static_iterator_helpers )
     //typedef typename helpers::advance_digits< i2, s23, 1 >::type i3;
     // indices (1,1) -> (2,2)
     typedef typename meta::integral::make_vector< index_type
-                                                 , typename meta::integral::transform< s23, meta::integral::minus< index_type, 1 > >::type
+                                                 , typename meta::integral::transform< s23, meta::integral::minus< index_type
+                                                                                                                 , meta::integral::constant< index_type, 1 > >
+                                                                                                                 >::type
                                                  //, typename meta::integral::minus< s23, size_type(1) >::type
                                                  >::type i3;
     typedef typename helpers::advance_digits< i3, s23, 1 >::type iend;

@@ -1,4 +1,4 @@
-/*  tensor_interface_test.cpp - Copyright Peter Urban 2012
+/*  io_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -14,25 +14,27 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/multidim/layout.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
-# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
 
 #define BOOST_TEST_DYN_LINK
-#define BOOST_TEST_MODULE tensor array
+#define BOOST_TEST_MODULE multidim::layout io
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
-using namespace utk::math::fixed_size::tensor;
+using namespace utk::math::fixed_size::multidim;
 
-BOOST_AUTO_TEST_CASE( construct_with_uninitialized_data )
+struct fixture
 {
-  typedef typename make_layout< size_vector<1,2,3>, covariant_tag >::type tensor_layout;
-  typedef array< double, tensor_layout > tensor123;
-  tensor123 test_tensor;
+  typedef layout< size_vector< 1,2,3 > > layout123;
+  typedef slice_layout< layout123, index_vector< 0,0,3 > > slice_layout3;
+};
 
-  at( test_tensor, 0,0,0 ) = 1.;
+BOOST_FIXTURE_TEST_SUITE( check_io, fixture )
 
-  BOOST_CHECK_EQUAL( at( test_tensor, 0,0,0 ), 1. );
-}
+
+  BOOST_AUTO_TEST_CASE( check_3d )
+  {
+    BOOST_TEST_MESSAGE( slice_layout3() );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()

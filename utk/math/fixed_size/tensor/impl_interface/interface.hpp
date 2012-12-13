@@ -56,6 +56,8 @@ namespace utk
 
 	  public:
 
+	    typedef type reference_interface;
+
 	    typedef Layout layout;
 
 	    typedef typename multidim_interface::storage_interface storage_interface;

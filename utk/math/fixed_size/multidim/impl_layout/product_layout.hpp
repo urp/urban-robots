@@ -17,6 +17,7 @@
 # pragma once
 
 # include "utk/meta/vector_push_front.hpp"
+# include "utk/meta/vector_split.hpp"
 # include "utk/meta/vector_transform.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/layout.hpp"
@@ -38,8 +39,11 @@ namespace utk
                                                       , typename LayoutB::sizes >::type new_sizes;
           typedef typename helpers::stride_sequence< new_sizes >::type new_strides;
 
-          typedef typename meta::binary_transform< typename LayoutA::attributes
-                                                 , typename LayoutB::attributes
+          typedef typename meta::split< typename LayoutA::attributes, 2 >::second extra_attributesA;
+          typedef typename meta::split< typename LayoutB::attributes, 2 >::second extra_attributesB;
+
+          typedef typename meta::binary_transform< extra_attributesA
+                                                 , extra_attributesB
                                                  , meta::function< meta::integral::concatinate >
                                                  >::type product_attributes;
 

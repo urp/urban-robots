@@ -15,6 +15,7 @@
 */
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/operators/plus.hpp"
 
@@ -27,26 +28,26 @@ using namespace utk::math::fixed_size;
 
 struct fixture
 {
-  typedef typename tensor::make_layout< tensor::size_vector<1,2,3>, tensor::contravariant_tag >::type contra_layout;
+  typedef typename tensor::make_layout< tensor::size_vector<2,3>, tensor::contravariant_tag >::type contra_layout;
   typedef tensor::interface< int, contra_layout > type123;
   int data[6];
-  type123 tensor123;
+  type123 tensor23;
 
-  fixture() : data{ 1,2,3,4,5,6 }, tensor123( data ) {}
+  fixture() : data{ 1,2,3,4,5,6 }, tensor23( data ) {}
 };
 
 BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
 
   BOOST_AUTO_TEST_CASE( check_complete_index_set )
   {
-    auto result = tensor123 + 1;
+    auto result = tensor23 + 1;
 
-    BOOST_CHECK_EQUAL( at( result, 0,0,0 ), 2 );
-    BOOST_CHECK_EQUAL( at( result, 0,0,1 ), 3 );
-    BOOST_CHECK_EQUAL( at( result, 0,0,2 ), 4 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,0 ), 5 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,1 ), 6 );
-    BOOST_CHECK_EQUAL( at( result, 0,1,2 ), 7 );
+    BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ), 3 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ), 4 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ), 5 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 6 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 7 );
   }
 
 BOOST_AUTO_TEST_SUITE_END()

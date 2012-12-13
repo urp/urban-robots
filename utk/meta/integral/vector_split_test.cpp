@@ -31,7 +31,7 @@ BOOST_FIXTURE_TEST_SUITE( check_split, fixture )
 
   BOOST_AUTO_TEST_CASE( check_no_split_begin )
   {
-    typedef typename split< vec, 0 > result;
+    typedef split< vec5, 0 > result;
 
     static const unsigned sizefirst = result::first::size;
     BOOST_CHECK_EQUAL( sizefirst, 0 );
@@ -53,7 +53,7 @@ BOOST_FIXTURE_TEST_SUITE( check_split, fixture )
 
   BOOST_AUTO_TEST_CASE( check_no_split_end )
   {
-    typedef typename split< vec, 5 > result;
+    typedef split< vec5, 5 > result;
 
     static const unsigned sizefirst = result::first::size;
     BOOST_CHECK_EQUAL( sizefirst, 5 );
@@ -75,26 +75,25 @@ BOOST_FIXTURE_TEST_SUITE( check_split, fixture )
 
   BOOST_AUTO_TEST_CASE( check_split )
   {
-    typedef typename split< vec, 3 > result;
+    typedef split< vec5, 3 > result;
 
     static const unsigned sizefirst = result::first::size;
-    BOOST_CHECK_EQUAL( sizefirst, 2 );
+    BOOST_CHECK_EQUAL( sizefirst, 3 );
 
     static const int n0 = at< result::first, 0 >::value;
     BOOST_CHECK_EQUAL( n0, 1 );
     static const int n1 = at< result::first, 1 >::value;
     BOOST_CHECK_EQUAL( n1, 2 );
+    static const int n2 = at< result::first, 2 >::value;
+    BOOST_CHECK_EQUAL( n2, 3 );
 
     static const unsigned sizesecond = result::second::size;
-    BOOST_CHECK_EQUAL( sizesecond, 3 );
+    BOOST_CHECK_EQUAL( sizesecond, 2 );
 
-    static const int n2 = at< result::first, 0 >::value;
-    BOOST_CHECK_EQUAL( n2, 3 );
-    static const int n3 = at< result::first, 1 >::value;
+    static const int n3 = at< result::second, 0 >::value;
     BOOST_CHECK_EQUAL( n3, 4 );
-    static const int n4 = at< result::first, 2 >::value;
+    static const int n4 = at< result::second, 1 >::value;
     BOOST_CHECK_EQUAL( n4, 5 );
-
   }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -36,136 +36,135 @@ namespace utk
       namespace multidim
       {
 
-	//---| static_iterator
-	//---| use slice_layout
+				//---| static_iterator
+				//---| use slice_layout
 
-	template < typename Interface
-		 , typename CurrentIndexVector = typename meta::integral::make_uniform_vector< index_type, Interface::layout::order, 0 >::type
-		 >
-	class static_iterator
-	{
-	    static_assert( std::is_same< typename CurrentIndexVector::value_type, index_type >::value
-			 , "CurrentIndexVector must contain indices of index_type.");
+				template < typename Interface
+								 , typename CurrentIndexVector = typename meta::integral::make_uniform_vector< index_type, Interface::layout::order, 0 >::type
+								 >
+				class static_iterator
+				{
+						static_assert( std::is_same< typename CurrentIndexVector::value_type, index_type >::value
+ 												 , "CurrentIndexVector must contain indices of index_type.");
+
+						//:::| static value interface |::::::::::::::::::::::::::::/
+
+						typedef slice_layout< typename Interface::layout, CurrentIndexVector  > value_layout;
+						typedef typename change_layout< typename Interface::reference_interface, value_layout >::type value_interface;
+						typedef typename value_interface::storage_interface value_storage_interface;
+
+					public:
+
+						//:::| iteration information |:::::::::::::::::::::::::::::/
+
+						typedef CurrentIndexVector current_indices;
+
+						//:::| container and value types |:::::::::::::::::::::::::/
+
+						typedef value_interface value_type;
+
+						//:::| iterator types |::::::::::::::::::::::::::::::::::::/
+
+						static constexpr bool use_random_access_impl = 0;// TODO: 1 if is_sorted< value_layout::sizes && strides cover managed memory
+
+						template< index_type IndexDelta, int impl  >
+						struct random_access_iterator_impl { /* unspecified */ };
+
+						//---| random access iterator ( general implementation )
+						//-----!enabled if other impl is not applicable!
+						//-----directly count through the indices
+
+						template< index_type IndexDelta >
+						struct random_access_iterator_impl< IndexDelta, 0 >
+						{
+							typedef static_iterator< Interface
+										 // TODO: only implemented for IndexDelta +/-1 and 0
+									 , typename helpers::advance_digits< current_indices
+														 , typename Interface::layout::sizes
+														 , IndexDelta
+														 >::type
+									 > type;
+						};
+
+						/*---| random access iterator ( index_to_indices implementation )
+						//-----!enabled if other impl is not applicable!
+						//-----directly count through the indices
+
+						template< index_type IndexDelta >
+						struct random_access_iterator_impl< IndexDelta, 1 >
+						{
+							static constexpr stride_type linear_index = value_layout::static_offset();
+							typedef static_iterator< Interface
+									 , typename helpers::index_to_indices< typename Interface::layout::strides
+												 , linear_index + IndexDelta
+												 >::type
+									 > type;
+						};*/
+
+						//---| random access iterator
+						template< index_type IndexDelta >
+						using random_access_iterator = typename random_access_iterator_impl< IndexDelta, use_random_access_impl >::type;
+
+						//---| forward iterator
+						typedef random_access_iterator<  1 > forward_iterator;
+
+						//---| reverse iterator
+						typedef random_access_iterator< -1 > reverse_iterator;
 
 
-	    //:::| static value interface |::::::::::::::::::::::::::::/
+						//:::| storage interface |:::::::::::::::::::::::::::::::::/
 
-	    typedef slice_layout< typename Interface::layout, CurrentIndexVector  > value_layout;
-	    typedef typename change_layout< Interface, value_layout >::type value_interface;
-	    typedef typename value_interface::storage_interface value_storage_interface;
+						typename value_interface::storage_interface storage;
 
-	  public:
+						//:::| constructors |::::::::::::::::::::::::::::::::::::::/
 
-	    //:::| iteration information |:::::::::::::::::::::::::::::/
+						//---| constructor with storage_interface
+						static_iterator( const Interface& inter )
+						: storage( inter.storage )  { }
 
-	    typedef CurrentIndexVector current_indices;
+						//---| copy constuctor
+						template< typename OtherInterface, typename OtherIndexVector >
+						static_iterator( const static_iterator< OtherInterface, OtherIndexVector >& other )
+						: storage( other.storage )  { }
 
-	    //:::| container and value types |:::::::::::::::::::::::::/
+						//:::| dereference operator |::::::::::::::::::::::::::::::/
 
-	    typedef value_interface value_type;
+						value_interface operator*() const
+						{ return value_interface( storage ); }
 
-	    //:::| iterator types |::::::::::::::::::::::::::::::::::::/
+						//:::| increment operator |::::::::::::::::::::::::::::::::/
 
-	    static constexpr bool use_random_access_impl = 0;// TODO: 1 if is_sorted< value_layout::sizes && strides cover managed memory
+						forward_iterator next() const
+						{ return forward_iterator( *this ); }
 
-	    template< index_type IndexDelta, int impl  >
-	    struct random_access_iterator_impl { /* unspecified */ };
+						//:::| decrement operator |::::::::::::::::::::::::::::::::/
+						// TODO: !!! CHECK for underrun ( mark rend() )
 
-	    //---| random access iterator ( general implementation )
-	    //-----!enabled if other impl is not applicable!
-	    //-----directly count through the indices
+						reverse_iterator previous() const
+						{ return reverse_iterator( *this ); }
 
-	    template< index_type IndexDelta >
-	    struct random_access_iterator_impl< IndexDelta, 0 >
-	    {
-	      typedef static_iterator< Interface
-				       // TODO: only implemented for IndexDelta +/-1 and 0
-				     , typename helpers::advance_digits< current_indices
-								       , typename Interface::layout::sizes
-								       , IndexDelta
-								       >::type
-				     > type;
-	    };
+						//:::| comparison operators |::::::::::::::::::::::::::::::/
 
-	    /*---| random access iterator ( index_to_indices implementation )
-	    //-----!enabled if other impl is not applicable!
-	    //-----directly count through the indices
+						template< typename OtherInterface, typename OtherIndexVector >
+						bool operator==( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
+						{
+							assert( storage.ptr() == other.storage.ptr() );
+							return meta::integral::all< typename meta::integral::equal< OtherIndexVector, CurrentIndexVector >::type >::value;
+						}
 
-	    template< index_type IndexDelta >
-	    struct random_access_iterator_impl< IndexDelta, 1 >
-	    {
-	      static constexpr stride_type linear_index = value_layout::static_offset();
-	      typedef static_iterator< Interface
-				     , typename helpers::index_to_indices< typename Interface::layout::strides
-									 , linear_index + IndexDelta
-									 >::type
-				     > type;
-	    };*/
+						template< typename OtherInterface, typename OtherIndexVector >
+						bool operator!=( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
+						{ return not operator==( other ); }
 
-	    //---| random access iterator
-	    template< index_type IndexDelta >
-	    using random_access_iterator = typename random_access_iterator_impl< IndexDelta, use_random_access_impl >::type;
+				}; // of static_iterator<>
 
-	    //---| forward iterator
-	    typedef random_access_iterator<  1 > forward_iterator;
-
-	    //---| reverse iterator
-	    typedef random_access_iterator< -1 > reverse_iterator;
-
-
-	    //:::| storage interface |:::::::::::::::::::::::::::::::::/
-
-	    typename value_interface::storage_interface storage;
-
-	    //:::| constructors |::::::::::::::::::::::::::::::::::::::/
-
-	    //---| constructor with storage_interface
-	    static_iterator( const Interface& interface )
-	    : storage( interface.storage )  { }
-
-	    //---| copy constuctor
-	    template< typename OtherInterface, typename OtherIndexVector >
-	    static_iterator( const static_iterator< OtherInterface, OtherIndexVector >& other )
-	    : storage( other.storage )  { }
-
-	    //:::| dereference operator |::::::::::::::::::::::::::::::/
-
-	    value_interface operator*() const
-	    { return value_interface( value_storage_interface( storage.ptr() ) ); }
-
-	    //:::| increment operator |::::::::::::::::::::::::::::::::/
-
-	    forward_iterator next() const
-	    { return forward_iterator( *this ); }
-
-	    //:::| decrement operator |::::::::::::::::::::::::::::::::/
-	    // TODO: !!! CHECK for underrun ( mark rend() )
-
-	    reverse_iterator previous() const
-	    { return reverse_iterator( *this ); }
-
-	    //:::| comparison operators |::::::::::::::::::::::::::::::/
-
-	    template< typename OtherInterface, typename OtherIndexVector >
-	    bool operator==( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
-	    {
-	      assert( storage.ptr() == other.storage.ptr() );
-	      return meta::integral::all< typename meta::integral::equal< OtherIndexVector, CurrentIndexVector >::type >::value;
-	    }
-
-	    template< typename OtherInterface, typename OtherIndexVector >
-	    bool operator!=( const static_iterator< OtherInterface, OtherIndexVector >& other ) const
-	    { return not operator==( other ); }
-
-	}; // of static_iterator<>
-
-	template< typename Interface >
-	struct make_static_end_iterator
-	{
-	    typedef static_iterator< Interface
-				   , typename helpers::end_iterator_indices< typename Interface::layout::sizes >::type
-				   > type;
-	};
+				template< typename Interface >
+				struct make_static_end_iterator
+				{
+						typedef static_iterator< Interface
+								 , typename helpers::end_iterator_indices< typename Interface::layout::sizes >::type
+								 > type;
+				};
 
       } // of multidim::
     } // of fixed_size::

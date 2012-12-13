@@ -34,9 +34,20 @@ namespace utk
 	//---| stream-io operators
 	template<class T,size_t Cnt>
 	std::ostream&	operator<<(std::ostream& os,const interface<T,Cnt>& v)
-	{ utk::io::sequence_to_stream( os<<'(' ,v.begin(),v.end(),",");
+	{
+	  os<< "interface p "<< v.ptr() << '(';
+	  utk::io::sequence_to_stream( os ,v.begin(),v.end(),",");
 	  return os<<')';
 	}
+
+	//---| stream-io operators
+	template<class T,size_t Cnt>
+	std::ostream&	operator<<(std::ostream& os,const array<T,Cnt>& v)
+	{
+	  os << "array (" << static_cast< const interface<T,Cnt>& >(v) << ")";
+	  return os;
+	}
+
 
 	template<class T,size_t Cnt>
 	std::istream&	operator>>(std::istream& is,interface<T,Cnt>& v)

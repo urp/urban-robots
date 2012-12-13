@@ -14,7 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-//# include "utk/meta/integral/vector.hpp"
+# include "utk/meta/integral/vector.hpp"
 
 # include "utk/meta/vector_at.hpp"
 

@@ -26,6 +26,8 @@
 # include "utk/math/fixed_size/multidim/impl_slice_layout/add_attributes.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/remove_index.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/product_layout.hpp"
+# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
+
 
 namespace utk
 {

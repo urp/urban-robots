@@ -17,6 +17,7 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
 
 namespace utk
 {
@@ -33,12 +34,12 @@ namespace utk
 
             // terminate
             template< typename StaticEndIterator >
-            auto plus_assign_scalar( StaticEndIterator it, StaticEndIterator end, const typename StaticEndIterator::value_type::value_type& scalar ) -> void
-            { static_assert(it==end, "BUG"); }
+            auto assign_plus_scalar( StaticEndIterator it, StaticEndIterator end, const typename StaticEndIterator::value_type::value_type& scalar ) -> void
+            { }
 
             // general case
             template< typename StaticIterator, typename StaticEndIterator >
-            auto plus_assign_scalar( StaticIterator it, StaticEndIterator end, const typename StaticIterator::value_type::value_type& scalar ) -> void
+            auto assign_plus_scalar( StaticIterator it, StaticEndIterator end, const typename StaticIterator::value_type::value_type& scalar ) -> void
             {
               (*it) += scalar;
               assign_plus_scalar( it.next(), end, scalar );
@@ -50,8 +51,8 @@ namespace utk
         auto operator+( const T& scalar, const Interface< T, Layout >& inter )
         -> array< T, Layout >
         {
-          array< T, Layout > result( inter );
-          plus_assign_scalar( result.begin(), result.end(), scalar );
+          array< T, Layout > result( inter.storage );
+          static_impl::assign_plus_scalar( result.begin(), result.end(), scalar );
           return result;
         }
 

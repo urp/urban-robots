@@ -42,7 +42,7 @@ BOOST_AUTO_TEST_SUITE( check_remove )
     BOOST_CHECK_EQUAL( n2, 5 );
   }
 
-  BOOST_AUTO_TEST_CASE( check_remove_false )
+  BOOST_AUTO_TEST_CASE( check_remove_at )
   {
     typedef vector< int, 1,2,3,4,5 >  vec;
 

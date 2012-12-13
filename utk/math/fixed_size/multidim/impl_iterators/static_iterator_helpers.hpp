@@ -121,7 +121,9 @@ namespace utk
 	  template < typename SizeVector, index_type Difference >
 	  struct advance_digits< typename meta::integral::make_vector< index_type
 								     //, typename meta::integral::minus< SizeVector, 1 >::type
-								     , typename meta::integral::transform< SizeVector, meta::integral::minus< index_type, 1 > >::type
+								     , typename meta::integral::transform< SizeVector
+													 , meta::integral::minus< index_type, meta::integral::constant< index_type, 1 > >
+													 >::type
 								     >::type
 			       , SizeVector
 			       , Difference

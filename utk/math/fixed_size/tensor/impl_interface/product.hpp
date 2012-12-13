@@ -49,7 +49,13 @@ namespace utk
 	auto assign_product( Result& result, const ItA& ita, const ItEndA& itenda, const B& b )
 	-> void
 	{
-	  at( result, typename ItA::current_indices() ) =  b * typename Result::value_type(*ita) ;
+	  std::cerr << "utk::math::fixed_size::tensor::assign_product | current "<< typename ItA::current_indices() << std::endl;
+
+	  auto res_part = at( result, typename ItA::current_indices() );
+	  auto val_part = b * typename Result::value_type(*ita) ;
+
+	  res_part = val_part;
+
 	  assign_product( result, ita.next(), itenda, b ) ;
 	}
 
@@ -71,6 +77,8 @@ namespace utk
 	  type result;
 
 	  assign_product( result, a.begin(), a.end(), b );
+
+	  std::cerr << "utk::math::fixed_size::tensor::product | result -> " << std::endl << result;
 
 	  return result;
 	}

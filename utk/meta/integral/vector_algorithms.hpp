@@ -47,22 +47,22 @@ namespace utk
 
       //---| minus ( scalar - scalar -> scalar )
 
-      template< typename T, T NegativeDifference >
+      template< typename T, typename NegativeDifference >
       struct minus
       {
 	typedef decltype( T() - T() ) value_type;
 
 	template< T Value >
 	struct apply
-	{ static constexpr value_type value = Value - NegativeDifference; };
+	{ static constexpr value_type value = Value - NegativeDifference::value; };
 
       };
 
       //---| minus ( vector - scalar -> vector )
 
       template< typename T, T...Values, T NegativeDifference >
-      struct minus< vector< T, Values... >, NegativeDifference >
-      : public transform< vector< T, Values... >, minus< T, NegativeDifference > >
+      struct minus< vector< T, Values... >, constant< T, NegativeDifference > >
+      : public transform< vector< T, Values... >, minus< T, constant< T, NegativeDifference > > >
       {	};
 
 
