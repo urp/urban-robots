@@ -24,12 +24,12 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
-using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::tensor;
 
 struct fixture
 {
-  typedef typename tensor::make_layout< tensor::size_vector<2,3>, tensor::contravariant_tag >::type contra_layout;
-  typedef tensor::interface< int, contra_layout > type123;
+  typedef typename make_layout< size_vector<2,3>, contravariant_tag >::type contra_layout;
+  typedef interface< int, unmanaged_tag, contra_layout > type123;
   int data[6];
   type123 tensor23;
 

@@ -19,7 +19,6 @@
 # include "utk/math/fixed_size/multidim/layout.hpp"
 # include "utk/math/fixed_size/multidim/slice_layout.hpp"
 # include "utk/math/fixed_size/multidim/interface.hpp"
-# include "utk/math/fixed_size/multidim/array.hpp"
 # include "utk/math/fixed_size/multidim/iterators.hpp"
 
 namespace utk

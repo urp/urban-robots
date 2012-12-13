@@ -33,77 +33,123 @@ namespace utk
       namespace multidim
       {
 
-	template < typename T, typename Layout >
+	struct unmanaged_tag {};
+	struct managed_tag {};
+
+	struct default_storage
+	{
+	  typedef unmanaged_tag unmanaged;
+
+	  typedef managed_tag managed;
+	};
+
+
+	template< typename Storage >
+	struct storage_traits
+	{ /* unspecified */ };
+
+	template< >
+	struct storage_traits< unmanaged_tag >
+	: public default_storage
+	{
+	  template< typename ValueType, size_type Size >
+	  using type = fixed_size::vector::interface< ValueType, Size >;
+	};
+
+	template< >
+	struct storage_traits< managed_tag >
+	: public default_storage
+	{
+	  template< typename ValueType, size_type Size >
+	  using type = fixed_size::vector::array< ValueType, Size >;
+	};
+
+	template < typename T, typename Storage, typename Layout >
 	struct interface
 	{
-	  typedef interface< T, Layout > type;
+	    typedef interface< T, Storage, Layout > type;
 
-	  typedef type reference_interface;
+	    typedef T value_type;
 
-	  typedef T value_type;
+	    typedef Layout layout;
 
-	  typedef Layout layout;
+	    //---| storage
 
-	  typedef vector::interface< value_type, layout::total_size > storage_interface;
+	    typedef typename storage_traits< Storage >::template type< T, layout::total_size > storage_type;
+
+	    typedef typename storage_traits< Storage >::unmanaged unmanaged_storage_tag;
+	    typedef typename storage_traits< Storage >::managed   managed_storage_tag;
+
+	    typedef typename storage_traits< unmanaged_storage_tag >::template type< T, layout::total_size > unmanaged_storage;
+	    typedef typename storage_traits< managed_storage_tag   >::template type< T, layout::total_size >   managed_storage;
+
+	    typedef interface< T, unmanaged_storage_tag, Layout > unmanaged_interface;
+	    typedef interface< T, managed_storage_tag  , Layout > managed_interface;
+
+	    storage_type storage;
+
+	    static constexpr index_type order = layout::order;
+
+	    //:::| constructors |::::::::::::::::::::::::::::::::::::::::/
+
+	    //---| default constructor
+	    //-----| enable if storage is managed
+
+	    //template< typename S = storage_type
+	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::managed >::value, void >::type
+	    //	    >
+	    explicit interface()
+	    : storage()  { }
 
 
-	  // storage
+	    //---| constructor with storage pointer
+	    //-----| enable if storage is unmanaged
 
-	  storage_interface storage;
+	    //template< typename S = storage_type
+	    //	    , typename = typename std::enable_if< std::is_same< storage_type, typename storage_traits< storage_type >::unmanaged >::value, void >::type
+	    //	    >
+	    explicit interface( const typename unmanaged_storage::pointer_type pointer )
+	    : storage( pointer )  { }
 
-	  static constexpr index_type order = layout::order;
+	    // either copies or handles values depending on storage_type
+	    explicit
+	    interface( const unmanaged_storage& s )
+	    : storage( s )
+	    { }
 
-	  //:::| constructors
+	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::::/
 
-	  //---| constructor with storage pointer
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
 
-	  explicit
-	  interface( typename storage_interface::pointer_type pointer ) : storage( pointer )  {	}
+	    //:::| conversion operators TODO Replace with macro
 
-	  explicit
-	  interface( const storage_interface& s ) : storage( s )
-	  { }
+	    //---| scalar component
 
-	  //---| copy constructor - TODO: use iterators
-	  template< typename OtherInterface >
-	  interface( const typename OtherInterface::storage_interface& other ) : storage( other )
-	  {
-	    static_assert( storage_interface::size >= OtherInterface::layout::total_size, "given storage is too short." );
-	  }
+	    template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
+	    operator value_type& ()
+	    {
+	      std::cerr << "multidim::interface::operator value_type\t|"
+			<<" offset  " << layout::static_offset()
+			<<" storage " << storage << std::endl;
 
-	  //:::| iterators |:::::::::::::::::::::::::::::::::::::::::::/
+	      return at( storage, layout::static_offset() );
+	    }
 
-	  UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
-
-	  //:::| conversion operators TODO Replace with macro
-
-	  //---| scalar component
-
-	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
-	  operator value_type& ()
-	  {
-	    std::cerr << "multidim::interface::operator value_type\t|"
-		      <<" offset  " << layout::static_offset()
-		      <<" storage " << storage << std::endl;
-
-	    return at( storage, layout::static_offset() );
-	  }
-
-	  template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
-	  operator const value_type& () const
-	  {
-	    std::cerr << "multidim::interface::operator const value_type\t|"
-		      <<" offset  " << layout::static_offset()
-		      <<" storage " << storage << std::endl;
-	    return at( storage, layout::static_offset() );
-	  }
+	    template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
+	    operator const value_type& () const
+	    {
+	      std::cerr << "multidim::interface::operator const value_type\t|"
+			<<" offset  " << layout::static_offset()
+			<<" storage " << storage << std::endl;
+	      return at( storage, layout::static_offset() );
+	    }
 
 	};
 
-	template< typename T, typename Layout >
-	constexpr index_type interface< T, Layout >::order;
+	template< typename T, typename Storage, typename Layout >
+	constexpr index_type interface< T, Storage, Layout >::order;
 
-      } // of multidim::
+      } // of multidim:
     } // of fixed_size::
   } // of math::
 } // of utk::

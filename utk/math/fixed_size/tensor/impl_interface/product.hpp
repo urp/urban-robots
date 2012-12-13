@@ -17,7 +17,6 @@
 # pragma once
 
 # include "utk/math/fixed_size/multidim/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
 
@@ -33,14 +32,15 @@ namespace utk
 	template< typename TensorA, typename TensorB >
 	struct product_array { /* unspecified */ };
 
-	template< typename T, typename LayoutA, typename LayoutB >
-	struct product_array< interface<T, LayoutA >
-			    , interface<T, LayoutB >
+	template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
+	struct product_array< interface< T, StorageA, LayoutA >
+			    , interface< T, StorageB, LayoutB >
 			    >
 	{
-	  typedef array< T
-		       , typename multidim::product_layout< LayoutA, LayoutB >::type
-		       > type;
+	  typedef interface< T
+			   , typename storage_traits< StorageA >::managed
+			   , typename multidim::product_layout< LayoutA, LayoutB >::type
+			   > type;
 	};
 
 	//---| assign_product
@@ -67,13 +67,13 @@ namespace utk
 
 	//---| product
 
-	template< typename T, typename LayoutA, typename LayoutB >
-	auto product( const interface<T, LayoutA >& a
-		    , const interface<T, LayoutB >& b
+	template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
+	auto product( const interface< T, StorageA, LayoutA >& a
+		    , const interface< T, StorageB, LayoutB >& b
 		    )
-	-> typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type
+	-> typename product_array< decltype(a), decltype(b) >::type
 	{
-	  typedef typename product_array< interface<T, LayoutA >, interface<T, LayoutB > >::type type;
+	  typedef typename product_array< decltype(a), decltype(b) >::type type;
 	  type result;
 
 	  assign_product( result, a.begin(), a.end(), b );

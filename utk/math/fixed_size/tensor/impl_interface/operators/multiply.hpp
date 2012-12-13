@@ -17,7 +17,6 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_array/array.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
 
@@ -53,20 +52,20 @@ namespace utk
         }
 
 
-        template< template< typename,typename > class Interface, typename T, typename Layout >
-        auto operator*( const T& scalar, const Interface< T, Layout >& inter )
-        -> array< T, Layout >
+        template< typename T, typename Storage, typename Layout >
+        auto operator*( const T& scalar, const interface< T, Storage, Layout >& inter )
+        -> typename interface< T, Storage, Layout >::managed_interface
         {
-          array< T, Layout > result( inter.storage );
+          typename interface< T, Storage, Layout >::managed_interface result( inter.storage );
 
           static_impl::assign_multiply_scalar( result.begin(), result.end(), scalar );
 
           return result;
         }
 
-        template< template< typename,typename > class Interface, typename T, typename Layout >
-        auto operator*( const Interface< T, Layout >& inter, const T& scalar )
-        -> array< T, Layout >
+        template< typename T, typename Storage, typename Layout >
+        auto operator*( const interface< T, Storage, Layout >& inter, const T& scalar )
+        -> typename interface< T, Storage, Layout >::managed_interface
         {
           return scalar * inter;
         }

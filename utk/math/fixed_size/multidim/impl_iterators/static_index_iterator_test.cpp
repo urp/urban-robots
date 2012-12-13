@@ -30,7 +30,7 @@ using namespace utk::math::fixed_size::multidim;
 BOOST_AUTO_TEST_CASE( check_layout3 )
 {
   typedef layout< size_vector<3> > layout3;
-  typedef interface< double, layout3 > type;
+  typedef interface< double, unmanaged_tag, layout3 > type;
   double  data[ layout3::total_size ] = { 0.,1.,2. };
   type multidim( data );
 
@@ -50,7 +50,7 @@ BOOST_AUTO_TEST_CASE( check_layout3 )
 struct layout23_fixture
 {
   typedef layout< size_vector<2,3> > layout23;
-  typedef interface< double, layout23 > type;
+  typedef interface< double, unmanaged_tag, layout23 > type;
   double  data[ layout23::total_size ];
   type multidim23;
 

@@ -38,12 +38,12 @@ namespace utk
 
 	  typedef Interface parent_interface;
 	  typedef typename parent_interface::layout parent_layout;
-	  typedef typename parent_interface::storage_interface parent_storage_interface;
+	  typedef typename parent_interface::unmanaged_storage parent_storage_type;
 
 
 	  //:::| storage interface |:::::::::::::::::::::::::::::::::::/
 
-	  parent_storage_interface storage;
+	  parent_storage_type storage;
 
 	  //:::| iteration information |:::::::::::::::::::::::::::::::/
 
@@ -52,7 +52,7 @@ namespace utk
 	  static constexpr stride_type index_stride = meta::integral::at< typename parent_layout::strides, Index >::value;
 	  static constexpr size_type   index_size   = meta::integral::at< typename parent_layout::sizes  , Index >::value;
 
-	  //---| constructor with storage_interface
+	  //---| constructor with storage_type
 
 	  index_iterator_base( const Interface& interface )
 	  : storage( interface.storage ) { }

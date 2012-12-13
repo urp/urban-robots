@@ -4,5 +4,4 @@ build-project impl_layout ;
 build-project impl_slice_layout ;
 build-project impl_iterators ;
 build-project impl_interface ;
-build-project impl_array ;
 

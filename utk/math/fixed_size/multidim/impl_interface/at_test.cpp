@@ -27,7 +27,7 @@ using namespace utk::math::fixed_size;
 struct fixture
 {
   typedef multidim::layout< multidim::size_vector< 1,2,3 > > layout123;
-  typedef multidim::interface< int, layout123 >::type type123;
+  typedef multidim::interface< int, multidim::unmanaged_tag, layout123 >::type type123;
   int data[6];
   type123 multidim123;
 

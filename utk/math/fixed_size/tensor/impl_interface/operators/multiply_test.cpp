@@ -17,7 +17,6 @@
 # include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_array/io.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
@@ -32,7 +31,7 @@ using namespace utk::math::fixed_size;
 struct fixture
 {
   typedef typename tensor::make_layout< tensor::size_vector<2,3>, tensor::contravariant_tag >::type contra_layout;
-  typedef tensor::interface< int, contra_layout > type123;
+  typedef tensor::interface< int, tensor::unmanaged_tag, contra_layout > type123;
   int data[6];
   type123 tensor123;
 
@@ -56,7 +55,7 @@ BOOST_FIXTURE_TEST_SUITE( check_multiply, fixture )
   BOOST_AUTO_TEST_CASE( check_multipy_scalar_with_slice_layout )
   {
     typedef typename multidim::fix_index< contra_layout, 1, 2 >::type fixed_layout;
-    typedef tensor::interface< int, fixed_layout > type12;
+    typedef tensor::interface< int, tensor::unmanaged_tag, fixed_layout > type12;
 
     type12 tensor12(data);
 

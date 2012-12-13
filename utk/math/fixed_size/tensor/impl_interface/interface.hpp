@@ -44,38 +44,58 @@ namespace utk
 	template< variance_type... Variances >
 	using variance_vector = meta::integral::vector< variance_type, Variances... >;
 
+	// TODO: move to own file
+	using multidim::storage_traits;
+	using multidim::unmanaged_tag;
+	using multidim::managed_tag;
+
 	//---| interface
 
-	template < typename ValueType, typename Layout >
+	template < typename ValueType, typename Storage, typename Layout >
 	class interface
-	: public multidim::interface< ValueType, Layout >
+	: public multidim::interface< ValueType, Storage, Layout >
 	{
-	    typedef interface< ValueType, Layout > type;
+	    typedef interface< ValueType, Storage, Layout > type;
 
-	    typedef multidim::interface< ValueType, Layout > multidim_interface;
+	    typedef multidim::interface< ValueType, Storage, Layout > base;
 
 	  public:
 
-	    typedef type reference_interface;
+	    // TODO: make template function
+	    typedef interface< ValueType, typename storage_traits< Storage >::unmanaged, Layout > unmanaged_interface;
+	    typedef interface< ValueType, typename storage_traits< Storage >::managed, Layout > managed_interface;
 
 	    typedef Layout layout;
-
-	    typedef typename multidim_interface::storage_interface storage_interface;
 
 	    typedef typename meta::pop_back< typename Layout::attributes >::type variances;
 
 	    static_assert( std::is_same< typename variances::value_type, variance_type >::value
 			 , "no variance index-attribute specified. Ought to be the last element in Layout::attributes" );
 
+	    //---| default constructor
+	    //-----| enable if storage is managed
+
+	    //template< typename S = typename type::storage_type
+	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::managed >::value, void >::type
+	    //	    >
+	    explicit interface()
+	    : base()  { }
+
+
 	    //---| constructor with storage pointer
+	    //-----| enable if storage is unmanaged
 
-	    explicit
-	    interface( const typename storage_interface::pointer_type pointer )
-	    : multidim_interface( pointer )  { }
+	    //template< typename S = typename type::storage_type
+	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::unmanaged >::value, void >::type
+	    //	    >
+	    explicit interface( const typename base::unmanaged_storage::pointer_type pointer )
+	    : base( pointer )  { }
 
+
+	    // either copies or handles values depending on storage_type
 	    explicit
-	    interface( const storage_interface& storage )
-	    : multidim_interface( storage )  { }
+	    interface( const typename base::unmanaged_storage& storage )
+	    : base( storage )  { }
 
 
 	    //template< index_type Index >
@@ -83,7 +103,7 @@ namespace utk
 
 	    //:::| assignment operator |:::::::::::::::::::::::::::::::/
 
-	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface, ValueType, Layout )
+	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface, ValueType, Storage, Layout )
 
 	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::/
 

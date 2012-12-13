@@ -27,8 +27,8 @@ namespace utk
       namespace tensor
       {
 
-	template< typename ValueType, typename Layout >
-	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Layout >& t )
+	template< typename ValueType, typename Storage, typename Layout >
+	std::ostream& operator<< ( std::ostream& os, const interface< ValueType, Storage, Layout >& t )
 	{
 	  // header
 	  os << "fixed_size::tensor::interface\t|" << std::endl
@@ -41,16 +41,16 @@ namespace utk
 
 	// scalar
 
-	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
+	template< typename ValueType, typename Storage, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Storage, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
 	{
 	  return os << at( t );
 	}
 
 	// 1d
-	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
+	template< typename ValueType, typename Storage, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Storage, Layout >& t )
 	-> typename std::enable_if< Layout::order == 1,	std::ostream& >::type
 	{
 	  os << "( ";
@@ -62,11 +62,11 @@ namespace utk
 	}
 
 	// 2d +
-	template< template<typename,typename> class Interface, typename ValueType, typename Layout >
-	auto print_components ( std::ostream& os, const Interface< ValueType, Layout >& t )
+	template< typename ValueType, typename Storage, typename Layout >
+	auto print_components ( std::ostream& os, const interface< ValueType, Storage, Layout >& t )
 	-> typename std::enable_if< (Layout::order > 1), std::ostream& >::type
 	{
-	  typedef Interface< ValueType, Layout > tensor_interface;
+	  typedef interface< ValueType, Storage, Layout > tensor_interface;
 
 	  constexpr size_type size0 = meta::integral::pop_front< typename Layout::sizes >::value;
 

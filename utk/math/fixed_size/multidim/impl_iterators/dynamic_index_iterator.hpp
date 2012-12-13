@@ -39,8 +39,12 @@ namespace utk
 	    //:::| dynamic value interface |:::::::::::::::::::::::::::/
 
 	    typedef typename remove_index< typename base::parent_layout, Index >::type value_layout;
-	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
-	    typedef typename value_interface::storage_interface value_storage_interface;
+
+	    // use unmanaged storage to avoid unintentional allocations and copies
+	    typedef typename base::parent_interface::unmanaged_interface unmanaged;
+
+	    typedef typename change_layout< unmanaged, value_layout >::type value_interface;
+	    typedef typename value_interface::storage_type value_storage_interface;
 
 	  public:
 
@@ -53,11 +57,11 @@ namespace utk
 
 	    mutable ptrdiff_t index_value;
 
-	    //---| constructor with storage_interface
+	    //---| constructor with storage_type
 
 	    explicit
-	    dynamic_index_iterator( const Interface& interface, ptrdiff_t index_value = 0 )
-	    : base( interface ), index_value( index_value )  { }
+	    dynamic_index_iterator( const Interface& inter, ptrdiff_t index_value = 0 )
+	    : base( inter ), index_value( index_value )  { }
 
 	    //---| copy constuctor
 

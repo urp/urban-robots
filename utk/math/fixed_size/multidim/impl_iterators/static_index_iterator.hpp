@@ -40,8 +40,12 @@ namespace utk
     	    //:::| static value interface |::::::::::::::::::::::::::::/
 
 	    typedef typename fix_index< typename base::parent_layout, Index, IndexValue >::type value_layout;
-	    typedef typename change_layout< typename base::parent_interface, value_layout >::type value_interface;
-	    typedef typename value_interface::storage_interface value_storage_interface;
+
+	    // use unmanaged storage to avoid unintentional allocations and copies
+	    typedef typename base::parent_interface::unmanaged_interface unmanaged;
+
+	    typedef typename change_layout< unmanaged, value_layout >::type value_interface;
+	    typedef typename value_interface::storage_type value_storage_type;
 
 	  public:
 
@@ -68,8 +72,8 @@ namespace utk
 	    //:::| constructors |::::::::::::::::::::::::::::::::::::::/
 
 	    //---| constructor with storage_interface
-	    static_index_iterator( const Interface& interface )
-	    : base( interface )  { }
+	    static_index_iterator( const Interface& inter )
+	    : base( inter )  { }
 
 	    //---| copy constuctor
 	    template< ptrdiff_t OtherIndexValue >
@@ -79,7 +83,7 @@ namespace utk
 	    //:::| dereference operator |::::::::::::::::::::::::::::::/
 
 	    value_interface operator*()
-	    { return value_interface( value_storage_interface( base::storage.ptr() ) ); }
+	    { return value_interface( value_storage_type( base::storage.ptr() ) ); }
 
 	    //:::| increment operator |::::::::::::::::::::::::::::::::/
 

@@ -50,8 +50,12 @@ namespace utk
 						//:::| static value interface |::::::::::::::::::::::::::::/
 
 						typedef slice_layout< typename Interface::layout, CurrentIndexVector  > value_layout;
-						typedef typename change_layout< typename Interface::reference_interface, value_layout >::type value_interface;
-						typedef typename value_interface::storage_interface value_storage_interface;
+
+            // use unmanaged storage to prevent unintentional allocations and copies
+            typedef typename Interface::unmanaged_interface unmanaged;
+
+            typedef typename change_layout< unmanaged, value_layout >::type value_interface;
+						typedef typename value_interface::storage_type value_storage_type;
 
 					public:
 
@@ -114,11 +118,11 @@ namespace utk
 
 						//:::| storage interface |:::::::::::::::::::::::::::::::::/
 
-						typename value_interface::storage_interface storage;
+						typename value_interface::storage_type storage;
 
 						//:::| constructors |::::::::::::::::::::::::::::::::::::::/
 
-						//---| constructor with storage_interface
+						//---| constructor with storage_type
 						static_iterator( const Interface& inter )
 						: storage( inter.storage )  { }
 

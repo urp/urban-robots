@@ -29,7 +29,7 @@ struct fixture123
 {
   typedef variance_vector< covariant,covariant,covariant > variances;
   typedef typename make_layout< size_vector<1,2,3>, variances >::type layout123;
-  typedef interface< double, layout123 > type123;
+  typedef interface< double, unmanaged_tag, layout123 > type123;
 
   double  data[ layout123::total_size ];
   type123 tensor123;
@@ -58,7 +58,7 @@ BOOST_AUTO_TEST_CASE( with_slice_layout )
   typedef variance_vector< covariant,covariant > variances;
   typedef typename make_layout< layout32_2, variances >::type tensor_layout;
 
-  typedef interface< double, tensor_layout > type;
+  typedef interface< double, unmanaged_tag, tensor_layout > type;
   double  data[ tensor_layout::total_size ] = {  0., 1., 2., 3., 4., 5.
                                               ,  6.,  7., 8., 9.,10.,11.
                                               , 12., 13.,14.,15.,16.,17. };

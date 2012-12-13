@@ -1,4 +1,4 @@
-/*  tensor_interface_test.cpp - Copyright Peter Urban 2012
+/*  change_layout_test.cpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -30,7 +30,7 @@ using namespace utk::math::fixed_size;
 struct interface_fixture
 {
   typedef multidim::layout< multidim::size_vector< 1,2,3 > > layout123;
-  typedef multidim::interface< int, layout123 >::type type123;
+  typedef multidim::interface< int, multidim::unmanaged_tag, layout123 >::type type123;
   int data[6];
   type123 multidim123;
 
@@ -43,7 +43,7 @@ BOOST_FIXTURE_TEST_SUITE( check_change_layout, interface_fixture )
   {
     typedef multidim::layout< multidim::size_vector< 6 > > layout6;
 
-    auto multidim6 = multidim::use_layout<type123,layout6>( multidim123 );
+    auto multidim6 = multidim::use_layout< type123, layout6 >( multidim123 );
 
     BOOST_CHECK_EQUAL( at( multidim6, 0), 1 );
     BOOST_CHECK_EQUAL( at( multidim6, 1), 2 );

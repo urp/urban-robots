@@ -34,13 +34,14 @@ namespace utk
 
 	// general
 	template< typename ValueType
+		, typename Storage
 		, typename OldLayout
-		, template< typename, typename > class Interface
+		, template< typename, typename, typename > class Interface
 		, typename NewLayout
 		>
-	struct change_layout< Interface< ValueType, OldLayout >, NewLayout >
+	struct change_layout< Interface< ValueType, Storage, OldLayout >, NewLayout >
 	{
-	  typedef Interface< ValueType, NewLayout > type;
+	  typedef Interface< ValueType, Storage, NewLayout > type;
 	};
 
 	//---| use_layout (instance)

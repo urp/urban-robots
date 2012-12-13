@@ -17,7 +17,6 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/interface.hpp"
-# include "utk/math/fixed_size/tensor/array.hpp"
 
 namespace utk
 {

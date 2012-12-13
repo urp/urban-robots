@@ -30,16 +30,23 @@ namespace utk
 	//:::| access components |:::::::::::::::::::::::::::::::::::::/
 
 	//TODO: out of range checks! thrwo exception?
-	template< template< typename, typename > class Interface, typename T, typename Layout, typename...CoordTypes >
-	auto at( Interface< T, Layout >& inter, CoordTypes...coords )
-	-> typename Interface< T, Layout >::value_type&
+	template< typename T
+		, typename Storage
+		, typename Layout
+		, typename...CoordTypes
+		>
+	auto at( interface< T, Storage, Layout >& inter, CoordTypes...coords )
+	-> typename interface< T, Storage, Layout >::value_type&
 	{
-	  const size_t storage_index = Interface< T, Layout >::layout::index_offset( coords... ) + Interface< T, Layout >::layout::static_offset();
+	  typedef interface< T, Storage, Layout > interface_type;
+
+	  const size_t storage_index = interface_type::layout::index_offset( coords... )
+				       + interface_type::layout::static_offset();
 
 	  std::cout << "utk::math::fixed_size::multidim::at (dynamic)| "
 	  	    << " storage_index " << storage_index
-		    << "(" << Interface< T, Layout >::layout::index_offset( coords... )
-		    << ", "<< Interface< T, Layout >::layout::static_offset() << ")"
+		    << "(" << interface_type::layout::index_offset( coords... )
+		    << ", "<< interface_type::layout::static_offset() << ")"
 		    << " storage "<< inter.storage << std::endl;
 
 	  return at( inter.storage, storage_index );
@@ -47,17 +54,20 @@ namespace utk
 
 	// const
 
-	template< template< typename, typename > class Interface, typename T, typename Layout, typename...CoordTypes >
-	auto at( const Interface< T, Layout >& inter, CoordTypes...coords )
-	-> const typename Interface< T, Layout >::value_type&
+	template< typename T, typename Storage, typename Layout, typename...CoordTypes >
+	auto at( const interface< T, Storage, Layout >& inter, CoordTypes...coords )
+	-> const typename interface< T, Storage, Layout >::value_type&
 	{
+	  typedef interface< T, Storage, Layout > interface_type;
+
 	  //TODO: checks
-	  const size_t storage_index = Interface< T, Layout >::layout::index_offset( coords... ) + Interface< T, Layout >::layout::static_offset();
+	  const size_t storage_index = interface_type::layout::index_offset( coords... )
+				       + interface_type::layout::static_offset();
 
 	  std::cout << "utk::math::fixed_size::multidim::at (const dynamic)| "
 	  	    << " storage_index " << storage_index
-		    << "(" << Interface< T, Layout >::layout::index_offset( coords... )
-		    << ", "<< Interface< T, Layout >::layout::static_offset() << ")"
+		    << "(" << interface_type::layout::index_offset( coords... )
+		    << ", "<< interface_type::layout::static_offset() << ")"
 		    << " storage "<< inter.storage << std::endl;
 
 	  return at( inter.storage, storage_index );
@@ -73,23 +83,28 @@ namespace utk
 	struct at_leftover_type
 	{
 	  // construct full_index_mask
-	  // from index-dimensions of unspecified indices
+	  // use Indices, fill up with 'visible' indices
 	  typedef typename meta::integral::split< typename Interface::layout::sizes, Indices::size >::second free_indices_tmp;
 	  typedef typename meta::integral::make_vector< index_type, free_indices_tmp >::type free_indices;
 	  typedef typename meta::integral::concatinate< Indices, free_indices >::type index_mask;
 	  typedef slice_layout< typename Interface::layout, index_mask > new_layout;
-	  typedef typename std::conditional< Indices::size == Interface::layout::order
-					   , Interface
-					   , typename change_layout< Interface, new_layout >::type
-					   >::type type;
+
+	  // use unmanaged storage to prevent unintended allocations and copies
+	  typedef typename Interface::unmanaged_interface unmanaged;
+
+	  typedef typename change_layout< Interface, new_layout >::type type;
 	};
 
 	//TODO: use static version (template) for layout::index_offset
-	template< template< typename, typename > class Interface, typename T, typename Layout, index_type...Indices >
-	auto at( Interface<T,Layout>& inter, const meta::integral::vector< index_type, Indices... >& coords )
-	-> typename at_leftover_type< Interface<T,Layout>, meta::integral::vector< index_type, Indices... > >::type
+	template< typename T, typename Storage, typename Layout, index_type...Indices >
+	auto at( interface<T, Storage, Layout>& inter, const meta::integral::vector< index_type, Indices... >& coords )
+	-> typename at_leftover_type< interface< T, Storage, Layout>
+				    , meta::integral::vector< index_type, Indices... >
+				    >::type
 	{
-	  typedef typename at_leftover_type< Interface<T,Layout>, index_vector< Indices... > >::type return_type;
+	  typedef typename at_leftover_type< interface< T, Storage, Layout >
+					   , index_vector< Indices... >
+					   >::type return_type;
 
 	  std::cout << "utk::math::fixed_size::multidim::at (static) | indices " << index_vector< Indices... >()
 		    << " storage " << inter.storage << std::endl;
@@ -98,11 +113,15 @@ namespace utk
 	}
 
 	//TODO: use static version (template) for layout::index_offset
-	template< template< typename, typename > class Interface, typename T, typename Layout, index_type...Indices >
-	auto at( const Interface<T,Layout>& inter, const meta::integral::vector< index_type, Indices... >& coords )
-	-> const typename at_leftover_type< Interface<T,Layout>, meta::integral::vector< index_type, Indices... > >::type
+	template< typename T, typename Storage, typename Layout, index_type...Indices >
+	auto at( const interface< T, Storage, Layout >& inter, const meta::integral::vector< index_type, Indices... >& coords )
+	-> const typename at_leftover_type< interface< T, Storage, Layout >
+					  , meta::integral::vector< index_type, Indices... >
+					  >::type
 	{
-	  typedef const typename at_leftover_type< Interface<T,Layout>, meta::integral::vector< index_type, Indices... > >::type return_type;
+	  typedef const typename at_leftover_type< interface< T, Storage, Layout >
+						 , meta::integral::vector< index_type, Indices... >
+						 >::type return_type;
 
 	  std::cout << "utk::math::fixed_size::multidim::at (static const) | indices " << index_vector< Indices... >()
 		    << " storage " << inter.storage << std::endl;

@@ -49,17 +49,17 @@ namespace static_impl
   }
 }
 
-
-# define UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface_template, prim_type, layout_type ) 		\
+// TODO: move to tensor::interface
+# define UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface_template, prim_type, storage_tag, layout_type ) 		\
                                                                                                                     \
-  template< typename OtherLayout > 								                                                                  \
-  auto operator=( const tensor::interface< prim_type, OtherLayout >& other) 				                                \
-  -> typename std::enable_if< interface_template< prim_type, layout_type >::layout::order == tensor::interface< prim_type, OtherLayout >::layout::order 	\
-                                and meta::integral::all< typename meta::integral::equal< typename interface_template< prim_type, layout_type >::layout::sizes \
-                                                       , typename tensor::interface< prim_type, OtherLayout >::layout::sizes                     \
-                                                       >::type 	                                                                                  \
+  template< typename OtherStorage, typename OtherLayout > 								                                                                  \
+  auto operator=( const tensor::interface< prim_type, OtherStorage, OtherLayout >& other) 				                                \
+  -> typename std::enable_if< interface_template< prim_type, storage_tag, layout_type >::layout::order == tensor::interface< prim_type, OtherStorage, OtherLayout >::layout::order 	\
+                                and meta::integral::all< typename meta::integral::equal< typename interface_template< prim_type, storage_tag, layout_type >::layout::sizes \
+                                                       , typename tensor::interface< prim_type, OtherStorage, OtherLayout >::layout::sizes                     \
+                                                       >::type 	                                                    \
 						     >::value 					                                                                                \
-			    , interface_template< prim_type, layout_type >&			                                                      \
+			    , interface_template< prim_type, storage_tag, layout_type >&                                              \
 			    >::type 								                                                                                  \
   { 			                                                                                                          \
     static_impl::assign_md( begin(), end(), other.begin() ); 					                                              \
