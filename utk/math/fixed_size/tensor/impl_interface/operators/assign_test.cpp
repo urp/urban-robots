@@ -15,7 +15,7 @@
 */
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
@@ -60,7 +60,8 @@ BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
 
   BOOST_AUTO_TEST_CASE( check_assign_to_array )
   {
-    tensor::interface< int, tensor::managed_tag, contra_layout > tensorB;
+    typedef typename type123::managed_interface array_type;
+    array_type tensorB( typename array_type::storage_type( 0 ) );
 
     BOOST_TEST_MESSAGE( "before A " << tensorA );
 

@@ -33,7 +33,7 @@ namespace utk
 	  // header
 	  os << "fixed_size::tensor::interface\t|" << std::endl
 	     << "  value_type " << typeid(ValueType).name()
-	     << "  data " << t.storage.ptr() << std::endl
+	     << "  data " << t.storage << "(" << Storage() << ")" << std::endl
 	     << "  layout " << Layout() << std::endl;
 	  // content
 	  return print_components( os << "  ", t ) << std::endl;
@@ -45,7 +45,7 @@ namespace utk
 	auto print_components ( std::ostream& os, const interface< ValueType, Storage, Layout >& t )
 	-> typename std::enable_if< Layout::order == 0, std::ostream& >::type
 	{
-	  return os << at( t );
+	  return os << ValueType( t );
 	}
 
 	// 1d
@@ -56,7 +56,7 @@ namespace utk
 	  os << "( ";
 	  std::for_each( t.template begin_index<0>(), t.template end_index<0>()
 		       , [&os] (const ValueType& value)
-		       { os << value << " "; }
+		       { os << ValueType( value ) << " "; }
 		       );
 	  return os << ")";
 	}

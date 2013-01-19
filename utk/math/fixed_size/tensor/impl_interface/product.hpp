@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2012
+/*  product.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,10 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/multidim/interface.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
 
 namespace utk
@@ -49,13 +51,14 @@ namespace utk
 	auto assign_product( Result& result, const ItA& ita, const ItEndA& itenda, const B& b )
 	-> void
 	{
-	  std::cerr << "utk::math::fixed_size::tensor::assign_product | current "<< typename ItA::current_indices() << std::endl;
+	  std::cerr << "tensor::assign_product | current indices "<< typename ItA::current_indices() << std::endl;
 
 	  auto res_part = at( result, typename ItA::current_indices() );
+	  std::cerr << "  res_part " << res_part << std::endl;
 	  auto val_part = b * typename Result::value_type(*ita) ;
+	  std::cerr << "  val_part " << res_part << std::endl;
 
 	  res_part = val_part;
-
 	  assign_product( result, ita.next(), itenda, b ) ;
 	}
 
@@ -71,10 +74,13 @@ namespace utk
 	auto product( const interface< T, StorageA, LayoutA >& a
 		    , const interface< T, StorageB, LayoutB >& b
 		    )
-	-> typename product_array< decltype(a), decltype(b) >::type
+	-> typename product_array< interface< T, StorageA, LayoutA >, interface< T, StorageB, LayoutB > >::type//product_array< decltype(a), decltype(b) >::type
 	{
-	  typedef typename product_array< decltype(a), decltype(b) >::type type;
+	  typedef typename //product_array< decltype(a), decltype(b) >::type
+	  product_array< interface< T, StorageA, LayoutA >, interface< T, StorageB, LayoutB > >::type type;
 	  type result;
+
+	  std::cerr << "utk::math::fixed_size::tensor::product | result -> " << std::endl << result;
 
 	  assign_product( result, a.begin(), a.end(), b );
 

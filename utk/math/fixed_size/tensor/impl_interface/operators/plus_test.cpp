@@ -17,6 +17,7 @@
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/plus.hpp"
 
 #define BOOST_TEST_DYN_LINK
@@ -36,11 +37,15 @@ struct fixture
   fixture() : data{ 1,2,3,4,5,6 }, tensor23( data ) {}
 };
 
-BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
+BOOST_FIXTURE_TEST_SUITE( plus_scalar, fixture )
 
-  BOOST_AUTO_TEST_CASE( check_complete_index_set )
+  BOOST_AUTO_TEST_CASE( check_tensor_plus_assign_scalar )
   {
-    auto result = tensor23 + 1;
+    type123::managed_interface result( tensor23.storage );
+
+    result += 1;
+
+    std::cerr << "result " << result << std::endl;
 
     BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
     BOOST_CHECK_EQUAL( at( result, 0,1 ), 3 );
@@ -48,6 +53,70 @@ BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
     BOOST_CHECK_EQUAL( at( result, 1,0 ), 5 );
     BOOST_CHECK_EQUAL( at( result, 1,1 ), 6 );
     BOOST_CHECK_EQUAL( at( result, 1,2 ), 7 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_tensor_plus_scalar )
+  {
+    auto result = tensor23 + 1;
+
+    std::cerr << "result " << result << std::endl;
+
+    BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ), 3 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ), 4 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ), 5 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 6 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 7 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_scalar_plus_tensor )
+  {
+    auto result = 1 + tensor23;
+
+    std::cerr << "result " << result << std::endl;
+
+    BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ), 3 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ), 4 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ), 5 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 6 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 7 );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+
+
+BOOST_FIXTURE_TEST_SUITE( plus_tensor, fixture )
+
+  BOOST_AUTO_TEST_CASE( check_tensor_plus_assign_tensor )
+  {
+    type123::managed_interface result( tensor23 );
+
+    result += tensor23;
+
+    std::cerr << "result " << result << std::endl;
+
+    BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ), 4 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ), 6 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ), 8 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 10 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 12 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_tensor_plus_tensor )
+  {
+    auto result = tensor23 + tensor23;
+
+    std::cerr << "result " << result << std::endl;
+
+    BOOST_CHECK_EQUAL( at( result, 0,0 ), 2 );
+    BOOST_CHECK_EQUAL( at( result, 0,1 ), 4 );
+    BOOST_CHECK_EQUAL( at( result, 0,2 ), 6 );
+    BOOST_CHECK_EQUAL( at( result, 1,0 ), 8 );
+    BOOST_CHECK_EQUAL( at( result, 1,1 ), 10 );
+    BOOST_CHECK_EQUAL( at( result, 1,2 ), 12 );
   }
 
 BOOST_AUTO_TEST_SUITE_END()

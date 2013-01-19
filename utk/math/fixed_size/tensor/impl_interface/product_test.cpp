@@ -16,6 +16,8 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
+# include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/product.hpp"
 
 #define BOOST_TEST_DYN_LINK
@@ -29,11 +31,12 @@ using namespace utk::math::fixed_size::tensor;
 struct product_fixture
 {
   typedef multidim::layout< size_vector<2> > layout;
-  typedef interface< double, typename make_layout< layout, contravariant_tag >::type > tensor_a;
-  typedef interface< double, typename make_layout< layout, covariant_tag     >::type > tensor_b;
+  typedef interface< double, unmanaged_tag, typename make_layout< layout, contravariant_tag >::type > tensor_a;
+  typedef interface< double, unmanaged_tag, typename make_layout< layout, covariant_tag     >::type > tensor_b;
 
   typedef typename product_array< tensor_a, tensor_b >::type product_ab;
 };
+
 
 BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
 
@@ -60,7 +63,12 @@ BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
     tensor_a t_a( data );
     tensor_b t_b( data+2 );
 
+    BOOST_TEST_MESSAGE( "tensor t_a " << t_a );
+    BOOST_TEST_MESSAGE( "tensor t_b " << t_b );
+
     product_ab prod = product( t_a, t_b );
+
+    BOOST_TEST_MESSAGE( "tensor product " << prod );
 
     BOOST_CHECK( prod.storage.ptr() != nullptr );
 

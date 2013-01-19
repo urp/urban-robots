@@ -20,6 +20,7 @@
 # include "utk/math/fixed_size/vector/at.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp" // for index_type, ...
+# include "utk/math/fixed_size/multidim/impl_interface/storage_traits.hpp" // for index_type, ...
 
 # include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"
@@ -33,37 +34,6 @@ namespace utk
       namespace multidim
       {
 
-	struct unmanaged_tag {};
-	struct managed_tag {};
-
-	struct default_storage
-	{
-	  typedef unmanaged_tag unmanaged;
-
-	  typedef managed_tag managed;
-	};
-
-
-	template< typename Storage >
-	struct storage_traits
-	{ /* unspecified */ };
-
-	template< >
-	struct storage_traits< unmanaged_tag >
-	: public default_storage
-	{
-	  template< typename ValueType, size_type Size >
-	  using type = fixed_size::vector::interface< ValueType, Size >;
-	};
-
-	template< >
-	struct storage_traits< managed_tag >
-	: public default_storage
-	{
-	  template< typename ValueType, size_type Size >
-	  using type = fixed_size::vector::array< ValueType, Size >;
-	};
-
 	template < typename T, typename Storage, typename Layout >
 	struct interface
 	{
@@ -74,17 +44,18 @@ namespace utk
 	    typedef Layout layout;
 
 	    //---| storage
+	    // TODO: move to interface_traits
+	    typedef Storage storage_tag;
+	    typedef typename storage_traits< storage_tag >::template type< T, layout::total_size > storage_type;
 
-	    typedef typename storage_traits< Storage >::template type< T, layout::total_size > storage_type;
-
-	    typedef typename storage_traits< Storage >::unmanaged unmanaged_storage_tag;
-	    typedef typename storage_traits< Storage >::managed   managed_storage_tag;
+	    typedef typename storage_traits< storage_tag >::unmanaged unmanaged_storage_tag;
+	    typedef typename storage_traits< storage_tag >::managed   managed_storage_tag;
 
 	    typedef typename storage_traits< unmanaged_storage_tag >::template type< T, layout::total_size > unmanaged_storage;
 	    typedef typename storage_traits< managed_storage_tag   >::template type< T, layout::total_size >   managed_storage;
 
-	    typedef interface< T, unmanaged_storage_tag, Layout > unmanaged_interface;
-	    typedef interface< T, managed_storage_tag  , Layout > managed_interface;
+	    typedef interface< T, unmanaged_storage_tag, layout > unmanaged_interface;
+	    typedef interface< T, managed_storage_tag  , layout > managed_interface;
 
 	    storage_type storage;
 
@@ -95,9 +66,9 @@ namespace utk
 	    //---| default constructor
 	    //-----| enable if storage is managed
 
-	    //template< typename S = storage_type
-	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::managed >::value, void >::type
-	    //	    >
+	    template< typename S = storage_tag
+	    	    , typename = typename std::enable_if< std::is_same< S, managed_storage_tag >::value, void >::type
+	    	    >
 	    explicit interface()
 	    : storage()  { }
 
@@ -105,9 +76,9 @@ namespace utk
 	    //---| constructor with storage pointer
 	    //-----| enable if storage is unmanaged
 
-	    //template< typename S = storage_type
-	    //	    , typename = typename std::enable_if< std::is_same< storage_type, typename storage_traits< storage_type >::unmanaged >::value, void >::type
-	    //	    >
+	    template< typename S = storage_tag
+	    	    , typename = typename std::enable_if< std::is_same< S, unmanaged_storage_tag >::value, void >::type
+	    	    >
 	    explicit interface( const typename unmanaged_storage::pointer_type pointer )
 	    : storage( pointer )  { }
 
@@ -116,6 +87,8 @@ namespace utk
 	    interface( const unmanaged_storage& s )
 	    : storage( s )
 	    { }
+
+
 
 	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::::/
 
@@ -128,9 +101,9 @@ namespace utk
 	    template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
 	    operator value_type& ()
 	    {
-	      std::cerr << "multidim::interface::operator value_type\t|"
+	      /*std::cerr << "multidim::interface::operator value_type\t|"
 			<<" offset  " << layout::static_offset()
-			<<" storage " << storage << std::endl;
+			<<" storage " << storage << std::endl;*/
 
 	      return at( storage, layout::static_offset() );
 	    }
@@ -138,9 +111,9 @@ namespace utk
 	    template< size_type order = layout::order, typename = typename std::enable_if< order==0, void >::type >
 	    operator const value_type& () const
 	    {
-	      std::cerr << "multidim::interface::operator const value_type\t|"
+	      /*std::cerr << "multidim::interface::operator const value_type\t|"
 			<<" offset  " << layout::static_offset()
-			<<" storage " << storage << std::endl;
+			<<" storage " << storage << std::endl;*/
 	      return at( storage, layout::static_offset() );
 	    }
 

@@ -25,7 +25,7 @@ namespace utk
 
     //---| at
 
-    template< typename, index_type > struct at { /* unspecified */ };
+    template< typename, index_type Index > struct at { /* unspecified */ };
 
     template< typename Unpacked, typename...Pack >
     struct at< vector< Unpacked, Pack... >, 0 >

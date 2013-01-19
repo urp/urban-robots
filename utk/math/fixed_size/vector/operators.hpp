@@ -35,7 +35,7 @@ namespace utk
 	template<class T,size_t Cnt>
 	std::ostream&	operator<<(std::ostream& os,const interface<T,Cnt>& v)
 	{
-	  os<< "interface p "<< v.ptr() << '(';
+	  os<< "interface "<< v.ptr() << '(';
 	  utk::io::sequence_to_stream( os ,v.begin(),v.end(),",");
 	  return os<<')';
 	}

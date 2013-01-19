@@ -24,8 +24,6 @@
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
 
-
-
 # include "utk/math/fixed_size/multidim/interface.hpp"
 
 namespace utk
@@ -49,8 +47,33 @@ namespace utk
 	using multidim::unmanaged_tag;
 	using multidim::managed_tag;
 
-	//---| interface
+	template< typename Layout, typename OtherLayout >
+	class is_tensor_structure_equivalent
+	{
+	    // trim attributes
+	    static constexpr size_type min_size = Layout::order > OtherLayout::order ? OtherLayout::order : Layout::order;
 
+	    typedef typename meta::integral::split< typename Layout::sizes, min_size >::first trimmed_size1;
+	    typedef typename meta::integral::split< typename OtherLayout::sizes, min_size >::first trimmed_size2;
+
+	    typedef typename meta::pop_back< typename Layout::attributes >::type var1;
+	    typedef typename meta::pop_back< typename OtherLayout::attributes >::type var2;
+
+	    typedef typename meta::integral::split< var1, min_size >::first trimmed_variances1;
+	    typedef typename meta::integral::split< var2, min_size >::first trimmed_variances2;
+
+	  public:
+
+	    // compare order, sizes and variances for equality
+	    static constexpr bool value = Layout::order == OtherLayout::order
+					  and meta::integral::all< typename meta::integral::equal< trimmed_size1
+												 , trimmed_size2 >::type >::value
+					  and meta::integral::all< typename meta::integral::equal< trimmed_variances1
+												 , trimmed_variances2 >::type >::value;
+	};
+
+	//---| interface
+	//-----| handles the variance attribute in multidim::layout
 	template < typename ValueType, typename Storage, typename Layout >
 	class interface
 	: public multidim::interface< ValueType, Storage, Layout >
@@ -70,24 +93,24 @@ namespace utk
 	    typedef typename meta::pop_back< typename Layout::attributes >::type variances;
 
 	    static_assert( std::is_same< typename variances::value_type, variance_type >::value
-			 , "no variance index-attribute specified. Ought to be the last element in Layout::attributes" );
+			 , "Expected an index attribute of type 'fixed_size::tensor::variance_type' as the last element in Layout::attributes" );
 
 	    //---| default constructor
 	    //-----| enable if storage is managed
 
-	    //template< typename S = typename type::storage_type
-	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::managed >::value, void >::type
-	    //	    >
+	    template< typename S = typename type::storage_tag
+	    	    , typename = typename std::enable_if< std::is_same< S, typename base::managed_storage_tag >::value, void >::type
+	    	    >
 	    explicit interface()
-	    : base()  { }
+	    : base()  { std::cerr << "tensor::interface::inferface (default) |" << *this << std::endl; }
 
 
 	    //---| constructor with storage pointer
 	    //-----| enable if storage is unmanaged
 
-	    //template< typename S = typename type::storage_type
-	    //	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::unmanaged >::value, void >::type
-	    //	    >
+	    template< typename S = typename type::storage_tag
+	    	    , typename = typename std::enable_if< std::is_same< S, typename base::unmanaged_storage_tag >::value, void >::type
+	    	    >
 	    explicit interface( const typename base::unmanaged_storage::pointer_type pointer )
 	    : base( pointer )  { }
 
@@ -95,15 +118,45 @@ namespace utk
 	    // either copies or handles values depending on storage_type
 	    explicit
 	    interface( const typename base::unmanaged_storage& storage )
-	    : base( storage )  { }
+	    : base( storage )
+	    { std::cerr << "tensor::interface::inferface (storage) |" << base::storage << " (" << Storage() << ")" << std::endl; }
+
+
+	    // copy
+	    template< typename OtherStorage, typename OtherLayout
+		    , typename = typename std::enable_if< is_tensor_structure_equivalent< layout
+										        , typename interface< ValueType, OtherStorage, OtherLayout >::layout
+										        >::value
+						        , void
+						        >::type
+		    >
+	    interface( const interface< ValueType, OtherStorage, OtherLayout >& other)
+	    : base( other.storage )
+	    { std::cerr << "tensor::interface::inferface (copy) | other" << other.storage << " new " << base::storage << std::endl; }
+
+	    interface( const type& other)
+	    : base( other.storage )
+	    { std::cerr << "tensor::interface::inferface (type copy) | other" << other.storage << " new " << base::storage << std::endl; }
 
 
 	    //template< index_type Index >
 	    //change_basis( const interface< ValueType
 
-	    //:::| assignment operator |:::::::::::::::::::::::::::::::/
 
-	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ASSIGNMENT_OPERATOR( interface, ValueType, Storage, Layout )
+	    //---| assignment operator
+	    //-----enable if order, index dimensions (sizes) and ValueType agree
+
+	    template< typename OtherStorage, typename OtherLayout >
+	    auto operator=( const interface< ValueType, OtherStorage, OtherLayout >& other)
+	    -> typename std::enable_if< is_tensor_structure_equivalent< layout
+								      , typename interface< ValueType, OtherStorage, OtherLayout >::layout
+								      >::value
+				      , type&
+				      >::type
+	    {
+	      static_impl::assign_md( begin(), end(), other.begin() );
+	      return *this;
+	    }
 
 	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::/
 

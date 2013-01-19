@@ -29,7 +29,7 @@ using namespace utk::math::fixed_size::multidim;
 struct fixture
 {
   typedef layout< size_vector< 2,3,4 > > old_layout;
-  typedef typename add_attributes< old_layout, meta::integral::vector< bool, true, false, true > >::type new_layout;
+  typedef typename utk::math::fixed_size::multidim::add_attributes< old_layout, meta::integral::vector< bool, true, false, true > >::type new_layout;
 };
 
 BOOST_FIXTURE_TEST_SUITE( check_new_layout_attributes, fixture )

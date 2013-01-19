@@ -2,8 +2,8 @@ project robots
 : build-dir build
 : requirements <cxxflags>-std=c++0x
 	       			 <cxxflags>-ftemplate-depth=2048
-	       			 <cxxflags>-fno-elide-type
-	       			 <cxxflags>-fdiagnostics-show-template-tree
+#	       			 <cxxflags>-fno-elide-type
+#	       			 <cxxflags>-fdiagnostics-show-template-tree
 	       			 ;
 
 path-constant TOP : . ;

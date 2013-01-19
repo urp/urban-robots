@@ -29,7 +29,26 @@ namespace utk
 
         namespace static_impl
         {
-            //---| assign_multipy scalar
+            //---| assign_plus
+
+            // terminate
+            template< typename StaticEndIteratorA, typename StaticIteratorB >
+            auto assign_plus( StaticEndIteratorA itA, StaticEndIteratorA endA, StaticIteratorB itB ) -> void
+            { }
+
+            // general case
+            template< typename StaticIteratorA, typename StaticEndIteratorA, typename StaticIteratorB >
+            auto assign_plus( StaticIteratorA itA, StaticEndIteratorA endA, StaticIteratorB itB ) -> void
+            {
+              std::cerr << "tensor::static_impl::assign_plus\t| itA " << (*itA) << std::endl;
+              std::cerr << "tensor::static_impl::assign_plus\t| itB " << (*itB) << std::endl;
+
+              static_cast< typename StaticIteratorA::value_type::value_type& >(*itA) += at(*itB);
+              assign_plus( itA.next(), endA, itB.next() );
+            }
+
+
+            //---| assign_plus_scalar
 
             // terminate
             template< typename StaticEndIterator >
@@ -45,14 +64,47 @@ namespace utk
             }
         }
 
+        //:::| tensor
+
+        template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
+        auto operator+=( interface< T, StorageA, LayoutA >& A, const interface< T, StorageB, LayoutB >& B )
+        -> interface< T, StorageA, LayoutA >&
+        {
+          static_assert( is_tensor_structure_equivalent< LayoutA, LayoutB >::value
+                       , "Tensors must have the same order and indices (size,variance)"
+                       );
+
+          static_impl::assign_plus( A.begin(), A.end(), B.begin() );
+          return A;
+        }
+
+        template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
+        auto operator+( const interface< T, StorageA, LayoutA >& A, const interface< T, StorageB, LayoutB >& B )
+        -> typename interface< T, StorageA, LayoutA >::managed_interface
+        {
+          typename interface< T, StorageA, LayoutA >::managed_interface result( A );
+
+          static_impl::assign_plus( result.begin(), result.end(), B.begin() );
+          return result;
+        }
+
+
+        //:::| scalar
+
+        template< typename T, typename Storage, typename Layout >
+        auto operator+=( interface< T, Storage, Layout >& inter, const T& scalar )
+        -> interface< T, Storage, Layout >&
+        {
+          static_impl::assign_plus_scalar( inter.begin(), inter.end(), scalar );
+          return inter;
+        }
 
         template< typename T, typename Storage, typename Layout >
         auto operator+( const T& scalar, const interface< T, Storage, Layout >& inter )
         -> typename interface< T, Storage, Layout >::managed_interface
         {
           typename interface< T, Storage, Layout >::managed_interface result( inter.storage );
-          static_impl::assign_plus_scalar( result.begin(), result.end(), scalar );
-          return result;
+          return result += scalar;
         }
 
         template< typename T, typename Storage, typename Layout >
@@ -61,7 +113,6 @@ namespace utk
         {
           return scalar + inter;
         }
-
 
       } // of tensor::
     } // of fixed_size::

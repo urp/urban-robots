@@ -18,7 +18,7 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 
 
 namespace utk
@@ -44,9 +44,15 @@ namespace utk
             template< typename StaticIterator, typename StaticEndIterator >
             auto assign_multiply_scalar( StaticIterator it, StaticEndIterator end, const typename StaticIterator::value_type::value_type& scalar ) -> void
             {
+              std::cerr << "tensor::assign_multiply_scalar| index " << typename StaticIterator::current_indices() << " res " << *it << std::endl;
 
               (*it) *= scalar;
-              std::cerr << "tensor::assign_multiply_scalar| index " << typename StaticIterator::current_indices() << std::endl;
+
+              std::cerr << "tensor::assign_multiply_scalar| index " << typename StaticIterator::current_indices() << " res " << *it << std::endl;
+
+              //std::cerr << "tensor::assign_multiply_scalar| index " << typename StaticIterator::current_indices() << " res " << *it << std::endl;
+
+
               assign_multiply_scalar( it.next(), end, scalar );
             }
         }

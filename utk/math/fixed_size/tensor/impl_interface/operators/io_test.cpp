@@ -16,7 +16,7 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE tensor::interface io

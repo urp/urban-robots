@@ -30,45 +30,45 @@ namespace utk
 	//:::| access components |:::::::::::::::::::::::::::::::::::::/
 
 	//TODO: out of range checks! thrwo exception?
-	template< typename T
-		, typename Storage
-		, typename Layout
-		, typename...CoordTypes
-		>
-	auto at( interface< T, Storage, Layout >& inter, CoordTypes...coords )
-	-> typename interface< T, Storage, Layout >::value_type&
+	template< template< typename,typename,typename > class Interface
+		, typename T, typename Storage, typename Layout
+		, typename...CoordTypes	>
+	auto at( Interface< T, Storage, Layout >& inter, CoordTypes...coords )
+	-> typename Interface< T, Storage, Layout >::value_type&
 	{
-	  typedef interface< T, Storage, Layout > interface_type;
+	  typedef Interface< T, Storage, Layout > interface_type;
 
 	  const size_t storage_index = interface_type::layout::index_offset( coords... )
 				       + interface_type::layout::static_offset();
 
-	  std::cout << "utk::math::fixed_size::multidim::at (dynamic)| "
+	  /*std::cout << "utk::math::fixed_size::multidim::at (dynamic)| "
 	  	    << " storage_index " << storage_index
 		    << "(" << interface_type::layout::index_offset( coords... )
 		    << ", "<< interface_type::layout::static_offset() << ")"
-		    << " storage "<< inter.storage << std::endl;
+		    << " storage "<< inter.storage << std::endl;*/
 
 	  return at( inter.storage, storage_index );
 	}
 
 	// const
 
-	template< typename T, typename Storage, typename Layout, typename...CoordTypes >
-	auto at( const interface< T, Storage, Layout >& inter, CoordTypes...coords )
-	-> const typename interface< T, Storage, Layout >::value_type&
+	template< template< typename,typename,typename > class Interface
+		, typename T, typename Storage, typename Layout
+		, typename...CoordTypes >
+	auto at( const Interface< T, Storage, Layout >& inter, CoordTypes...coords )
+	-> const typename Interface< T, Storage, Layout >::value_type&
 	{
-	  typedef interface< T, Storage, Layout > interface_type;
+	  typedef Interface< T, Storage, Layout > interface_type;
 
 	  //TODO: checks
 	  const size_t storage_index = interface_type::layout::index_offset( coords... )
 				       + interface_type::layout::static_offset();
 
-	  std::cout << "utk::math::fixed_size::multidim::at (const dynamic)| "
+	  /*std::cout << "utk::math::fixed_size::multidim::at (const dynamic)| "
 	  	    << " storage_index " << storage_index
 		    << "(" << interface_type::layout::index_offset( coords... )
 		    << ", "<< interface_type::layout::static_offset() << ")"
-		    << " storage "<< inter.storage << std::endl;
+		    << " storage "<< inter.storage << std::endl;*/
 
 	  return at( inter.storage, storage_index );
 	}
@@ -90,41 +90,41 @@ namespace utk
 	  typedef slice_layout< typename Interface::layout, index_mask > new_layout;
 
 	  // use unmanaged storage to prevent unintended allocations and copies
-	  typedef typename Interface::unmanaged_interface unmanaged;
-
-	  typedef typename change_layout< Interface, new_layout >::type type;
+	  typedef typename change_layout< Interface, new_layout >::type::unmanaged_interface type;
 	};
 
 	//TODO: use static version (template) for layout::index_offset
-	template< typename T, typename Storage, typename Layout, index_type...Indices >
-	auto at( interface<T, Storage, Layout>& inter, const meta::integral::vector< index_type, Indices... >& coords )
-	-> typename at_leftover_type< interface< T, Storage, Layout>
+	template< template< typename,typename,typename > class Interface
+		, typename T, typename Storage, typename Layout, index_type...Indices >
+	auto at( Interface<T, Storage, Layout>& inter, const meta::integral::vector< index_type, Indices... >& coords )
+	-> typename at_leftover_type< Interface< T, Storage, Layout>
 				    , meta::integral::vector< index_type, Indices... >
 				    >::type
 	{
-	  typedef typename at_leftover_type< interface< T, Storage, Layout >
+	  typedef typename at_leftover_type< Interface< T, Storage, Layout >
 					   , index_vector< Indices... >
 					   >::type return_type;
 
-	  std::cout << "utk::math::fixed_size::multidim::at (static) | indices " << index_vector< Indices... >()
-		    << " storage " << inter.storage << std::endl;
+	  /*std::cout << "utk::math::fixed_size::multidim::at (static) | indices " << index_vector< Indices... >()
+		    << " storage " << inter.storage << std::endl;*/
 
 	  return return_type( inter.storage );
 	}
 
 	//TODO: use static version (template) for layout::index_offset
-	template< typename T, typename Storage, typename Layout, index_type...Indices >
-	auto at( const interface< T, Storage, Layout >& inter, const meta::integral::vector< index_type, Indices... >& coords )
-	-> const typename at_leftover_type< interface< T, Storage, Layout >
+	template< template< typename,typename,typename > class Interface
+		, typename T, typename Storage, typename Layout, index_type...Indices >
+	auto at( const Interface< T, Storage, Layout >& inter, const meta::integral::vector< index_type, Indices... >& coords )
+	-> const typename at_leftover_type< Interface< T, Storage, Layout >
 					  , meta::integral::vector< index_type, Indices... >
 					  >::type
 	{
-	  typedef const typename at_leftover_type< interface< T, Storage, Layout >
+	  typedef const typename at_leftover_type< Interface< T, Storage, Layout >
 						 , meta::integral::vector< index_type, Indices... >
 						 >::type return_type;
 
-	  std::cout << "utk::math::fixed_size::multidim::at (static const) | indices " << index_vector< Indices... >()
-		    << " storage " << inter.storage << std::endl;
+	  /*std::cout << "utk::math::fixed_size::multidim::at (static const) | indices " << index_vector< Indices... >()
+		    << " storage " << inter.storage << std::endl;*/
 
 	  return return_type( inter.storage );
 	}
