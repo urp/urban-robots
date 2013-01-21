@@ -23,6 +23,7 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
+//# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 
 # include "utk/math/fixed_size/multidim/interface.hpp"
 
@@ -101,8 +102,8 @@ namespace utk
 	    template< typename S = typename type::storage_tag
 	    	    , typename = typename std::enable_if< std::is_same< S, typename base::managed_storage_tag >::value, void >::type
 	    	    >
-	    explicit interface()
-	    : base()  { std::cerr << "tensor::interface::inferface (default) |" << *this << std::endl; }
+	    explicit interface() : base()
+	    { std::cerr << "tensor::interface::inferface (default) |" << base::storage << std::endl; }
 
 
 	    //---| constructor with storage pointer
@@ -112,7 +113,8 @@ namespace utk
 	    	    , typename = typename std::enable_if< std::is_same< S, typename base::unmanaged_storage_tag >::value, void >::type
 	    	    >
 	    explicit interface( const typename base::unmanaged_storage::pointer_type pointer )
-	    : base( pointer )  { }
+	    : base( pointer )
+	    { std::cerr << "tensor::interface::inferface (pointer) |" << base::storage << std::endl; }
 
 
 	    // either copies or handles values depending on storage_type
@@ -161,6 +163,13 @@ namespace utk
 	    //:::| iterators |:::::::::::::::::::::::::::::::::::::::::/
 
 	    UTK_MATH_FIXED_SIZE_MULTIDIM__DECLARE_ITERATORS( type )
+
+	    //:::| type conversion operators:::::::::::::::::::::::::::/
+	    // NEW
+	    /*operator typename base::unmanaged_interface()
+	    {
+	      return base::unmanaged_interface( *this );
+	    }*/
 
 	};
 

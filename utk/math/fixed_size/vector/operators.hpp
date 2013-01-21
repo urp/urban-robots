@@ -36,7 +36,9 @@ namespace utk
 	std::ostream&	operator<<(std::ostream& os,const interface<T,Cnt>& v)
 	{
 	  os<< "interface "<< v.ptr() << '(';
-	  utk::io::sequence_to_stream( os ,v.begin(),v.end(),",");
+	  if( v.is_valid() )
+	    utk::io::sequence_to_stream( os ,v.begin(),v.end(),",");
+	  else os << "INVALID";
 	  return os<<')';
 	}
 

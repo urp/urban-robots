@@ -18,6 +18,7 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/plus.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 
 namespace utk
 {
@@ -44,14 +45,17 @@ namespace utk
 		       , "template parameter DualIndex must be covariant" );
 
 	  static_assert( meta::integral::at< sizes, Index >::value == meta::integral::at< sizes, DualIndex >::value
-		       , "template parameter DualIndex must be covariant" );
+		       , "Contracted indeces have diffents size," );
 
 
 	  typedef typename multidim::remove_index< Layout, DualIndex >::type dual_removed;
 	  typedef typename multidim::remove_index< dual_removed, Index >::type contracted_layout;
 
+	  //typedef typename multidim::default_strides_layout< contracted_layout >::type new_layout;
+
 	  typedef interface< T
 			   , typename storage_traits< Storage >::managed
+			   //, new_layout
 			   , contracted_layout
 			   > type;
 	};
@@ -74,6 +78,7 @@ namespace utk
 	    typedef typename meta::integral::make_vector< index_type, sizes >::type all_free;
 	    typedef typename meta::integral::assign< all_free, Index, meta::integral::constant< index_type, IndexValue > >::type index_fixed;
 	    typedef typename meta::integral::assign< index_fixed, DualIndex, meta::integral::constant< index_type, IndexValue > >::type index_mask;
+
 	    typedef typename multidim::slice_layout< typename Tensor::layout, index_mask > new_layout;
 	    typedef typename change_layout< Tensor, new_layout >::type::unmanaged_interface slice_interface;
 
@@ -81,12 +86,12 @@ namespace utk
 
 	    std::cerr << "tensor::assign_contraction | slice "<< slice << std::endl;
 	    std::cerr << "tensor::assign_contraction | result "<< result << std::endl;
-	    // sum
+
+	    // component-wise sum
 
 	    result += slice;
 
 	    std::cerr << "tensor::assign_contraction | result (new) "<< result << std::endl;
-
 
 	    assign_contraction< Size, Index, DualIndex, IndexValue+1 >::template apply( A, result ) ;
 	  }
@@ -116,8 +121,7 @@ namespace utk
 
 	  assign_contraction< index_size, Index, DualIndex, 0 >::template apply( A, result );
 
-
-	  std::cerr << "utk::math::fixed_size::tensor::contraction | result -> " << std::endl << result;
+	  //std::cerr << "utk::math::fixed_size::tensor::contraction | result -> " << std::endl << result;
 
 	  return result;
 	}

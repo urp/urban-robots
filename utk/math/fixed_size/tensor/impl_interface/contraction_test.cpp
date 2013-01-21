@@ -26,34 +26,69 @@ using namespace utk;
 using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::tensor;
 
-struct product_fixture
+struct product_fixture22
 {
   typedef typename tensor::make_layout< size_vector< 2,2 >, variance_vector< contravariant,covariant > >::type layout22;
-  typedef interface< double, unmanaged_tag, layout22 > tensor_a;
+  typedef interface< double, unmanaged_tag, layout22 > tensor22;
 
-  typedef typename contracted< tensor_a, 0,1 >::type contraction22;
+  typedef typename contracted< tensor22, 0,1 >::type contraction22;
 };
 
-BOOST_FIXTURE_TEST_SUITE( check_product, product_fixture )
+BOOST_FIXTURE_TEST_SUITE( check_contraction22, product_fixture22 )
 
   BOOST_AUTO_TEST_CASE( check_type )
   {
     //order
     const index_type order = contraction22::order;
     BOOST_CHECK_EQUAL( order, 0 );
-
   }
 
   BOOST_AUTO_TEST_CASE( check_components )
   {
     double data[] = { 1.,2.,3.,4. };
 
-    tensor_a t_a( data );
+    tensor22 t_a( data );
 
-    contraction22 scalar = contraction< tensor_a, 0, 1 >( t_a );
+    contraction22 scalar = contraction< tensor22, 0, 1 >( t_a );
 
     const double p00 = at( scalar );
     BOOST_CHECK_EQUAL( p00, 5 );
+  }
+
+BOOST_AUTO_TEST_SUITE_END()
+
+struct product_fixture222
+{
+  typedef typename tensor::make_layout< size_vector< 2,2,2 >, variance_vector< contravariant,covariant,covariant > >::type layout222;
+  typedef interface< double, unmanaged_tag, layout222 > tensor222;
+
+  typedef typename contracted< tensor222, 0,2 >::type contraction222;
+};
+
+BOOST_FIXTURE_TEST_SUITE( check_contraction222, product_fixture222 )
+
+  BOOST_AUTO_TEST_CASE( check_type )
+  {
+    //order
+    const index_type order = contraction222::order;
+    BOOST_CHECK_EQUAL( order, 1 );
+  }
+
+  BOOST_AUTO_TEST_CASE( check_components )
+  {
+    double data[] = { 1.,2.,3.,4.,5.,6.,7.,8. };
+
+    tensor222 t_a( data );
+
+    contraction222 vec2 = contraction< tensor222, 0, 2 >( t_a );
+
+    BOOST_TEST_MESSAGE( "result: " << vec2 );
+
+    const double c0 = at( vec2, 0 );
+    BOOST_CHECK_EQUAL( c0, 7 );
+    const double c1 = at( vec2, 1 );
+    BOOST_CHECK_EQUAL( c1, 11 );
+
   }
 
 BOOST_AUTO_TEST_SUITE_END()

@@ -18,6 +18,7 @@
 
 # include "utk/meta/integral/integral.hpp"
 # include "utk/meta/vector.hpp"
+# include "utk/meta/vector_assign.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp"
 
@@ -98,6 +99,17 @@ namespace utk
 	{
 	  typedef layout< IndexAttributes... > type;
 	};
+
+	// TODO: tests
+	template< typename Layout >
+	struct default_strides_layout
+	{
+	  typedef typename helpers::stride_sequence< typename Layout::sizes >::type new_strides;
+
+	  typedef typename meta::assign< typename Layout::attributes, 1, new_strides >::type new_attributes;
+	  typedef typename make_layout< new_attributes >::type type;
+	};
+
 
       } // of multidim::
     } // of fixed_size::
