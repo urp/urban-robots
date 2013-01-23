@@ -16,13 +16,10 @@
 
 # pragma once
 
-//# include "utk/meta/integral/integral.hpp"
+//# include <boost/lexical_cast.hpp>
 
 # include "utk/math/fixed_size/multidim/impl_layout/io.hpp"
 # include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
-
-//# include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
-//# include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
 namespace utk
 {
@@ -40,13 +37,13 @@ namespace utk
 
 	  // header
 	  os << "fixed_size::multidim::slice_layout\t|" << std::endl
-	     << "  full" << FullLayout() << std::endl
-	     << "  mask" << FullIndexMask() << "  offset " << type::static_offset()
+	     << "  masked\t: " << typename type::layout() << std::endl
+	     << "  mask\t" << FullIndexMask() << "  offset " << type::static_offset()
 	     << ( sizeof...(NewIndexAttributes) > 0
 		  ? "  new attributes " + boost::lexical_cast<std::string>( sizeof...(NewIndexAttributes) - 2 )
 		  : ""
 		) << std::endl
-	     << "  slice layout " << typename type::layout();
+	     << "  full\t" << FullLayout();
 	  return os;
 	}
 	/*

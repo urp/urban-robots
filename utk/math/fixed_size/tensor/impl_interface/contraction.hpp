@@ -51,12 +51,12 @@ namespace utk
 	  typedef typename multidim::remove_index< Layout, DualIndex >::type dual_removed;
 	  typedef typename multidim::remove_index< dual_removed, Index >::type contracted_layout;
 
-	  //typedef typename multidim::default_strides_layout< contracted_layout >::type new_layout;
+	  typedef typename multidim::replace_strides< contracted_layout >::type new_layout;
 
 	  typedef interface< T
 			   , typename storage_traits< Storage >::managed
-			   //, new_layout
-			   , contracted_layout
+			   , new_layout
+			   //, contracted_layout
 			   > type;
 	};
 
@@ -69,7 +69,7 @@ namespace utk
 	  template< typename Tensor, typename Result >
 	  static auto apply( const Tensor& A, Result& result ) -> void
 	  {
-	    std::cerr << "tensor::assign_contraction | current "<< IndexValue << std::endl;
+	    std::cerr << "tensor::assign_contraction | current "<< IndexValue << " ---------------------------------------" << std::endl;
 
 	    typedef typename Tensor::layout::sizes sizes;
 
@@ -116,6 +116,8 @@ namespace utk
 	{
 	  typedef typename contracted< Tensor, Index, DualIndex >::type result_type;
 	  result_type result;
+
+	  std::fill( result.storage.begin(), result.storage.end(), typename result_type::value_type( 0 ) );
 
 	  static constexpr index_type index_size = meta::integral::at< typename Tensor::layout::sizes, Index >::value;
 

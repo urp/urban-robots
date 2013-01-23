@@ -73,6 +73,29 @@ namespace utk
 												 , trimmed_variances2 >::type >::value;
 	};
 
+	template< typename Layout, typename OtherLayout >
+	class is_memory_structure_equivalent
+	{
+	    // trim attributes
+	    static constexpr size_type min_size = Layout::order > OtherLayout::order ? OtherLayout::order : Layout::order;
+
+	    typedef typename meta::integral::split< typename Layout::sizes, min_size >::first trimmed_size1;
+	    typedef typename meta::integral::split< typename OtherLayout::sizes, min_size >::first trimmed_size2;
+
+	    typedef typename meta::integral::split< typename Layout::strides, min_size >::first trimmed_strides1;
+	    typedef typename meta::integral::split< typename OtherLayout::strides, min_size >::first trimmed_strides2;
+
+	  public:
+
+	    // compare order, sizes and variances for equality
+	    static constexpr bool value = Layout::order == OtherLayout::order
+					  and meta::integral::all< typename meta::integral::equal< trimmed_size1
+												 , trimmed_size2 >::type >::value
+					  and meta::integral::all< typename meta::integral::equal< trimmed_strides1
+												 , trimmed_strides2 >::type >::value;
+	};
+
+
 	//---| interface
 	//-----| handles the variance attribute in multidim::layout
 	template < typename ValueType, typename Storage, typename Layout >
@@ -103,7 +126,9 @@ namespace utk
 	    	    , typename = typename std::enable_if< std::is_same< S, typename base::managed_storage_tag >::value, void >::type
 	    	    >
 	    explicit interface() : base()
-	    { std::cerr << "tensor::interface::inferface (default) |" << base::storage << std::endl; }
+	    {
+	      std::cerr << "tensor::interface::inferface (default) |" << base::storage << std::endl;
+	    }
 
 
 	    //---| constructor with storage pointer
@@ -114,31 +139,47 @@ namespace utk
 	    	    >
 	    explicit interface( const typename base::unmanaged_storage::pointer_type pointer )
 	    : base( pointer )
-	    { std::cerr << "tensor::interface::inferface (pointer) |" << base::storage << std::endl; }
+	    {
+	      std::cerr << "tensor::interface::inferface (pointer) | " << base::storage << std::endl;
+	    }
 
 
 	    // either copies or handles values depending on storage_type
 	    explicit
 	    interface( const typename base::unmanaged_storage& storage )
 	    : base( storage )
-	    { std::cerr << "tensor::interface::inferface (storage) |" << base::storage << " (" << Storage() << ")" << std::endl; }
+	    {
+	      std::cerr << "tensor::interface::inferface (storage) | " << base::storage << " (" << Storage() << ") total size " << layout::total_size  << std::endl;
+	    }
 
 
 	    // copy
 	    template< typename OtherStorage, typename OtherLayout
-		    , typename = typename std::enable_if< is_tensor_structure_equivalent< layout
-										        , typename interface< ValueType, OtherStorage, OtherLayout >::layout
-										        >::value
+		    , bool SameTensorStructure = is_tensor_structure_equivalent< layout, typename interface< ValueType, OtherStorage, OtherLayout >::layout >::value
+		    , bool SameMemoryStructure = is_memory_structure_equivalent< layout, typename interface< ValueType, OtherStorage, OtherLayout >::layout >::value
+		    // can not copy if using unmanaged storage with and other tensor has different memory structure
+		    , typename = typename std::enable_if< not ( std::is_same< typename base::storage_tag, typename base::unmanaged_storage_tag >::value
+								and not SameMemoryStructure
+							      ) and SameTensorStructure
 						        , void
-						        >::type
+							>::type
 		    >
 	    interface( const interface< ValueType, OtherStorage, OtherLayout >& other)
-	    : base( other.storage )
-	    { std::cerr << "tensor::interface::inferface (copy) | other" << other.storage << " new " << base::storage << std::endl; }
+	    : base( other.storage ) // TODO: unnessacary copy if Storage is managed
+	    {
+	      if( std::is_same< typename base::storage_tag, typename base::unmanaged_storage_tag >::value )
+	        base::storage.ref( other.storage.ptr() );
+	      else // managed storage
+		static_impl::assign_md( other.begin(), other.end(), begin() );
+
+	      std::cerr << "tensor::interface::inferface (copy) | " << base::storage << " other " << other.storage << " (" << typename base::storage_tag() << ")" << std::endl;
+	    }
 
 	    interface( const type& other)
 	    : base( other.storage )
-	    { std::cerr << "tensor::interface::inferface (type copy) | other" << other.storage << " new " << base::storage << std::endl; }
+	    {
+	      std::cerr << "tensor::interface::inferface (type copy) | " << base::storage << base::storage << " other " << other.storage << " (" << typename base::storage_tag() << ")" << std::endl;
+	    }
 
 
 	    //template< index_type Index >

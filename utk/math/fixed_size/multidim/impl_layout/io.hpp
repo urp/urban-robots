@@ -38,7 +38,7 @@ namespace utk
 	  // header
 	  os << "fixed_size::multidim::layout\t|" << std::endl
 	     //<< "  typeid " <<< typeid(type).name() << std::endl // requires <typeinfo>
-	     << "  size " << typename type::sizes()
+	     << "  size " << typename type::sizes() << " (total " << type::total_size << ") "
 	     << "  stride " << typename type::strides()
 	     << "  offset " << type::static_offset() << "  "
 	     << ( sizeof...(Attributes) > 2

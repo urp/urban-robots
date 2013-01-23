@@ -101,15 +101,14 @@ namespace utk
 	};
 
 	// TODO: tests
-	template< typename Layout >
-	struct default_strides_layout
+	template< typename Layout
+		, typename NewStrideVector = typename helpers::stride_sequence< typename Layout::sizes >::type
+		>
+	struct replace_strides
 	{
-	  typedef typename helpers::stride_sequence< typename Layout::sizes >::type new_strides;
-
-	  typedef typename meta::assign< typename Layout::attributes, 1, new_strides >::type new_attributes;
+	  typedef typename meta::assign< typename Layout::attributes, 1, NewStrideVector >::type new_attributes;
 	  typedef typename make_layout< new_attributes >::type type;
 	};
-
 
       } // of multidim::
     } // of fixed_size::

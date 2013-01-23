@@ -66,7 +66,7 @@ namespace utk
 						interface( pointer_type pointer ) : val( pointer ) { }
 
 						// TODO: needs LOVE (conditional?)
-						// constructs the interface from s second interface with larger or equal size
+						// constructs the interface from second interface with larger or equal size
 						template< size_type Size2 >
 						interface( const interface< value_type, Size2 >& o ) : val( o.ptr() )
 						{ static_assert( size <= Size2, "copy constructor (vector to short to initialize with)." ); }
