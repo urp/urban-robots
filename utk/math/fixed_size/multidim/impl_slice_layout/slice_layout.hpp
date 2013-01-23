@@ -132,8 +132,9 @@ namespace utk
 	    typedef FullLayout full_layout;
 
 	    //---| total_size
-	    //-----number of Values (memory-)managed by the layout
+	    //-----number of components "spanned" by the slice layout
 	    //-----note: empty layout has total_size=1
+	    // TODO: compute span of slice layout
 	    static constexpr size_type total_size = full_layout::total_size;
 
 	    //:::| memory model

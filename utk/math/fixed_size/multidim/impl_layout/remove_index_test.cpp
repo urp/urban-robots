@@ -1,4 +1,4 @@
-/*  remove_index_test.cpp - Copyright Peter Urban 2012
+/*  remove_index_test.cpp - Copyright Peter Urban 2012-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -26,16 +26,22 @@
 using namespace utk;
 using namespace utk::math::fixed_size::multidim;
 
-BOOST_AUTO_TEST_SUITE( layout_remove_index )
+struct fixture123
+{
+  typedef layout< size_vector<1,2,3> > layout123;
+};
 
-  BOOST_AUTO_TEST_CASE( with_3d_layout )
+BOOST_FIXTURE_TEST_SUITE( layout_remove_index, fixture123 )
+
+  BOOST_AUTO_TEST_CASE( remove_first_index )
   {
-    typedef layout< size_vector<1,2,3> > layout123;
-
     typedef typename remove_index< layout123, 0 >::type layout23;
 
     const size_type order = layout23::order;
     BOOST_CHECK_EQUAL( order, 2 );
+
+    const size_type total_size = layout23::total_size;
+    BOOST_CHECK_EQUAL( total_size, 6 );
 
     const size_type size0 = meta::integral::at< typename layout23::sizes, 0 >::value;
     BOOST_CHECK_EQUAL( size0, 2 );
@@ -48,7 +54,54 @@ BOOST_AUTO_TEST_SUITE( layout_remove_index )
 
     const stride_type stride1 = meta::integral::at< typename layout23::strides, 1 >::value;
     BOOST_CHECK_EQUAL( stride1, 1 );
-
   }
+
+
+  BOOST_AUTO_TEST_CASE( remove_second_index )
+  {
+    typedef typename remove_index< layout123, 1 >::type layout13;
+
+    const size_type order = layout13::order;
+    BOOST_CHECK_EQUAL( order, 2 );
+
+    const size_type total_size = layout13::total_size;
+    BOOST_CHECK_EQUAL( total_size, 6 );
+
+    const size_type size0 = meta::integral::at< typename layout13::sizes, 0 >::value;
+    BOOST_CHECK_EQUAL( size0, 1 );
+
+    const size_type size1 = meta::integral::at< typename layout13::sizes, 1 >::value;
+    BOOST_CHECK_EQUAL( size1, 3 );
+
+    const stride_type stride0 = meta::integral::at< typename layout13::strides, 0 >::value;
+    BOOST_CHECK_EQUAL( stride0, 6 );
+
+    const stride_type stride1 = meta::integral::at< typename layout13::strides, 1 >::value;
+    BOOST_CHECK_EQUAL( stride1, 1 );
+  }
+
+  BOOST_AUTO_TEST_CASE( remove_third_index )
+  {
+    typedef typename remove_index< layout123, 2 >::type layout12;
+
+    const size_type order = layout12::order;
+    BOOST_CHECK_EQUAL( order, 2 );
+
+    const size_type total_size = layout12::total_size;
+    BOOST_CHECK_EQUAL( total_size, 6 );
+
+    const size_type size0 = meta::integral::at< typename layout12::sizes, 0 >::value;
+    BOOST_CHECK_EQUAL( size0, 1 );
+
+    const size_type size1 = meta::integral::at< typename layout12::sizes, 1 >::value;
+    BOOST_CHECK_EQUAL( size1, 2 );
+
+    const stride_type stride0 = meta::integral::at< typename layout12::strides, 0 >::value;
+    BOOST_CHECK_EQUAL( stride0, 6 );
+
+    const stride_type stride1 = meta::integral::at< typename layout12::strides, 1 >::value;
+    BOOST_CHECK_EQUAL( stride1, 3 );
+  }
+
 
 BOOST_AUTO_TEST_SUITE_END()
