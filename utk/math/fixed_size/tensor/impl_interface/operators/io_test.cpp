@@ -31,20 +31,20 @@ struct fixture
   int data[6];
 
   typedef typename make_layout< size_vector< 1,2,3 >, contravariant_tag >::type layout123;
-  typedef interface< int, unmanaged_tag, layout123 > type123;
+  typedef interface< int, vector::unmanaged_tag, layout123 > type123;
   type123 tensor123;
 
   typedef typename make_layout< size_vector< 1,2 >, contravariant_tag >::type layout12;
-  typedef interface< int, unmanaged_tag, layout12 > type12;
+  typedef interface< int, vector::unmanaged_tag, layout12 > type12;
   type12 tensor12;
 
   typedef typename make_layout< size_vector< 1 >, contravariant_tag >::type layout1;
-  typedef interface< int, unmanaged_tag, layout1 > type1;
+  typedef interface< int, vector::unmanaged_tag, layout1 > type1;
   type1  tensor1;
 
 
   typedef typename make_layout< size_vector< >, contravariant_tag >::type layout_;
-  typedef interface< int, unmanaged_tag, layout_ > type_;
+  typedef interface< int, vector::unmanaged_tag, layout_ > type_;
   type_  tensor_;
 
   fixture() : data{ 1,2,3,4,5,6 }, tensor123(data), tensor12(data), tensor1(data), tensor_(data) {}

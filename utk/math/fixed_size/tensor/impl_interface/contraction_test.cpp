@@ -29,7 +29,7 @@ using namespace utk::math::fixed_size::tensor;
 struct product_fixture22
 {
   typedef typename tensor::make_layout< size_vector< 2,2 >, variance_vector< contravariant,covariant > >::type layout22;
-  typedef interface< double, unmanaged_tag, layout22 > tensor22;
+  typedef interface< double, vector::unmanaged_tag, layout22 > tensor22;
 
   typedef typename contracted< tensor22, 0,1 >::type contraction22;
 };
@@ -60,7 +60,7 @@ BOOST_AUTO_TEST_SUITE_END()
 struct product_fixture222
 {
   typedef typename tensor::make_layout< size_vector< 2,2,2 >, variance_vector< contravariant,covariant,covariant > >::type layout222;
-  typedef interface< double, unmanaged_tag, layout222 > tensor222;
+  typedef interface< double, vector::unmanaged_tag, layout222 > tensor222;
 
   typedef typename contracted< tensor222, 0,2 >::type contraction222;
 };

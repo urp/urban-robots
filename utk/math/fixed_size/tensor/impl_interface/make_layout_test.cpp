@@ -29,7 +29,7 @@ BOOST_AUTO_TEST_SUITE( make_tensor_layout )
   BOOST_AUTO_TEST_CASE( check_contravariant )
   {
     typedef typename make_layout< size_vector<1,2,3>, contravariant_tag >::type contra_layout;
-    typedef interface< int, unmanaged_tag, contra_layout > contra_tensor;
+    typedef interface< int, vector::unmanaged_tag, contra_layout > contra_tensor;
     contra_tensor contravariant_test_tensor( nullptr );
 
     const size_type var1 = meta::integral::at< contra_tensor::variances, 0 >::value;
@@ -43,7 +43,7 @@ BOOST_AUTO_TEST_SUITE( make_tensor_layout )
   BOOST_AUTO_TEST_CASE( check_covariant )
   {
     typedef typename make_layout< size_vector<1,2,3>, covariant_tag >::type co_layout;
-    typedef interface< int, unmanaged_tag, co_layout > co_tensor;
+    typedef interface< int, vector::unmanaged_tag, co_layout > co_tensor;
     co_tensor co_test_tensor( nullptr );
 
     const size_type covar1 = meta::integral::at< co_tensor::variances, 0 >::value;
@@ -57,7 +57,7 @@ BOOST_AUTO_TEST_SUITE( make_tensor_layout )
   BOOST_AUTO_TEST_CASE( check_mixed )
   {
     typedef typename make_layout< size_vector<1,2,3>, mixed_tag<2> >::type mixed_layout;
-    typedef interface< double, unmanaged_tag, mixed_layout > mixed_tensor;
+    typedef interface< double, vector::unmanaged_tag, mixed_layout > mixed_tensor;
     mixed_tensor mixed_test_tensor( nullptr );
 
     const size_type var1 = meta::integral::at< mixed_tensor::variances, 0 >::value;

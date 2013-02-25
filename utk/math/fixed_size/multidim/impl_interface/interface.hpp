@@ -16,11 +16,11 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/vector/vector.hpp"
+# include "utk/math/fixed_size/vector/storage_traits.hpp"
 # include "utk/math/fixed_size/vector/at.hpp"
+# include "utk/math/fixed_size/vector/storage_traits.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp" // for index_type, ...
-# include "utk/math/fixed_size/multidim/impl_interface/storage_traits.hpp" // for index_type, ...
 
 # include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"

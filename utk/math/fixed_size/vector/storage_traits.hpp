@@ -16,6 +16,7 @@
 
 # pragma once
 
+# include "utk/math/fixed_size/storage_traits.hpp"
 # include "utk/math/fixed_size/vector/vector.hpp"
 
 namespace utk
@@ -24,7 +25,7 @@ namespace utk
   {
     namespace fixed_size
     {
-      namespace multidim
+      namespace vector
       {
 	struct unmanaged_tag {};
 	struct managed_tag {};
@@ -39,35 +40,29 @@ namespace utk
 	  return os << "managed";
 	}
 
-	struct default_storage
+	struct default_storage_tags
 	{
 	  typedef unmanaged_tag unmanaged;
 
 	  typedef managed_tag managed;
 	};
 
+      } // of vector:
 
-	template< typename Storage >
-	struct storage_traits
-	{ /* unspecified */ };
+      template< >
+      struct storage_traits< vector::unmanaged_tag > : public vector::default_storage_tags
+      {
+	template< typename ValueType, vector::size_type Size >
+	using type = vector::interface< ValueType, Size >;
+      };
 
-	template< >
-	struct storage_traits< unmanaged_tag >
-	: public default_storage
-	{
-	  template< typename ValueType, size_type Size >
-	  using type = fixed_size::vector::interface< ValueType, Size >;
-	};
+      template< >
+      struct storage_traits< vector::managed_tag > : public vector::default_storage_tags
+      {
+	template< typename ValueType, vector::size_type Size >
+	using type = vector::array< ValueType, Size >;
+      };
 
-	template< >
-	struct storage_traits< managed_tag >
-	: public default_storage
-	{
-	  template< typename ValueType, size_type Size >
-	  using type = fixed_size::vector::array< ValueType, Size >;
-	};
-
-      } // of multidim:
     } // of fixed_size::
   } // of math::
 } // of utk::

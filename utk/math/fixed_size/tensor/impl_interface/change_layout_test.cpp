@@ -28,7 +28,7 @@ using namespace utk::math::fixed_size::tensor;
 struct fixture
 {
   typedef typename make_layout< size_vector< 1,2,3 >, contravariant_tag >::type layout123;
-  typedef interface< int, unmanaged_tag, layout123 > type123;
+  typedef interface< int, vector::unmanaged_tag, layout123 > type123;
   int data[6];
   type123 tensor123;
 

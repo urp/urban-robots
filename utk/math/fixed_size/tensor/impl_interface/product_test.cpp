@@ -31,8 +31,8 @@ using namespace utk::math::fixed_size::tensor;
 struct product_fixture
 {
   typedef multidim::layout< size_vector<2> > layout;
-  typedef interface< double, unmanaged_tag, typename make_layout< layout, contravariant_tag >::type > tensor_a;
-  typedef interface< double, unmanaged_tag, typename make_layout< layout, covariant_tag     >::type > tensor_b;
+  typedef interface< double, vector::unmanaged_tag, typename make_layout< layout, contravariant_tag >::type > tensor_a;
+  typedef interface< double, vector::unmanaged_tag, typename make_layout< layout, covariant_tag     >::type > tensor_b;
 
   typedef typename product_array< tensor_a, tensor_b >::type product_ab;
 };

@@ -25,13 +25,13 @@
 #define BOOST_TEST_MODULE tensor::interface operator multiply
 #include <boost/test/unit_test.hpp>
 
-using namespace utk;
 using namespace utk::math::fixed_size;
+using namespace utk::math::fixed_size::tensor;
 
 struct fixture
 {
-  typedef typename tensor::make_layout< tensor::size_vector<2,3>, tensor::contravariant_tag >::type contra_layout;
-  typedef tensor::interface< int, tensor::unmanaged_tag, contra_layout > type123;
+  typedef typename make_layout< size_vector<2,3>, contravariant_tag >::type contra_layout;
+  typedef interface< int, vector::unmanaged_tag, contra_layout > type123;
   int data[6];
   type123 tensor123;
 
@@ -55,7 +55,7 @@ BOOST_FIXTURE_TEST_SUITE( check_multiply, fixture )
   BOOST_AUTO_TEST_CASE( check_multipy_scalar_with_slice_layout )
   {
     typedef typename multidim::fix_index< contra_layout, 1, 2 >::type fixed_layout;
-    typedef tensor::interface< int, tensor::unmanaged_tag, fixed_layout > type12;
+    typedef interface< int, vector::unmanaged_tag, fixed_layout > type12;
 
     type12 tensor12(data);
 

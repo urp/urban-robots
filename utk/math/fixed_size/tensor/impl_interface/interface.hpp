@@ -43,10 +43,6 @@ namespace utk
 	template< variance_type... Variances >
 	using variance_vector = meta::integral::vector< variance_type, Variances... >;
 
-	// TODO: move to own file
-	using multidim::storage_traits;
-	using multidim::unmanaged_tag;
-	using multidim::managed_tag;
 
 	template< typename Layout, typename OtherLayout >
 	class is_tensor_structure_equivalent
@@ -110,7 +106,7 @@ namespace utk
 
 	    // TODO: make template function
 	    typedef interface< ValueType, typename storage_traits< Storage >::unmanaged, Layout > unmanaged_interface;
-	    typedef interface< ValueType, typename storage_traits< Storage >::managed, Layout > managed_interface;
+	    typedef interface< ValueType, typename storage_traits< Storage >::managed  , Layout > managed_interface;
 
 	    typedef Layout layout;
 

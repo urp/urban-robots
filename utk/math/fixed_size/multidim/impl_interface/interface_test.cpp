@@ -24,7 +24,7 @@
 #define BOOST_TEST_MODULE multidim::interface
 #include <boost/test/unit_test.hpp>
 
-//using namespace utk;
+
 using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
@@ -32,7 +32,7 @@ using namespace utk::math::fixed_size::multidim;
 struct fixture
 {
   typedef layout< size_vector<1,2,3> > layout123;
-  typedef interface< double, unmanaged_tag, layout123 > type123;
+  typedef interface< double, vector::unmanaged_tag, layout123 > type123;
   double  data6[ layout123::total_size ];
   type123    multidim123;
 
@@ -66,7 +66,7 @@ BOOST_FIXTURE_TEST_SUITE( sliced_layout_tests, fixture )
   BOOST_AUTO_TEST_CASE( copy_handle_other_layout )
   {
     // check general copy
-    typedef interface< double, unmanaged_tag, slice_layout< layout123, index_vector<1,0,3> > > fixed_type;
+    typedef interface< double, vector::unmanaged_tag, slice_layout< layout123, index_vector<1,0,3> > > fixed_type;
 
     fixed_type fixed_copy( multidim123.storage );
 
@@ -80,7 +80,7 @@ BOOST_FIXTURE_TEST_SUITE( sliced_layout_tests, fixture )
   {
     typedef layout< size_vector<2,3,4> > unfixed_layout;
     typedef typename fix_index< unfixed_layout, 2, 2 >::type layout;
-    typedef interface< double, unmanaged_tag, layout > type;
+    typedef interface< double, vector::unmanaged_tag, layout > type;
     double  data[ layout::total_size ] = {  0.,  1., 2., 3., 4., 5.
                                          ,  6.,  7., 8., 9.,10.,11.
                                          , 12., 13.,14.,15.,16.,17.

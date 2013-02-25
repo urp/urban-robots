@@ -24,13 +24,13 @@
 #define BOOST_TEST_MODULE tensor::interface operator plus
 #include <boost/test/unit_test.hpp>
 
-using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::tensor;
 
 struct fixture
 {
   typedef typename make_layout< size_vector<2,3>, contravariant_tag >::type contra_layout;
-  typedef interface< int, unmanaged_tag, contra_layout > type123;
+  typedef interface< int, vector::unmanaged_tag, contra_layout > type123;
   int data[6];
   type123 tensor23;
 

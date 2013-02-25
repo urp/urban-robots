@@ -23,14 +23,13 @@
 #define BOOST_TEST_MODULE multidim::interface change_layout
 #include <boost/test/unit_test.hpp>
 
-using namespace utk;
 using namespace utk::math::fixed_size;
-//using namespace utk::math::fixed_size::multidim;
+using namespace utk::math::fixed_size::multidim;
 
 struct interface_fixture
 {
-  typedef multidim::layout< multidim::size_vector< 1,2,3 > > layout123;
-  typedef multidim::interface< int, multidim::unmanaged_tag, layout123 >::type type123;
+  typedef layout< size_vector< 1,2,3 > > layout123;
+  typedef interface< int, vector::unmanaged_tag, layout123 >::type type123;
   int data[6];
   type123 multidim123;
 
@@ -41,9 +40,9 @@ BOOST_FIXTURE_TEST_SUITE( check_change_layout, interface_fixture )
 
   BOOST_AUTO_TEST_CASE( check_change_to_1d )
   {
-    typedef multidim::layout< multidim::size_vector< 6 > > layout6;
+    typedef layout< size_vector< 6 > > layout6;
 
-    auto multidim6 = multidim::use_layout< type123, layout6 >( multidim123 );
+    auto multidim6 = use_layout< type123, layout6 >( multidim123 );
 
     BOOST_CHECK_EQUAL( at( multidim6, 0), 1 );
     BOOST_CHECK_EQUAL( at( multidim6, 1), 2 );

@@ -23,12 +23,13 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_CASE( layout_1d )
 {
   typedef layout< size_vector<3> > layout3;
-  typedef interface< double, unmanaged_tag, layout3 > type;
+  typedef interface< double, vector::unmanaged_tag, layout3 > type;
   double  data[ layout3::total_size ] = { 0.,1.,2. };
   type multidim3( data );
 
@@ -52,7 +53,7 @@ BOOST_AUTO_TEST_CASE( layout_1d )
 struct layout23_fixture
 {
   typedef layout< size_vector<2,3> > layout23;
-  typedef interface< double, unmanaged_tag, layout23 > type;
+  typedef interface< double, vector::unmanaged_tag, layout23 > type;
   double  data[ layout23::total_size ];
   type multidim23;
 
