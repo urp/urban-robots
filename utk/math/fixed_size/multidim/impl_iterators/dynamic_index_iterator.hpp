@@ -41,10 +41,11 @@ namespace utk
 	    typedef typename remove_index< typename base::parent_layout, Index >::type value_layout;
 
 	    // use unmanaged storage to avoid unintentional allocations and copies
-	    typedef typename base::parent_interface::unmanaged_interface unmanaged;
+	    typedef typename interface_traits< typename base::parent_interface >::unmanaged_interface unmanaged_interface;
+	    // switch to value_layout
+	    typedef typename change_layout< unmanaged_interface, value_layout >::type value_interface;
 
-	    typedef typename change_layout< unmanaged, value_layout >::type value_interface;
-	    typedef typename value_interface::storage_type value_storage_interface;
+	    //typedef typename value_interface::storage_type value_storage_type;
 
 	  public:
 
@@ -74,11 +75,11 @@ namespace utk
 
 	    // TODO: ask layout for offset?!!!
 	    auto operator*() -> value_interface
-	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+	    { return value_interface( typename value_interface::storage_type( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
-	    // TODO: ask layout for offset?!!!
+	    // TODO: ask layout for offset?!!!, need this???
 	    auto operator*() const -> const value_interface
-	    { return value_interface( value_storage_interface( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
+	    { return value_interface( typename value_interface::storage_type( base::storage.ptr() + ptrdiff_t( base::index_stride ) * index_value ) ); }
 
 	    //:::| increment operators |:::::::::::::::::::::::::::::::/
 

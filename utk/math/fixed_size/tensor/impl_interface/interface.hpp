@@ -94,19 +94,16 @@ namespace utk
 
 	//---| interface
 	//-----| handles the variance attribute in multidim::layout
-	template < typename ValueType, typename Storage, typename Layout >
+	template < typename ValueType, typename StorageTag, typename Layout >
 	class interface
-	: public multidim::interface< ValueType, Storage, Layout >
+	: public multidim::interface< ValueType, StorageTag, Layout >
 	{
-	    typedef interface< ValueType, Storage, Layout > type;
+	    typedef interface< ValueType, StorageTag, Layout > type;
 
-	    typedef multidim::interface< ValueType, Storage, Layout > base;
+	    typedef multidim::interface< ValueType, StorageTag, Layout > base;
 
 	  public:
 
-	    // TODO: make template function
-	    typedef interface< ValueType, typename storage_traits< Storage >::unmanaged, Layout > unmanaged_interface;
-	    typedef interface< ValueType, typename storage_traits< Storage >::managed  , Layout > managed_interface;
 
 	    typedef Layout layout;
 
@@ -119,7 +116,7 @@ namespace utk
 	    //-----| enable if storage is managed
 
 	    template< typename S = typename type::storage_tag
-	    	    , typename = typename std::enable_if< std::is_same< S, typename base::managed_storage_tag >::value, void >::type
+	    	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< typename base::storage_tag >::managed_tag >::value >::type
 	    	    >
 	    explicit interface() : base()
 	    {
@@ -131,9 +128,9 @@ namespace utk
 	    //-----| enable if storage is unmanaged
 
 	    template< typename S = typename type::storage_tag
-	    	    , typename = typename std::enable_if< std::is_same< S, typename base::unmanaged_storage_tag >::value, void >::type
+	    	    , typename = typename std::enable_if< std::is_same< S, typename storage_traits< S >::unmanaged_tag >::value >::type
 	    	    >
-	    explicit interface( const typename base::unmanaged_storage::pointer_type pointer )
+	    explicit interface( const typename interface_traits< base >::unmanaged_storage::pointer_type pointer )
 	    : base( pointer )
 	    {
 	      std::cerr << "tensor::interface::inferface (pointer) | " << base::storage << std::endl;
@@ -142,10 +139,10 @@ namespace utk
 
 	    // either copies or handles values depending on storage_type
 	    explicit
-	    interface( const typename base::unmanaged_storage& storage )
+	    interface( const typename interface_traits< base >::unmanaged_storage& storage )
 	    : base( storage )
 	    {
-	      std::cerr << "tensor::interface::inferface (storage) | " << base::storage << " (" << Storage() << ") total size " << layout::total_size  << std::endl;
+	      std::cerr << "tensor::interface::inferface (storage) | " << base::storage << " (" << StorageTag() << ") total size " << layout::total_size  << std::endl;
 	    }
 
 
@@ -154,16 +151,18 @@ namespace utk
 		    , bool SameTensorStructure = is_tensor_structure_equivalent< layout, typename interface< ValueType, OtherStorage, OtherLayout >::layout >::value
 		    , bool SameMemoryStructure = is_memory_structure_equivalent< layout, typename interface< ValueType, OtherStorage, OtherLayout >::layout >::value
 		    // can not copy if using unmanaged storage with and other tensor has different memory structure
-		    , typename = typename std::enable_if< not ( std::is_same< typename base::storage_tag, typename base::unmanaged_storage_tag >::value
+		    , typename S = typename base::storage_tag
+		    , typename = typename std::enable_if< not ( std::is_same< S, typename storage_traits< S >::unmanaged_tag >::value
 								and not SameMemoryStructure
 							      ) and SameTensorStructure
 						        , void
 							>::type
 		    >
 	    interface( const interface< ValueType, OtherStorage, OtherLayout >& other)
-	    : base( other.storage ) // TODO: unnessacary copy if Storage is managed
+	    : base( other.storage ) // TODO: make two seperate constructors?
 	    {
-	      if( std::is_same< typename base::storage_tag, typename base::unmanaged_storage_tag >::value )
+	      if( std::is_same< typename base::storage_tag
+			      , typename storage_traits< typename base::storage_tag >::unmanaged_tag >::value )
 	        base::storage.ref( other.storage.ptr() );
 	      else // managed storage
 		static_impl::assign_md( other.begin(), other.end(), begin() );
@@ -208,9 +207,25 @@ namespace utk
 	      return base::unmanaged_interface( *this );
 	    }*/
 
-	};
+	}; // of interface<>
 
       } // of tensor::
+
+      //:::| interface_traits |:::::::::::::::::::::::::::::::::::::::::
+
+      template< typename ValueType, typename StorageTag, typename Layout >
+      class interface_traits< tensor::interface< ValueType, StorageTag, Layout > >
+      : public interface_traits< multidim::interface< ValueType, StorageTag, Layout > >
+      {
+	  typedef interface_traits< multidim::interface< ValueType, StorageTag, Layout > > base;
+
+	public:
+        // determine tensor::interface with (un-)managed storage
+        typedef tensor::interface< ValueType, typename base::unmanaged_storage_tag, Layout > unmanaged_interface;
+        typedef tensor::interface< ValueType, typename base::  managed_storage_tag, Layout >   managed_interface;
+
+      };
+
     } // of fixed_size::
   } // of math::
 } // of utk::

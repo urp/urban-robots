@@ -32,11 +32,11 @@ namespace utk
 	template< typename Tensor, index_type Index, index_type DualIndex >
 	struct contracted { /* unspecified */ };
 
-	template< typename T, typename Storage, typename Layout, index_type Index, index_type DualIndex >
-	struct contracted< interface< T, Storage, Layout >, Index, DualIndex >
+	template< typename ValueType, typename StorageTag, typename Layout, index_type Index, index_type DualIndex >
+	struct contracted< interface< ValueType, StorageTag, Layout >, Index, DualIndex >
 	{
-	  typedef typename interface< T, Storage, Layout >::layout::sizes sizes;
-	  typedef typename interface< T, Storage, Layout >::variances variances;
+	  typedef typename interface< ValueType, StorageTag, Layout >::layout::sizes sizes;
+	  typedef typename interface< ValueType, StorageTag, Layout >::variances variances;
 
 	  static_assert( meta::integral::at< variances, Index >::value == contravariant
 		       , "template parameter Index must be contravariant" );
@@ -53,8 +53,8 @@ namespace utk
 
 	  typedef typename multidim::replace_strides< contracted_layout >::type new_layout;
 
-	  typedef interface< T
-			   , typename storage_traits< Storage >::managed
+	  typedef interface< ValueType
+			   , typename storage_traits< StorageTag >::managed_tag
 			   , new_layout
 			   //, contracted_layout
 			   > type;
@@ -80,7 +80,7 @@ namespace utk
 	    typedef typename meta::integral::assign< index_fixed, DualIndex, meta::integral::constant< index_type, IndexValue > >::type index_mask;
 
 	    typedef typename multidim::slice_layout< typename Tensor::layout, index_mask > new_layout;
-	    typedef typename change_layout< Tensor, new_layout >::type::unmanaged_interface slice_interface;
+	    typedef typename interface_traits< typename change_layout< Tensor, new_layout >::type >::unmanaged_interface slice_interface;
 
 	    const slice_interface slice( A.storage );
 

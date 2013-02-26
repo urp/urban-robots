@@ -1,4 +1,4 @@
-/*  interface.hpp - Copyright Peter Urban 2012
+/*  storage_traits.hpp - Copyright Peter Urban 2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@
 
 # pragma once
 
+# include <ostream>
+
 # include "utk/math/fixed_size/storage_traits.hpp"
-# include "utk/math/fixed_size/vector/vector.hpp"
 
 namespace utk
 {
@@ -42,26 +43,17 @@ namespace utk
 
 	struct default_storage_tags
 	{
-	  typedef unmanaged_tag unmanaged;
+	  typedef unmanaged_tag unmanaged_tag;
 
-	  typedef managed_tag managed;
+	  typedef managed_tag managed_tag;
 	};
 
       } // of vector:
 
-      template< >
-      struct storage_traits< vector::unmanaged_tag > : public vector::default_storage_tags
-      {
-	template< typename ValueType, vector::size_type Size >
-	using type = vector::interface< ValueType, Size >;
-      };
+      //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
+      //:::| storage_storaits defined in interface.hpp and array.hpp |::
+      //::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::::
 
-      template< >
-      struct storage_traits< vector::managed_tag > : public vector::default_storage_tags
-      {
-	template< typename ValueType, vector::size_type Size >
-	using type = vector::array< ValueType, Size >;
-      };
 
     } // of fixed_size::
   } // of math::

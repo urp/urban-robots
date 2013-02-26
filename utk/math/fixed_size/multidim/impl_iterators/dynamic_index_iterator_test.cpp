@@ -13,7 +13,7 @@
     You should have received a copy of the GNU General Public License
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
-
+# include "utk/math/fixed_size/vector/vector.hpp"
 # include "utk/math/fixed_size/vector/operators.hpp"
 # include "utk/math/fixed_size/multidim/interface.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/dynamic_index_iterator.hpp"

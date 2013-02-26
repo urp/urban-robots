@@ -20,6 +20,8 @@
 
 # include <type_traits>
 
+# include "utk/math/fixed_size/interface_traits.hpp"
+
 # include "utk/math/fixed_size/multidim/impl_slice_layout/slice_layout.hpp"
 # include "utk/math/fixed_size/multidim/impl_interface/change_layout.hpp"
 
@@ -67,10 +69,9 @@ namespace utk
 						typedef slice_layout< typename Interface::layout, current_indices > value_layout;
 
             // use unmanaged storage to prevent unintentional allocations and copies
-            typedef typename Interface::unmanaged_interface unmanaged;
+            typedef typename interface_traits< Interface >::unmanaged_interface unmanaged;
 
             typedef typename change_layout< unmanaged, value_layout >::type value_interface;
-						typedef typename value_interface::storage_type value_storage_type;
 
 					public:
 
@@ -86,7 +87,7 @@ namespace utk
 						//:::| constructors |::::::::::::::::::::::::::::::::::::::/
 
 						//---| constructor with storage_type
-						static_iterator_base( const typename Interface::unmanaged_interface::storage_type& other_storage )
+						static_iterator_base( const typename interface_traits< Interface >::unmanaged_storage& other_storage )
 						: storage( other_storage )  { }
 
 						//---| copy constuctor
@@ -138,7 +139,7 @@ namespace utk
             }
 
 						//---| constructor with storage_type
-						static_iterator( const typename Interface::unmanaged_interface::storage_type& other_storage )
+						static_iterator( const typename interface_traits< Interface >::unmanaged_storage& other_storage )
 						: base( other_storage )
             { std::cerr << "multidim::static_iterator (" << typename Interface::storage_tag() << " storage) | indices " << typename base::current_indices()
               << " other" << other_storage << " new "

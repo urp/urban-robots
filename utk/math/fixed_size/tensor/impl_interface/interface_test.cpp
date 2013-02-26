@@ -14,8 +14,11 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/tensor/interface.hpp"
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/multidim/slice_layout.hpp"
+
+# include "utk/math/fixed_size/tensor/interface.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE tensor::interface

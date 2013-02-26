@@ -14,7 +14,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
-# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
+# include "utk/math/fixed_size/vector/vector.hpp"
+
+//# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"

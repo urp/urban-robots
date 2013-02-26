@@ -96,9 +96,21 @@ namespace utk
 	    virtual
 	    ~array()
 	    {	}
-	};
+
+	}; // of array
 
       } // of vector::
+
+
+      //:::| storage_traits |:::::::::::::::::::::::::::::::::::::::::::
+
+      template< >
+      struct storage_traits< vector::managed_tag > : public vector::default_storage_tags
+      {
+	template< typename ValueType, vector::size_type Size >
+	using type = vector::array< ValueType, Size >;
+      };
+
     } // of fixed_size::
   } // of math::
 } // of utk::

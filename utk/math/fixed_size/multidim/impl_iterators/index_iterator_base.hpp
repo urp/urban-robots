@@ -38,12 +38,12 @@ namespace utk
 
 	  typedef Interface parent_interface;
 	  typedef typename parent_interface::layout parent_layout;
-	  typedef typename parent_interface::unmanaged_storage parent_storage_type;
-
+	  // storage type is unmanaged to avoid copies
+	  typedef typename interface_traits< parent_interface >::unmanaged_storage storage_type;
 
 	  //:::| storage interface |:::::::::::::::::::::::::::::::::::/
 
-	  parent_storage_type storage;
+	  storage_type storage;
 
 	  //:::| iteration information |:::::::::::::::::::::::::::::::/
 

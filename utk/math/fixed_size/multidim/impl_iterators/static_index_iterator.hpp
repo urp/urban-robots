@@ -42,10 +42,9 @@ namespace utk
 	    typedef typename fix_index< typename base::parent_layout, Index, IndexValue >::type value_layout;
 
 	    // use unmanaged storage to avoid unintentional allocations and copies
-	    typedef typename base::parent_interface::unmanaged_interface unmanaged;
+	    typedef typename interface_traits< typename base::parent_interface >::unmanaged_interface unmanaged;
 
 	    typedef typename change_layout< unmanaged, value_layout >::type value_interface;
-	    typedef typename value_interface::storage_type value_storage_type;
 
 	  public:
 
@@ -83,7 +82,7 @@ namespace utk
 	    //:::| dereference operator |::::::::::::::::::::::::::::::/
 
 	    value_interface operator*()
-	    { return value_interface( value_storage_type( base::storage.ptr() ) ); }
+	    { return value_interface( typename value_interface::storage_type( base::storage.ptr() ) ); }
 
 	    //:::| increment operator |::::::::::::::::::::::::::::::::/
 

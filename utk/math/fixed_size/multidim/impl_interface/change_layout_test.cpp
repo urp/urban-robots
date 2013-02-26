@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/multidim/impl_interface/at.hpp"
 
@@ -29,7 +31,7 @@ using namespace utk::math::fixed_size::multidim;
 struct interface_fixture
 {
   typedef layout< size_vector< 1,2,3 > > layout123;
-  typedef interface< int, vector::unmanaged_tag, layout123 >::type type123;
+  typedef interface< int, vector::unmanaged_tag, layout123 > type123;
   int data[6];
   type123 multidim123;
 

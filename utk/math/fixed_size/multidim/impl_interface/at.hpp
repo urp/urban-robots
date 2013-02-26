@@ -90,7 +90,7 @@ namespace utk
 	  typedef slice_layout< typename Interface::layout, index_mask > new_layout;
 
 	  // use unmanaged storage to prevent unintended allocations and copies
-	  typedef typename change_layout< Interface, new_layout >::type::unmanaged_interface type;
+	  typedef typename interface_traits< typename change_layout< Interface, new_layout >::type >::unmanaged_interface type;
 	};
 
 	//TODO: use static version (template) for layout::index_offset

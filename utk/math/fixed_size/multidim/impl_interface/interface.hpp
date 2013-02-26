@@ -16,9 +16,8 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/vector/storage_traits.hpp"
-# include "utk/math/fixed_size/vector/at.hpp"
-# include "utk/math/fixed_size/vector/storage_traits.hpp"
+# include "utk/math/fixed_size/storage_traits.hpp"
+# include "utk/math/fixed_size/interface_traits.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_layout/helpers.hpp" // for index_type, ...
 
@@ -34,28 +33,21 @@ namespace utk
       namespace multidim
       {
 
-	template < typename T, typename Storage, typename Layout >
-	struct interface
+	template < typename ValueType, typename StorageTag, typename Layout >
+	class interface
 	{
-	    typedef interface< T, Storage, Layout > type;
+	    typedef interface< ValueType, StorageTag, Layout > type;
 
-	    typedef T value_type;
+	  public:
+
+	    typedef ValueType value_type;
+
+	    typedef StorageTag storage_tag;
 
 	    typedef Layout layout;
 
 	    //---| storage
-	    // TODO: move to interface_traits
-	    typedef Storage storage_tag;
-	    typedef typename storage_traits< storage_tag >::template type< T, layout::total_size > storage_type;
-
-	    typedef typename storage_traits< storage_tag >::unmanaged unmanaged_storage_tag;
-	    typedef typename storage_traits< storage_tag >::managed   managed_storage_tag;
-
-	    typedef typename storage_traits< unmanaged_storage_tag >::template type< T, layout::total_size > unmanaged_storage;
-	    typedef typename storage_traits< managed_storage_tag   >::template type< T, layout::total_size >   managed_storage;
-
-	    typedef interface< T, unmanaged_storage_tag, layout > unmanaged_interface;
-	    typedef interface< T, managed_storage_tag  , layout > managed_interface;
+	    typedef typename storage_traits< storage_tag >::template type< ValueType, layout::total_size > storage_type;
 
 	    storage_type storage;
 
@@ -67,7 +59,7 @@ namespace utk
 	    //-----| enable if storage is managed
 
 	    template< typename S = storage_tag
-	    	    , typename = typename std::enable_if< std::is_same< S, managed_storage_tag >::value, void >::type
+	    	    , typename = typename std::enable_if< std::is_same< S, typename interface_traits< type >::managed_storage_tag >::value >::type
 	    	    >
 	    explicit interface()
 	    : storage()  { }
@@ -77,14 +69,14 @@ namespace utk
 	    //-----| enable if storage is unmanaged
 
 	    template< typename S = storage_tag
-	    	    , typename = typename std::enable_if< std::is_same< S, unmanaged_storage_tag >::value, void >::type
+	    	    , typename = typename std::enable_if< std::is_same< S, typename interface_traits< type >::unmanaged_storage_tag >::value >::type
 	    	    >
-	    explicit interface( const typename unmanaged_storage::pointer_type pointer )
+	    explicit interface( const typename interface_traits< type >::unmanaged_storage::pointer_type pointer )
 	    : storage( pointer )  { }
 
 	    // either copies or handles values depending on storage_type
 	    explicit
-	    interface( const unmanaged_storage& s )
+	    interface( const typename interface_traits< type >::unmanaged_storage& s )
 	    : storage( s )
 	    { }
 
@@ -119,10 +111,30 @@ namespace utk
 
 	};
 
-	template< typename T, typename Storage, typename Layout >
-	constexpr index_type interface< T, Storage, Layout >::order;
+	template< typename ValueType, typename Storage, typename Layout >
+	constexpr index_type interface< ValueType, Storage, Layout >::order;
 
       } // of multidim:
+
+      //:::| interface_traits |:::::::::::::::::::::::::::::::::::::::::
+
+      template< typename ValueType, typename StorageTag, typename Layout >
+      struct interface_traits< multidim::interface< ValueType, StorageTag, Layout > >
+      {
+        typedef StorageTag storage_tag;
+        typedef typename storage_traits< StorageTag >::unmanaged_tag unmanaged_storage_tag;
+        typedef typename storage_traits< StorageTag >::managed_tag     managed_storage_tag;
+
+        // determine unmanaged storage type with propper size
+        typedef typename storage_traits< unmanaged_storage_tag >::template type< ValueType, Layout::total_size > unmanaged_storage;
+        typedef typename storage_traits<   managed_storage_tag >::template type< ValueType, Layout::total_size >   managed_storage;
+
+        // determine multidim::interface with (un-)managed storage
+        typedef multidim::interface< ValueType, unmanaged_storage_tag, Layout > unmanaged_interface;
+        typedef multidim::interface< ValueType,   managed_storage_tag, Layout >   managed_interface;
+
+      };
+
     } // of fixed_size::
   } // of math::
 } // of utk::

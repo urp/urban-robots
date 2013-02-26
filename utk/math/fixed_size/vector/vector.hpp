@@ -18,6 +18,8 @@
 
 # include "utk/math/fixed_size/vector/interface.hpp"
 # include "utk/math/fixed_size/vector/array.hpp"
+# include "utk/math/fixed_size/vector/storage_traits.hpp"
+
 # include "utk/math/fixed_size/vector/operators.hpp"
 
 # include "utk/math/fixed_size/vector/abs.hpp"

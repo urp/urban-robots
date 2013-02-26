@@ -22,8 +22,13 @@ namespace utk
   {
     namespace fixed_size
     {
-
-      template< typename Storage > struct storage_traits { /* unspecified */ };
+      // defines a tag based to construct linear storage types ( like (un-)managed pointers and (managed) arrays,
+      template< typename Storage > struct storage_traits
+      {
+        /* typedef unspecified unmanaged_tag*/
+        /* typedef unspecified managed_tag*/
+        /* typedef unspecified type*/
+      };
 
     } // of fixed_size::
   } // of math::

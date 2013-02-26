@@ -66,9 +66,9 @@ namespace utk
 
         //:::| tensor
 
-        template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
-        auto operator+=( interface< T, StorageA, LayoutA >& A, const interface< T, StorageB, LayoutB >& B )
-        -> interface< T, StorageA, LayoutA >&
+        template< typename ValueType, typename StorageTagA, typename LayoutA, typename StorageTagB, typename LayoutB >
+        auto operator+=( interface< ValueType, StorageTagA, LayoutA >& A, const interface< ValueType, StorageTagB, LayoutB >& B )
+        -> interface< ValueType, StorageTagA, LayoutA >&
         {
           static_assert( is_tensor_structure_equivalent< LayoutA, LayoutB >::value
                        , "Tensors must have the same order and indices (size,variance)"
@@ -78,11 +78,11 @@ namespace utk
           return A;
         }
 
-        template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
-        auto operator+( const interface< T, StorageA, LayoutA >& A, const interface< T, StorageB, LayoutB >& B )
-        -> typename interface< T, StorageA, LayoutA >::managed_interface
+        template< typename ValueType, typename StorageTagA, typename LayoutA, typename StorageTagB, typename LayoutB >
+        auto operator+( const interface< ValueType, StorageTagA, LayoutA >& A, const interface< ValueType, StorageTagB, LayoutB >& B )
+        -> typename interface_traits< interface< ValueType, StorageTagA, LayoutA > >::managed_interface
         {
-          typename interface< T, StorageA, LayoutA >::managed_interface result( A );
+          typename interface_traits< interface< ValueType, StorageTagA, LayoutA > >::managed_interface result( A );
 
           static_impl::assign_plus( result.begin(), result.end(), B.begin() );
           return result;
@@ -91,25 +91,25 @@ namespace utk
 
         //:::| scalar
 
-        template< typename T, typename Storage, typename Layout >
-        auto operator+=( interface< T, Storage, Layout >& inter, const T& scalar )
-        -> interface< T, Storage, Layout >&
+        template< typename ValueType, typename StorageTag, typename Layout >
+        auto operator+=( interface< ValueType, StorageTag, Layout >& inter, const ValueType& scalar )
+        -> interface< ValueType, StorageTag, Layout >&
         {
           static_impl::assign_plus_scalar( inter.begin(), inter.end(), scalar );
           return inter;
         }
 
-        template< typename T, typename Storage, typename Layout >
-        auto operator+( const T& scalar, const interface< T, Storage, Layout >& inter )
-        -> typename interface< T, Storage, Layout >::managed_interface
+        template< typename ValueType, typename StorageTag, typename Layout >
+        auto operator+( const ValueType& scalar, const interface< ValueType, StorageTag, Layout >& inter )
+        -> typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface
         {
-          typename interface< T, Storage, Layout >::managed_interface result( inter.storage );
+          typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface result( inter.storage );
           return result += scalar;
         }
 
-        template< typename T, typename Storage, typename Layout >
-        auto operator+( const interface< T, Storage, Layout >& inter, const T& scalar )
-        -> typename interface< T, Storage, Layout >::managed_interface
+        template< typename ValueType, typename StorageTag, typename Layout >
+        auto operator+( const interface< ValueType, StorageTag, Layout >& inter, const ValueType& scalar )
+        -> typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface
         {
           return scalar + inter;
         }

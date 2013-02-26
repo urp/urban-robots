@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
@@ -41,7 +43,7 @@ BOOST_FIXTURE_TEST_SUITE( plus_scalar, fixture )
 
   BOOST_AUTO_TEST_CASE( check_tensor_plus_assign_scalar )
   {
-    type123::managed_interface result( tensor23.storage );
+    typename interface_traits< type123 >::managed_interface result( tensor23.storage );
 
     result += 1;
 
@@ -91,7 +93,7 @@ BOOST_FIXTURE_TEST_SUITE( plus_tensor, fixture )
 
   BOOST_AUTO_TEST_CASE( check_tensor_plus_assign_tensor )
   {
-    type123::managed_interface result( tensor23 );
+    typename interface_traits< type123 >::managed_interface result( tensor23 );
 
     result += tensor23;
 

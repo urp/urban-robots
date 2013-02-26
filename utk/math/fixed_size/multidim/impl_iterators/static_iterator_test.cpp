@@ -14,6 +14,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/vector/vector.hpp"
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_iterators/static_iterator.hpp"

@@ -16,6 +16,8 @@
 
 # pragma once
 
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
@@ -34,13 +36,13 @@ namespace utk
 	template< typename TensorA, typename TensorB >
 	struct product_array { /* unspecified */ };
 
-	template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
-	struct product_array< interface< T, StorageA, LayoutA >
-			    , interface< T, StorageB, LayoutB >
+	template< typename ValueType, typename StorageTagA, typename LayoutA, typename StorageTagB, typename LayoutB >
+	struct product_array< interface< ValueType, StorageTagA, LayoutA >
+			    , interface< ValueType, StorageTagB, LayoutB >
 			    >
 	{
-	  typedef interface< T
-			   , typename storage_traits< StorageA >::managed
+	  typedef interface< ValueType
+			   , typename storage_traits< StorageTagA >::managed_tag
 			   , typename multidim::product_layout< LayoutA, LayoutB >::type
 			   > type;
 	};
@@ -70,14 +72,14 @@ namespace utk
 
 	//---| product
 
-	template< typename T, typename StorageA, typename LayoutA, typename StorageB, typename LayoutB >
-	auto product( const interface< T, StorageA, LayoutA >& a
-		    , const interface< T, StorageB, LayoutB >& b
+	template< typename ValueType, typename StorageTagA, typename LayoutA, typename StorageTagB, typename LayoutB >
+	auto product( const interface< ValueType, StorageTagA, LayoutA >& a
+		    , const interface< ValueType, StorageTagB, LayoutB >& b
 		    )
-	-> typename product_array< interface< T, StorageA, LayoutA >, interface< T, StorageB, LayoutB > >::type//product_array< decltype(a), decltype(b) >::type
+	-> typename product_array< interface< ValueType, StorageTagA, LayoutA >, interface< ValueType, StorageTagB, LayoutB > >::type//product_array< decltype(a), decltype(b) >::type
 	{
 	  typedef typename //product_array< decltype(a), decltype(b) >::type
-	  product_array< interface< T, StorageA, LayoutA >, interface< T, StorageB, LayoutB > >::type type;
+	  product_array< interface< ValueType, StorageTagA, LayoutA >, interface< ValueType, StorageTagB, LayoutB > >::type type;
 	  type result;
 
 	  std::cerr << "utk::math::fixed_size::tensor::product | result -> " << std::endl << result;

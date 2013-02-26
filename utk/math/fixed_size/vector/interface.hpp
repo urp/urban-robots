@@ -20,6 +20,8 @@
 # include <cassert>
 # include <algorithm>
 
+# include "utk/math/fixed_size/vector/storage_traits.hpp"
+
 # pragma GCC visibility push(default)
 
 namespace utk
@@ -192,6 +194,20 @@ namespace utk
 				constexpr size_type interface< T, Size >::size;
 
       } // of vector::
+
+
+
+      //:::| storage_traits |:::::::::::::::::::::::::::::::::::::::::::
+
+      template< >
+      struct storage_traits< vector::unmanaged_tag > : public vector::default_storage_tags
+      {
+        template< typename ValueType, vector::size_type Size >
+        using type = vector::interface< ValueType, Size >;
+      };
+
+
+
     } // of fixed_size::
   } // end of math::
 } // end of utk::

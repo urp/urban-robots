@@ -14,6 +14,8 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 */
 
+# include "utk/math/fixed_size/vector/vector.hpp"
+
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
@@ -60,7 +62,7 @@ BOOST_FIXTURE_TEST_SUITE( check_at, fixture )
 
   BOOST_AUTO_TEST_CASE( check_assign_to_array )
   {
-    typedef typename type123::managed_interface array_type;
+    typedef typename interface_traits< type123 >::managed_interface array_type;
     array_type tensorB( typename array_type::storage_type( 0 ) );
 
     BOOST_TEST_MESSAGE( "before A " << tensorA );

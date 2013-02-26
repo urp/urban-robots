@@ -16,6 +16,8 @@
 
 # pragma once
 
+# include <boost/lexical_cast.hpp>
+
 # include "utk/meta/integral/integral.hpp"
 
 # include "utk/math/fixed_size/multidim/impl_interface/interface.hpp"

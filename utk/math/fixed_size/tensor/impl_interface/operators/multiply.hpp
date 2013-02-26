@@ -58,20 +58,20 @@ namespace utk
         }
 
 
-        template< typename T, typename Storage, typename Layout >
-        auto operator*( const T& scalar, const interface< T, Storage, Layout >& inter )
-        -> typename interface< T, Storage, Layout >::managed_interface
+        template< typename ValueType, typename StorageTag, typename Layout >
+        auto operator*( const ValueType& scalar, const interface< ValueType, StorageTag, Layout >& inter )
+        -> typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface
         {
-          typename interface< T, Storage, Layout >::managed_interface result( inter.storage );
+          typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface result( inter.storage );
 
           static_impl::assign_multiply_scalar( result.begin(), result.end(), scalar );
 
           return result;
         }
 
-        template< typename T, typename Storage, typename Layout >
-        auto operator*( const interface< T, Storage, Layout >& inter, const T& scalar )
-        -> typename interface< T, Storage, Layout >::managed_interface
+        template< typename ValueType, typename StorageTag, typename Layout >
+        auto operator*( const interface< ValueType, StorageTag, Layout >& inter, const ValueType& scalar )
+        -> typename interface_traits< interface< ValueType, StorageTag, Layout > >::managed_interface
         {
           return scalar * inter;
         }
