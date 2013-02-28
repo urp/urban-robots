@@ -29,7 +29,7 @@ namespace utk
       namespace tensor
       {
 
-	template< multidim::size_type...SizeVector >
+	template< size_type...SizeVector >
 	using size_vector = multidim::size_vector< SizeVector... >;
 
 	typedef meta::integral::constant< variance_type, contravariant > contravariant_tag;

@@ -25,6 +25,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
 struct fixture123_023

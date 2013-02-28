@@ -22,6 +22,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_SUITE( two_dim_x_one_dim )

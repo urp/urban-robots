@@ -20,7 +20,7 @@
 #define BOOST_TEST_MODULE multidim::layout
 #include <boost/test/unit_test.hpp>
 
-using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_SUITE( static_use )
@@ -54,7 +54,7 @@ BOOST_AUTO_TEST_SUITE( static_use )
     BOOST_CHECK_EQUAL( total, 24 );
 
 
-    std::array< size_type, 3 > size_array = meta::integral::make_array< layout234::sizes >::value;
+    std::array< size_type, 3 > size_array = utk::meta::integral::make_array< layout234::sizes >::value;
     BOOST_CHECK_EQUAL( size_array[0], 2 );
   }
 

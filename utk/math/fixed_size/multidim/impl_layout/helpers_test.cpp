@@ -21,6 +21,7 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
 
 BOOST_AUTO_TEST_CASE( strides_sequence_helper )

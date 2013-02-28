@@ -23,8 +23,8 @@
 #include <boost/test/unit_test.hpp>
 
 using namespace utk;
+using namespace utk::math::fixed_size;
 using namespace utk::math::fixed_size::multidim;
-
 
 //---| fix_unmasked_index ( slice_layout ) |------------------/
 

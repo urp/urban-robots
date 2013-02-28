@@ -20,6 +20,8 @@
 
 # include "utk/meta/integral/integral.hpp"
 
+# include "utk/math/fixed_size/index_types.hpp"
+
 namespace utk
 {
   namespace math
@@ -28,11 +30,6 @@ namespace utk
     {
       namespace multidim
       {
-	typedef ptrdiff_t index_type;
-
-	// TODO: move to common header?
-	typedef size_t size_type;
-	typedef ptrdiff_t stride_type;
 
 	//-----| bool_vector
 

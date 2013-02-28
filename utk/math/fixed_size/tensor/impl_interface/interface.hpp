@@ -18,7 +18,7 @@
 
 # include "utk/meta/vector_pop_back.hpp"
 
-# include "utk/math/fixed_size/multidim/impl_layout/add_attributes.hpp"
+//# include "utk/math/fixed_size/multidim/impl_layout/add_attributes.hpp"
 # include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
@@ -34,9 +34,6 @@ namespace utk
     {
       namespace tensor
       {
-	typedef size_t size_type;
-	typedef ptrdiff_t index_type;
-
 	typedef enum { contravariant=false, covariant=true } variance_type;
 
 	template< variance_type... Variances >
