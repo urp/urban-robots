@@ -1,4 +1,4 @@
-/*  tensor.hpp - Copyright Peter Urban 2012-2013
+/*  interface_traits.hpp - Copyright Peter Urban 2012
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,19 +16,27 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/tensor/interface.hpp"
-# include "utk/math/fixed_size/tensor/operators.hpp"
-
 namespace utk
 {
   namespace math
   {
     namespace fixed_size
     {
-      namespace tensor
-      {
 
-      } // of tensor::
+      template< typename Interface >
+      struct interface_traits
+      {
+        /* typedef unspecified storage_tag
+         * typedef unspecified unmanaged_storage_tag
+         * typedef unspecified   managed_storage_tag
+         * typedef unspecified unmanaged_storage
+         * typedef unspecified   managed_storage
+         * typedef unspecified unmanaged_interface
+         * typedef unspecified   managed_interface
+         *
+         * */
+      };
+
     } // of fixed_size::
   } // of math::
 } // of utk::

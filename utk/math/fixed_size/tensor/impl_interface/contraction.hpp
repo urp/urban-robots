@@ -17,8 +17,8 @@
 # pragma once
 
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/operators/plus.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/plus.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/io.hpp"
 
 namespace utk
 {

@@ -1,4 +1,4 @@
-/*  multiply_test.cpp - Copyright Peter Urban 2012
+/*  multiply_test.cpp - Copyright Peter Urban 2012-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,12 +16,10 @@
 
 # include "utk/math/fixed_size/vector/vector.hpp"
 
-//# include "utk/math/fixed_size/multidim/impl_slice_layout/io.hpp"
-
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/multiply.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE tensor::interface operator multiply

@@ -22,8 +22,7 @@
 # include "utk/math/fixed_size/multidim/impl_iterators/declare_iterators.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/change_layout.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/operators/assign.hpp"
-//# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_interface/assign.hpp"
 
 # include "utk/math/fixed_size/multidim/interface.hpp"
 
@@ -220,9 +219,9 @@ namespace utk
 	  typedef interface_traits< multidim::interface< ValueType, StorageTag, Layout > > base;
 
 	public:
-        // determine tensor::interface with (un-)managed storage
-        typedef tensor::interface< ValueType, typename base::unmanaged_storage_tag, Layout > unmanaged_interface;
-        typedef tensor::interface< ValueType, typename base::  managed_storage_tag, Layout >   managed_interface;
+	  // determine tensor::interface with (un-)managed storage
+	  typedef tensor::interface< ValueType, typename base::unmanaged_storage_tag, Layout > unmanaged_interface;
+	  typedef tensor::interface< ValueType, typename base::  managed_storage_tag, Layout >   managed_interface;
 
       };
 

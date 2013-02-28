@@ -1,4 +1,4 @@
-/*  make_interface_test.cpp - Copyright Peter Urban 2012
+/*  make_layout_test.cpp - Copyright Peter Urban 2012-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by

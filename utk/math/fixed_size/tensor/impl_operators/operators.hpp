@@ -1,4 +1,4 @@
-/*  tensor.hpp - Copyright Peter Urban 2012-2013
+/*  operators.hpp - Copyright Peter Urban 2012-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -16,8 +16,9 @@
 
 # pragma once
 
-# include "utk/math/fixed_size/tensor/interface.hpp"
-# include "utk/math/fixed_size/tensor/operators.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/plus.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/multiply.hpp"
 
 namespace utk
 {
@@ -27,6 +28,7 @@ namespace utk
     {
       namespace tensor
       {
+
 
       } // of tensor::
     } // of fixed_size::

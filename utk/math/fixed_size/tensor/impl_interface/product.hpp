@@ -21,8 +21,8 @@
 # include "utk/math/fixed_size/tensor/impl_interface/interface.hpp"
 
 # include "utk/math/fixed_size/tensor/impl_interface/at.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
-# include "utk/math/fixed_size/tensor/impl_interface/operators/multiply.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/multiply.hpp"
 
 namespace utk
 {

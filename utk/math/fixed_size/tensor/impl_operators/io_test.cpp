@@ -1,4 +1,4 @@
-/*  io_test.cpp - Copyright Peter Urban 2012
+/*  io_test.cpp - Copyright Peter Urban 2012-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,7 +18,7 @@
 
 # include "utk/math/fixed_size/tensor/impl_interface/make_layout.hpp"
 
-# include "utk/math/fixed_size/tensor/impl_interface/operators/io.hpp"
+# include "utk/math/fixed_size/tensor/impl_operators/io.hpp"
 
 #define BOOST_TEST_DYN_LINK
 #define BOOST_TEST_MODULE tensor::interface io
