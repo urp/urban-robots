@@ -1,5 +1,6 @@
 project utk/math/fixed_size ;
 
-build-project vector ;
-build-project multidim ;
-build-project tensor ;
+build-project layout ;
+build-project iterator ;
+build-project interface ;
+

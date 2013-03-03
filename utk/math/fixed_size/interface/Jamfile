@@ -1,0 +1,7 @@
+project utk/math/fixed_size/interface ;
+
+build-project generic_functions ;
+build-project vector ;
+build-project multidim ;
+build-project tensor ;
+

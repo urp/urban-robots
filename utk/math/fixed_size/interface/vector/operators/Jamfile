@@ -1,0 +1,7 @@
+project utk/math/fixed_size/interfaces/vector/operators ;
+
+run io_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run comparison_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run logical_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run arithmetic_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+

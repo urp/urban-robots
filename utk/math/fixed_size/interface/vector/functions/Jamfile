@@ -1,0 +1,19 @@
+project utk/math/fixed_size/interfaces/vector/functions ;
+
+run at_test.cpp				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run named_access_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run shifted_test.cpp		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run min_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run max_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run abs_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run sgn_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run floor_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run ceil_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run flipped_test.cpp		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run clamp_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run sum_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run dot_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run cross_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run length_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run distance_test.cpp		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run normal_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;

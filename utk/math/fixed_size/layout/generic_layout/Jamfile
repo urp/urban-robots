@@ -1,0 +1,8 @@
+project utk/math/fixed_size/layouts/layout ;
+
+run generic_layout_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+build-project functions ;
+build-project operators ;
+
+

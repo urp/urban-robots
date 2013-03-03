@@ -1,0 +1,6 @@
+project utk/math/fixed_size/interface/multidim/operators ;
+
+run io_test.cpp			 			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run plus_test.cpp			 		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run multiply_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+

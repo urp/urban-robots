@@ -1,0 +1,7 @@
+project utk/math/fixed_size/interfaces/vector ;
+
+run interface_test.cpp		 			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run array_test.cpp							/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+
+build-project functions ;
+build-project operators ;

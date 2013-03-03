@@ -1,0 +1,4 @@
+project utk/math/fixed_size/iterator/stl ;
+
+run index_iterator_test.cpp 	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+

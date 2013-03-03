@@ -1,4 +1,4 @@
-/*  bla.h - Copyright Peter Urban 2009
+/*  close.hpp - Copyright Peter Urban 2009-2013
 
     This program is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
@@ -18,6 +18,7 @@
 
 # include <cassert>
 # include <cmath>
+
 // utk::close_ulps uses boost::math::float_distance
 # include <boost/math/special_functions/next.hpp>
 
@@ -25,12 +26,11 @@ namespace utk
 {
   namespace math
   {
-
     //TODO: include comparison type in template arguiment (boost???)
     template<class T>
     bool close_ulps(const T& a, const T& b, const int& maxulps = 10)
     { assert( maxulps > 0 );
-      return std::abs( boost::math::float_distance(a,b) ) <= maxulps; 
+      return std::abs( boost::math::float_distance(a,b) ) <= maxulps;
     }
 
     template<class T>
@@ -47,29 +47,29 @@ namespace utk
 
     template<typename T>
     struct close
-    { 
-	  bool operator()(const T& a, const T& b)	const
-  	  { return close_ulps(a,b); }
+    {
+      bool operator()(const T& a, const T& b)	const
+      { return close_ulps(a,b); }
     };
-  
+
     template<typename T>
     struct greater_close
-    { 
-	  bool operator()(const T& a, const T& b)	const
-  	  { return a>b || close_ulps(a,b); }
+    {
+      bool operator()(const T& a, const T& b)	const
+      { return a>b || close_ulps(a,b); }
     };
-  
-    template<typename T>     
+
+    template<typename T>
     struct less_close
-    { 
-	  bool operator()(const T& a, const T& b)	const
+    {
+      bool operator()(const T& a, const T& b)	const
       { return a<b || close_ulps(a,b); }
     };
 
-    template<typename T>     
+    template<typename T>
     struct less_not_close
-    { 
-	  bool operator()(const T& a, const T& b)	const
+    {
+      bool operator()(const T& a, const T& b)	const
       { return a<b || !close_ulps(a,b); }
     };
   }

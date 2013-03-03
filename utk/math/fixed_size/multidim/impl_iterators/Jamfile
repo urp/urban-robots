@@ -1,6 +1,0 @@
-project utk/math/fixed_size/multidim/impl_iterators ;
-
-run dynamic_index_iterator_test.cpp 			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run static_index_iterator_test.cpp 				/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run static_iterator_helpers_test.cpp 	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run static_iterator_test.cpp 	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
