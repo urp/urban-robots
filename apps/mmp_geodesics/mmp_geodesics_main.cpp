@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
 
   //----| model - surface
 
-  typedef flat::QuadSurface	surface_t;
+  typedef flat::Surface	surface_t;
 
   std::shared_ptr<surface_t> surface;
 

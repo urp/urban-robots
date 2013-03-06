@@ -588,7 +588,7 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
 
 void gl::GeodesicsDrawable::gl_draw()
 {
-  //std::clog << "mmp::visualizer::gl::GeodesicsDrawable::gl_draw" << std::endl;
+  //std::clog << "gl::GeodesicsDrawable::gl_draw" << std::endl;
 
   if( !m_gl_initialized )
   { gl_init_textures();

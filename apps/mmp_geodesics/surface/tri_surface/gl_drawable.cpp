@@ -58,18 +58,18 @@ void gl::SurfaceDrawable::gl_init_textures()	const
   // allocate a texture name
 	glGenTextures( 1, &m_gl_texture_handle );
 
-    // select our current texture
-    glBindTexture( GL_TEXTURE_2D, m_gl_texture_handle );
+  // select our current texture
+  glBindTexture( GL_TEXTURE_2D, m_gl_texture_handle );
 
-    glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
+  glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP );
 
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
-    glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST );
+  glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
-    glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, texture.size.first, texture.size.second, 0, GL_RGBA, GL_FLOAT, &texture.pixmap[0] );
+  glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, texture.size.first, texture.size.second, 0, GL_RGBA, GL_FLOAT, &texture.pixmap[0] );
 }
 
 void gl::SurfaceDrawable::gl_draw_gaussian_curvature_vertices() const
@@ -261,12 +261,46 @@ bool	gl::SurfaceDrawable::gl_draw_edges( const mode_t& mode )    const
 
 bool    gl::SurfaceDrawable::gl_draw_faces( const mode_t& mode )    const
 {
+  if( mode == INVISIBLE_FACE_MODE ) return true;
+
+
+  if( mode == SOLID_FACE_MODE )
+  {
+    glPushMatrix();
+
+      Scale( get_global_scale() );
+
+      for( auto its = get_surface()->face_handles(); its.first != its.second; its.first++ )
+      {
+        const Surface::edge_handle e0 = its.first->edge();
+        const Surface::edge_handle e1 = e0.next();
+        const Surface::edge_handle e2 = e1.next();
+
+        const Surface::vertex_handle v0 = e0.source();
+        const Surface::vertex_handle v1 = e1.source();
+        const Surface::vertex_handle v2 = e2.source();
+
+        const location_t normal = its.first->normal();
+
+        glBegin( GL_TRIANGLES );
+          gl::Color( rgba_color_t( .3, .3, .3, 1. ) );
+          gl::Normal( normal );
+          gl::Vertex( v0.location() );
+          gl::Vertex( v1.location() );
+          gl::Vertex( v2.location() );
+        glEnd();
+      }
+
+    glPopMatrix();
+    return true;
+  }
+
   if( mode == TEXTURE_FACE_MODE )
   {
-	if( ! m_gl_texture_initialized )
-	{
-	  gl_init_textures();
-	  m_gl_texture_initialized = true;
+    if( ! m_gl_texture_initialized )
+    {
+      gl_init_textures();
+      m_gl_texture_initialized = true;
     }
     gl_draw_textured_faces();
 
