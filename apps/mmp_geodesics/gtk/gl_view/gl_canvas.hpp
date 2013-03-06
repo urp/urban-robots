@@ -73,12 +73,16 @@ namespace gtk
 	  std::cerr << "gtk::GLRenderTarget::gl_begin_context\t|" << "FAILED" << std::endl;
       }
 
-      void gl_end_context() { m_drawable->gl_end(); }
+      void gl_end_context()
+      {
+	gl::PrintError();
+	m_drawable->gl_end();
+      }
 
-      void gl_finish()
+      void gl_flush()
       {
 	assert( m_drawable );
-	glFinish();
+	//glFinish();
 	if( m_drawable->is_double_buffered() ) m_drawable->swap_buffers();
 	else glFlush();
       }

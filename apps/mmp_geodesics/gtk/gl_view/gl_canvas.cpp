@@ -33,8 +33,8 @@ GLWindowRenderTarget::GLWindowRenderTarget( GLCanvas& canvas )
   if( !Gtk::GL::widget_is_gl_capable( canvas ) )
   {
     Glib::RefPtr<Gdk::GL::Config> window_config = Gdk::GL::Config::create( Gdk::GL::MODE_RGB
-                                       						   		     | Gdk::GL::MODE_DOUBLE
-                                   							   		     | Gdk::GL::MODE_DEPTH );
+                                                                         | Gdk::GL::MODE_DOUBLE
+                                                                         | Gdk::GL::MODE_DEPTH );
     if( !window_config )
     {
       std::clog << "gtk::GLWindowRenderTarget::GLWindowRenderTarget\t|"
@@ -233,8 +233,6 @@ void GLCanvas::gl_render_scene()
 
   glPopMatrix();
 
-  gl::PrintError();
-
 }
 
 bool 	GLCanvas::render_to_window()
@@ -247,7 +245,7 @@ bool 	GLCanvas::render_to_window()
 
     gl_render_scene();
 
-    m_active_target->gl_finish();
+    m_active_target->gl_flush();
 
   m_active_target->gl_end_context();
 
@@ -259,7 +257,7 @@ bool 	GLCanvas::render_to_window()
                                  0, 0, 0, 0,
                                  get_width(), get_height() );
 
-	m_pixmap_update_signal( m_pixmap );
+    m_pixmap_update_signal( m_pixmap );
 
   } else assert( m_active_target->get_type() == GLRenderTarget::WINDOW );
 
@@ -270,11 +268,11 @@ bool 	GLCanvas::render_to_pixmap()
 {
   if( m_active_target->get_type() == GLRenderTarget::PIXMAP )
   {
-	render_to_window();
+    render_to_window();
 
     m_pixmap_update_signal( m_pixmap );
 
-	return true;
+    return true;
   }
 
   const std::shared_ptr< GLRenderTarget >&	pix_target = std::get< GLRenderTarget::PIXMAP >( m_targets );
@@ -283,7 +281,7 @@ bool 	GLCanvas::render_to_pixmap()
 
     gl_render_scene();
 
-    pix_target->gl_finish();
+    pix_target->gl_flush();
 
   pix_target->gl_end_context();
 

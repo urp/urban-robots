@@ -270,7 +270,7 @@ bool    gl::SurfaceDrawable::gl_draw_faces( const mode_t& mode )    const
     }
     gl_draw_textured_faces();
 
-	//glDeleteTextures( 1, & m_gl_texture_handle );
+    //glDeleteTextures( 1, & m_gl_texture_handle );
 
     return true;
   }
@@ -304,9 +304,9 @@ void    gl::SurfaceDrawable::gl_draw_textured_faces()   const
     glBegin( GL_TRIANGLES );
 	  gl::Color( rgba_color_t( 1., 1., 1., 1. ) );
 	  gl::Normal( normal );
-      gl::TexCoord2( v0.texture_coordinate() ); gl::Vertex( v0.location() );
-      gl::TexCoord2( v1.texture_coordinate() ); gl::Vertex( v1.location() );
-      gl::TexCoord2( v2.texture_coordinate() ); gl::Vertex( v2.location() );
+    gl::TexCoord2( v0.texture_coordinate() ); gl::Vertex( v0.location() );
+    gl::TexCoord2( v1.texture_coordinate() ); gl::Vertex( v1.location() );
+    gl::TexCoord2( v2.texture_coordinate() ); gl::Vertex( v2.location() );
     glEnd();
   }
 

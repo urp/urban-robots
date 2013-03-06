@@ -78,12 +78,12 @@ namespace mmp
 
       struct edge_info
       {
-	const edge_descriptor& descriptor; // the target edge
-	const coord_t&	 length;     // the length of the target edge
-	const coord_t&	 srcbound;   // the left or right interval bouindary of the source window
-	const coord_t&	 edgebound;  // the corresponding boundary ( 0 or length ) on the target edge
+        const edge_descriptor& descriptor; // the target edge
+        const coord_t&	 length;     // the length of the target edge
+        const coord_t&	 srcbound;   // the left or right interval bouindary of the source window
+        const coord_t&	 edgebound;  // the corresponding boundary ( 0 or length ) on the target edge
 
-	const utk::ray<coord_t,2>& ray;    // TODO: what?
+        const utk::ray<coord_t,2>& ray;    // TODO: what?
       };
 
       // other typedefs
@@ -92,13 +92,13 @@ namespace mmp
       // of the last modified or deleted windows in the access channel
       struct insert_result
       {
-	insert_result()
-	: event( 0 ), trimmed( false, false ), ac_ev( 0, 0 )
-	{ }
+        insert_result()
+        : event( 0 ), trimmed( false, false ), ac_ev( 0, 0 )
+        { }
 
-	EventPoint* event;
-	std::pair< bool, bool > trimmed;
-	ev_pair_t ac_ev;
+        EventPoint* event;
+        std::pair< bool, bool > trimmed;
+        ev_pair_t ac_ev;
       };
 
 
@@ -124,11 +124,11 @@ namespace mmp
 
       template< side_t >
       friend std::pair< EventPoint*, bool > trim_ac( Window*
-						   , Geodesics::ac_t&
-						   , Geodesics::winlist_t&
-						   , const utk::ray<coord_t,2>&
-						   , const ps_t&, const ps_t&, ps_t&
-						   , Geodesics& );
+                                                   , Geodesics::ac_t&
+                                                   , Geodesics::winlist_t&
+                                                   , const utk::ray<coord_t,2>&
+                                                   , const ps_t&, const ps_t&, ps_t&
+                                                   , Geodesics& );
 
     private:
       //----|data members
@@ -139,9 +139,9 @@ namespace mmp
 
       vertex_label_pmap_t     vertex_labels;
 
-      edge_winlist_pmap_t	windows;
+      edge_winlist_pmap_t	    windows;
 
-      event_queue_t		event_queue;
+      event_queue_t		        event_queue;
 
       mutable distance_t      m_max_distance;
 
@@ -154,11 +154,11 @@ namespace mmp
 
       bool step()
       {
-	assert( !event_queue.empty() );
-	EventPoint* ev = event_queue.pop();
-	handle_event( ev );
-	delete ev;
-	return !event_queue.empty();
+        assert( !event_queue.empty() );
+        EventPoint* ev = event_queue.pop();
+        handle_event( ev );
+        delete ev;
+        return !event_queue.empty();
       }
 
 
@@ -176,10 +176,10 @@ namespace mmp
 
       template< side_t Bound >    // TODO: const??
       std::pair< coord_t, edge_descriptor > project_bound( EventPoint& ev
-							 , const edge_descriptor& e1, const edge_descriptor& e2
-							 , const utk::ray<coord_t,2>& e1vec, const utk::ray<coord_t,2>& e2vec
-							 , const coord_t e0l, const coord_t e1l, const coord_t e2l, const ps_t& ps
-							 );
+                                                         , const edge_descriptor& e1, const edge_descriptor& e2
+                                                         , const utk::ray<coord_t,2>& e1vec, const utk::ray<coord_t,2>& e2vec
+                                                         , const coord_t e0l, const coord_t e1l, const coord_t e2l, const ps_t& ps
+                                                         );
 
       // project pseudosource through window over the mesh
       void propagate_window( EventPoint& ev );
@@ -200,7 +200,7 @@ namespace mmp
       // returns the connected neighbor-event
       template< side_t Side >
       EventPoint* trim_ac( Window* candidate, ac_t& ac, winlist_t& wlist, const utk::ray<coord_t,2>& edge_ray
-			 , const ps_t& pred_ps,  const ps_t& psc, ps_t& psac );
+                         , const ps_t& pred_ps,  const ps_t& psc, ps_t& psac );
 
       // if window has minimal distance on an edge segment: add it to the edge and push it to queue
       // returns the frontier point if candidate was inserted
@@ -227,12 +227,12 @@ namespace mmp
 
       std::pair< coord_t, coord_t > 	backtrace( const Window& window, const std::pair< coord_t, coord_t >& bounds )	const
       {
-	coord_t  left = backtrace( window, get<  LEFT >( bounds ) );
-	coord_t right = backtrace( window, get< RIGHT >( bounds ) );
+        coord_t  left = backtrace( window, get<  LEFT >( bounds ) );
+        coord_t right = backtrace( window, get< RIGHT >( bounds ) );
 
-	assert( left <= right );
+        assert( left <= right );
 
-	return std::make_pair( left, right );
+        return std::make_pair( left, right );
       }
 
       std::pair< coord_t, coord_t > 	backtrace( const Window& window )	const
@@ -242,27 +242,27 @@ namespace mmp
 
       const distance_t max_distance() const
       {
-	if( ! event_queue.empty() )
-	{ const Window& bottom = *event_queue.bottom()->window();
-	  return bottom.subpath() + bottom.max_ps_distance( bottom.pseudosource() ).second;
-	}
+        if( ! event_queue.empty() )
+        { const Window& bottom = *event_queue.bottom()->window();
+          return bottom.subpath() + bottom.max_ps_distance( bottom.pseudosource() ).second;
+        }
 
-	if( m_max_distance != 0 )
-	  return m_max_distance;
+        if( m_max_distance != 0 )
+          return m_max_distance;
 
-	for( auto listit = windows.storage_begin(); listit != windows.storage_end(); ++listit )
-	  std::for_each( listit->begin(), listit->end()
-		       , [&] ( const Window* win )
-			 { m_max_distance = std::max( m_max_distance, win->subpath() + win->max_ps_distance( win->pseudosource() ).second ); }
-		       );
-	return m_max_distance;
+        for( auto listit = windows.storage_begin(); listit != windows.storage_end(); ++listit )
+          std::for_each( listit->begin(), listit->end()
+                       , [&] ( const Window* win )
+                         { m_max_distance = std::max( m_max_distance, win->subpath() + win->max_ps_distance( win->pseudosource() ).second ); }
+                       );
+        return m_max_distance;
       }
 
 
       std::pair< winlist_t::const_iterator, winlist_t::const_iterator >  edge_windows( const edge_descriptor& edge ) const
       {
-	const winlist_t& wlist = windows[edge];
-	return std::make_pair( wlist.begin(), wlist.end() );
+        const winlist_t& wlist = windows[edge];
+        return std::make_pair( wlist.begin(), wlist.end() );
       }
 
 
@@ -274,21 +274,22 @@ namespace mmp
 
       // deletes all windows on a given edge
       static void delete_windows_on_edge(winlist_t& wins)
-      { std::for_each(wins.begin(), wins.end(), [](Window* w) { delete w; } );
-	wins.clear();
+      {
+        std::for_each(wins.begin(), wins.end(), [](Window* w) { delete w; } );
+        wins.clear();
       }
 
   };
 
   template< side_t EdgeSide >
   void couple_edge_events( EventPoint* source
-			 , const Geodesics::insert_result& projected
-			 , const Geodesics::insert_result& sidelobe
-			 , const bool two_projected
-			 , const Geodesics::edge_handle& edge
-			 , const distance_t& opp_edge_length
-			 , const distance_t& base_edge_length
-			 );
+                         , const Geodesics::insert_result& projected
+                         , const Geodesics::insert_result& sidelobe
+                         , const bool two_projected
+                         , const Geodesics::edge_handle& edge
+                         , const distance_t& opp_edge_length
+                         , const distance_t& base_edge_length
+                         );
 
 
 } // of namespace mmp

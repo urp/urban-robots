@@ -123,7 +123,7 @@ void gl::GeodesicsDrawable::gl_draw_window_edges( const Window& window, const Wi
   if( window_type == Window::INNER_SIDELOBE )
   {
     glLineWidth( 1.6 );
-    const bool ps_left = window.has_ps_vertex<mmp::LEFT>();
+    //const bool ps_left = window.has_ps_vertex<mmp::LEFT>();
 
     glBegin( GL_LINES );
 
@@ -539,8 +539,8 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
   rgba_color_t fill_color           ( 1, .5, 1, .1 );
   rgba_color_t source_color         ( 1., 1. ,.0, 1. );
 
-  auto draw_win     = [&] ( const Window& win )
-                      { this->gl_draw_window( win, edge_color, fill_color, source_color, shading ); };
+  /*auto draw_win     = [&] ( const Window& win )
+                      { this->gl_draw_window( win, edge_color, fill_color, source_color, shading ); };*/
   auto draw_top_win = [&] ( const Window& win )
                       { this->gl_draw_window_sequence( win, top_edge_color, top_covering_color, source_color, shading ); };
 
@@ -573,8 +573,8 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
                      else if( ev == top_ev->adjacent<LEFT>() || ev == top_ev->adjacent<RIGHT>() )
                        draw_cross_win( *ev->window() );
                      # endif
-                     else
-                       draw_win( *ev->window() );
+                    // else
+                    //   draw_win( *ev->window() );
 
                      gl_draw_event_point( ev, is_top_ev );
                    }

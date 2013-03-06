@@ -69,22 +69,21 @@ bool gtk::GeodesicsInspector::step()
 
       const bool end_result_sane = m_check_result ? m_geodesics->sanity_check() :true;
 
-	  // deactivate propagation controls
-	  m_step_button->set_sensitive( false );
-	  m_iterate_button->set_sensitive( false );
+      // deactivate propagation controls
+      m_step_button->set_sensitive( false );
+      m_iterate_button->set_sensitive( false );
 
       if( m_view->is_renderer_blocked() )  m_view->force_redraw();
 
       // check result
       if( !end_result_sane && m_stop_on_errors )
-	  { Gtk::MessageDialog( "sanity check failed for source "
-                          + boost::lexical_cast< std::string >( m_geodesics->source() )
-                          ).run();
-         m_iterate_button->set_active( false );
-	  	 return false; // block idle signal -> keep window open for eximination
-	  }
-	  hide();// stops inner main-loop
-
+	{ Gtk::MessageDialog( "sanity check failed for source "
+			    + boost::lexical_cast< std::string >( m_geodesics->source() )
+			    ).run();
+	  m_iterate_button->set_active( false );
+	  return false; // block idle signal -> keep window open for eximination
+	}
+      hide();// stops inner main-loop
     }
   }while( !m_geodesics->event_queue.empty() && ! ( m_geodesics->event_queue.top()->flags() & EventPoint::FRONTIER ) );
 
@@ -97,7 +96,7 @@ bool gtk::GeodesicsInspector::step()
     m_top_event_entry   ->set_text( boost::lexical_cast<std::string>( *top_event ) );
     m_top_window_entry  ->set_text( boost::lexical_cast<std::string>( *top_event->window() ) );
     m_top_distance_label->set_text( boost::lexical_cast<std::string>( top_event->distance() ) );
-   	m_queue_size_label  ->set_text( boost::lexical_cast<std::string>( m_geodesics->event_queue.size() ) );
+    m_queue_size_label  ->set_text( boost::lexical_cast<std::string>( m_geodesics->event_queue.size() ) );
 
     m_geodesics_drawable->invalidate();
   }
