@@ -54,6 +54,7 @@ namespace utk
 
               typedef CurrentIndexVector old_index_vector;
 
+              // strip dummy index marking zero-order end iterator
               typedef typename std::conditional< (Interface::layout::order > 0)
                                                , CurrentIndexVector
                                                  // remove dummy index
@@ -240,8 +241,8 @@ namespace utk
           {
               typedef typename std::conditional< (Interface::layout::order > 0)
                                                , typename end_iterator_indices< typename Interface::layout::sizes >::type
-                                                 // add dummy index - should be ignored by
-                                               , index_vector< 0 >
+                                                 // add dummy index - should be ignored by non zero-order component_iterators
+                                               , index_vector< -1 >
                                                >::type end_iterator_index_vector;
 
               typedef Interface end_iterator_interface;

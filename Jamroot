@@ -1,10 +1,11 @@
 project robots
 : build-dir build
-: requirements <cxxflags>-std=c++0x
-	       			 <cxxflags>-ftemplate-depth=2048
-#	       			 <cxxflags>-fno-elide-type
-#	       			 <cxxflags>-fdiagnostics-show-template-tree
-	       			 ;
+: requirements <include>/$(TOP)
+			   <cxxflags>-std=c++0x
+#	       	   <cxxflags>-ftemplate-depth=2048
+#	       	   <cxxflags>-fno-elide-type
+#	       	   <cxxflags>-fdiagnostics-show-template-tree
+	       	   ;
 
 path-constant TOP : . ;
 
@@ -17,8 +18,18 @@ echo "INSTALL_PREFIX = $(INSTALL_PREFIX)" ;
 
 using testing ;
 
-lib boost-unit-test  : : <name>boost_unit_test_framework ;
-lib boost-system     : : <name>boost_system ;
 lib boost-filesystem : : <name>boost_filesystem ;
+lib boost-unit-test  : : <name>boost_unit_test_framework ;
+lib boost-options  	 : : <name>boost_program_options ;
+lib boost-signals  	 : : <name>boost_signals ;
+lib boost-system     : : <name>boost_system ;
+
+
+#lib gl				 	: : <name>gl ;
+#lib glu				: : <name>glu ;
+#lib gtkmm			: : <name>gtkmm ;
+#lib gtkglextmm : : <name>gtkglextmm ;
+
 
 build-project utk ;
+build-project apps ;

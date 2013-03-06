@@ -1,5 +1,5 @@
 project utk/math/fixed_size/interface/multidim/functions ;
 
-run at_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
-run assign_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run at_test.cpp			/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
+run assign_test.cpp		/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
 run change_layout_test.cpp	/utk/io//io /robots//boost-unit-test : --log_level=test_suite :  ;
