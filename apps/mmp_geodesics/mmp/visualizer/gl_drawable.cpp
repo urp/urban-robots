@@ -482,18 +482,18 @@ void gl::GeodesicsDrawable::gl_draw_wavefront_indicators( EventPoint* 	ev
   const coord_t rel_length = .333;
 
   auto draw_indicators = [&] ( EventPoint* left_ev, EventPoint* right_ev )
-  						 { const Window& left_win =  *left_ev->window();
-						   const Window& right_win = *right_ev->window();
+                         { const Window& left_win =  *left_ev->window();
+                           const Window& right_win = *right_ev->window();
 
-						   Geodesics::edge_handle  left_edge(  left_win.edge, m_geodesics->get_surface() );
- 						   Geodesics::edge_handle right_edge( right_win.edge, m_geodesics->get_surface() );
+                           Geodesics::edge_handle  left_edge(  left_win.edge, m_geodesics->get_surface() );
+                           Geodesics::edge_handle right_edge( right_win.edge, m_geodesics->get_surface() );
 
-						   Vertex(  left_edge.ray().at_arc_length( left_win.bound<RIGHT>() - rel_length * left_win.length() ) );
-						   Vertex(  left_edge.ray().at_arc_length( left_win.bound<RIGHT>() ) );
+                           Vertex(  left_edge.ray().at_arc_length( left_win.bound<RIGHT>() - rel_length * left_win.length() ) );
+                           Vertex(  left_edge.ray().at_arc_length( left_win.bound<RIGHT>() ) );
 
-						   Vertex( right_edge.ray().at_arc_length( right_win.bound<LEFT>() ) );
-						   Vertex( right_edge.ray().at_arc_length( right_win.bound<LEFT>() + rel_length * right_win.length() ) );
-						 };
+                           Vertex( right_edge.ray().at_arc_length( right_win.bound<LEFT>() ) );
+                           Vertex( right_edge.ray().at_arc_length( right_win.bound<LEFT>() + rel_length * right_win.length() ) );
+                         };
 
   # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
 
@@ -541,6 +541,7 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
 
   /*auto draw_win     = [&] ( const Window& win )
                       { this->gl_draw_window( win, edge_color, fill_color, source_color, shading ); };*/
+
   auto draw_top_win = [&] ( const Window& win )
                       { this->gl_draw_window_sequence( win, top_edge_color, top_covering_color, source_color, shading ); };
 
@@ -597,7 +598,7 @@ void gl::GeodesicsDrawable::gl_draw()
   if( get_covering_visibility() )
     gl_draw_covering( TEXTURE_DISTANCE_SHADING );
 
-  //if( get_events_visibility() )
+  if( ! m_geodesics->event_queue.empty() )
     gl_draw_wavefront( FLAT_SHADING );
 
   //glDeleteTextures( 1, &m_equidist_texture );

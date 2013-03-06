@@ -77,12 +77,12 @@ bool gtk::GeodesicsInspector::step()
 
       // check result
       if( !end_result_sane && m_stop_on_errors )
-	{ Gtk::MessageDialog( "sanity check failed for source "
-			    + boost::lexical_cast< std::string >( m_geodesics->source() )
-			    ).run();
-	  m_iterate_button->set_active( false );
-	  return false; // block idle signal -> keep window open for eximination
-	}
+      { Gtk::MessageDialog( "sanity check failed for source "
+			  + boost::lexical_cast< std::string >( m_geodesics->source() )
+			  ).run();
+	m_iterate_button->set_active( false );
+	return false; // block idle signal -> keep window open for eximination
+      }
       hide();// stops inner main-loop
     }
   }while( !m_geodesics->event_queue.empty() && ! ( m_geodesics->event_queue.top()->flags() & EventPoint::FRONTIER ) );

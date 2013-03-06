@@ -61,14 +61,14 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
       const auto 	casq 	= utk::sqr( ca ).sum();
       const auto 	ablen	= std::sqrt( absq );
       const auto 	calen	= std::sqrt( casq );
-      const bool  	alpha_obtuse = bcsq > casq + absq;
-      const bool  	obtuse = absq > bcsq + casq || alpha_obtuse || casq > absq + bcsq;
+      const bool  alpha_obtuse = bcsq > casq + absq;
+      const bool  obtuse = absq > bcsq + casq || alpha_obtuse || casq > absq + bcsq;
 
       if(!obtuse)
-	area += .125 * (  std::atan( - dot( bc, ca ) / ( std::sqrt( bcsq ) * calen ) ) * absq
-			    + std::atan( - dot( ab, bc ) / ( ablen * std::sqrt( bcsq ) ) ) * casq );
+        area += .125 * (  std::atan( - dot( bc, ca ) / ( std::sqrt( bcsq ) * calen ) ) * absq
+                + std::atan( - dot( ab, bc ) / ( ablen * std::sqrt( bcsq ) ) ) * casq );
       else
-	area += cross( ab, bc ).length() / ( alpha_obtuse ? 4. :8. );
+        area += cross( ab, bc ).length() / ( alpha_obtuse ? 4. :8. );
 	    anglesum += std::acos( utk::dot( ca, ab ) / ( calen * ablen ) );
     } // of for
 
@@ -78,9 +78,9 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
     utk::clamp_max( maxc, curvature );
 
     *col_it = rgb_color_t( curvature<0. ? - curvature : 0.,
-			   curvature>0. ?   curvature : 0.,
-			   std::fabs( curvature )
-			 );
+     curvature>0. ?   curvature : 0.,
+     std::fabs( curvature )
+   );
     //rgb_color_t(1.f - exp(-fabs(curvature)));
   }
   std::clog << "flat::gl::QuadSurfaceDrawable::gl_draw_vertices"
