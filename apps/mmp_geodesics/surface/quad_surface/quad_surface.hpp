@@ -29,14 +29,14 @@
 namespace flat
 {
 
-  class QuadSurface	: public Surface
+  class QuadSurface	: public TriSurface
   {
       size_pair m_vertices_size;
 
       QuadSurface( const size_pair& vertex_size
 	     , const size_pair& texture_size
 	     , const std::string& name )
-      : Surface( std::get<0>(vertex_size) * std::get<1>(vertex_size), texture_size, name ), m_vertices_size( vertex_size )
+      : TriSurface( std::get<0>(vertex_size) * std::get<1>(vertex_size), texture_size, name ), m_vertices_size( vertex_size )
       {   }
 
     public:
@@ -45,7 +45,7 @@ namespace flat
       static std::shared_ptr< QuadSurface > create_with_generator( Generator&                   generator
                                                                  , Triangulator&                triangulator
                                                                  , Transform&                   transform
-                                                                 , Surface::distance_function   distances = distance_function()
+                                                                 , TriSurface::distance_function   distances = distance_function()
                                                                  )
       {
         std::shared_ptr< QuadSurface > surface( new QuadSurface( generator.vertex_field_size(), generator.texture_size(), generator.get_name() ) );

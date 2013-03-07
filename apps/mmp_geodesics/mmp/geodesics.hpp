@@ -60,7 +60,7 @@ namespace mmp
 {
 
   // check | distance(a,b) - distance(b,a) |
-  bool vertex_pair_check( const std::shared_ptr< Surface >& surface, const distance_t& tolerance );
+  bool vertex_pair_check( const std::shared_ptr< TriSurface >& surface, const distance_t& tolerance );
 
   class Geodesics
   {
@@ -68,7 +68,7 @@ namespace mmp
 
       //----| surface type
 
-      typedef Surface  surface_type;
+      typedef TriSurface  surface_type;
 
       typedef surface_type::vertex_descriptor vertex_descriptor;
       typedef surface_type::edge_descriptor   edge_descriptor;

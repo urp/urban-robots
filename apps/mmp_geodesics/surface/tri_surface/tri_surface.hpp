@@ -158,14 +158,14 @@ namespace flat
   };
 
 
-  class Surface : public PointCloud
+  class TriSurface : public PointCloud
   {
     public:
 
       typedef std::pair< vertex_descriptor, vertex_descriptor > vertex_pair;
       typedef std::pair< vertex_handle, vertex_handle > vertex_handle_pair;
 
-      static vertex_handle_pair make_vertex_handle_pair( const vertex_pair& pair, const Surface& surface )
+      static vertex_handle_pair make_vertex_handle_pair( const vertex_pair& pair, const TriSurface& surface )
       { return { vertex_handle( pair.first, surface ), vertex_handle( pair.second, surface ) }; }
 
       struct texture_type
@@ -216,7 +216,7 @@ namespace flat
         //TODO: distance_function( distance_function&& d ) : neighborhood( d.neighborhood ), distance_matrix( d.distance_matrix ) { }
         distance_function() : neighborhood( NONE )  {   }
 
-        void compute_distances( const std::shared_ptr<Surface>&, neighborhood_mask_type );
+        void compute_distances( const std::shared_ptr<TriSurface>&, neighborhood_mask_type );
 
         distance_matrix_type::const_reference operator() ( vertex_descriptor a, vertex_descriptor b )   const
         {
@@ -229,16 +229,16 @@ namespace flat
         }
 
         private:
-          void compute_all_to_all( const std::shared_ptr< Surface >& );
-          void compute_all_to_neighbors( const std::shared_ptr< Surface >& );
+          void compute_all_to_all( const std::shared_ptr< TriSurface >& );
+          void compute_all_to_neighbors( const std::shared_ptr< TriSurface >& );
       };
 
     public: // initial (geodesic) distances
 
       distance_function initial_distances;
 
-      friend std::istream&   operator>>( std::istream&, Surface::distance_function& );
-      friend std::ostream&   operator<<( std::ostream&, Surface::distance_function const& );
+      friend std::istream&   operator>>( std::istream&, TriSurface::distance_function& );
+      friend std::ostream&   operator<<( std::ostream&, TriSurface::distance_function const& );
     private:
 
       std::string  m_name;
@@ -251,18 +251,18 @@ namespace flat
 
     protected:
 
-      Surface( const vertices_size_type vertex_count = 0
+      TriSurface( const vertices_size_type vertex_count = 0
              , const size_pair& texture_size = size_pair{ 0, 0 }
              , const std::string& name = "untitled" );
 
     public:
 
       template< typename Generator, typename Triangulator, typename Transform >
-      static std::shared_ptr< Surface > create_with_generator( Generator&    generator
+      static std::shared_ptr< TriSurface > create_with_generator( Generator&    generator
                                                              , Triangulator& triangulator
                                                              , Transform&    transform )
       {
-        std::shared_ptr< Surface > surface( new Surface( generator.num_vertices(), generator.texture_size(), generator.get_name() ) );
+        std::shared_ptr< TriSurface > surface( new TriSurface( generator.num_vertices(), generator.texture_size(), generator.get_name() ) );
 
         generator( surface );
 
@@ -315,13 +315,13 @@ namespace flat
   };
 
 
-  inline std::ostream&   operator<<( std::ostream& os, Surface::distance_function const& distances  )
+  inline std::ostream&   operator<<( std::ostream& os, TriSurface::distance_function const& distances  )
   {
     os << "nb " << distances.neighborhood << ' ' << distances.distance_matrix;
     return os;
   }
 
-  inline std::istream&   operator>>( std::istream& is, Surface::distance_function& distances  )
+  inline std::istream&   operator>>( std::istream& is, TriSurface::distance_function& distances  )
   {
     std::string token;
     is >> token;

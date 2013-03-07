@@ -71,7 +71,7 @@ namespace flat
     RectlinearTriangulator( const size_pair& vertices_size )
     : vertices_size( vertices_size ) {   }
 
-    virtual void operator() ( const std::shared_ptr< Surface >& surface )	= 0;
+    virtual void operator() ( const std::shared_ptr< TriSurface >& surface )	= 0;
   };
 
   struct SimpleRectlinearTriangulator : public RectlinearTriangulator
@@ -79,7 +79,7 @@ namespace flat
     SimpleRectlinearTriangulator( const size_pair& vertices_size )
     : RectlinearTriangulator( vertices_size ) {   }
 
-    void operator() ( const std::shared_ptr< Surface >& surface );
+    void operator() ( const std::shared_ptr< TriSurface >& surface );
   };
 
   struct TextureGenerator
@@ -109,13 +109,13 @@ namespace flat
       RectlinearFieldGenerator( const size_pair& vertices_size )
       : m_vertices_size( vertices_size ) {   }
 
-      virtual void  operator() ( const std::shared_ptr< Surface >& ) = 0;
+      virtual void  operator() ( const std::shared_ptr< TriSurface >& ) = 0;
 
       virtual std::string get_name() const = 0;
 
       const size_pair&	vertex_field_size() const { return m_vertices_size; }
 
-      const typename Surface::vertices_size_type 	num_vertices()	const
+      const typename TriSurface::vertices_size_type 	num_vertices()	const
       { return std::get<0>( m_vertices_size ) * std::get<1>( m_vertices_size ); }
   };
 
@@ -126,13 +126,13 @@ namespace flat
   {
       coord_t   noise_amplitude;
 
-      static void add_noise( const std::shared_ptr< Surface >&, const coord_t );
+      static void add_noise( const std::shared_ptr< TriSurface >&, const coord_t );
 
       RandomHeightGenerator( const size_pair& size, const coord_t& amplitude )
       : RectlinearFieldGenerator( size ), TextureGenerator( size )
       , noise_amplitude( amplitude ) {    }
 
-      void operator() ( const std::shared_ptr< Surface >& surface );
+      void operator() ( const std::shared_ptr< TriSurface >& surface );
 
       std::string   get_name() const { return "HeightField"; }
   };
@@ -143,7 +143,7 @@ namespace flat
       : RandomHeightGenerator( size, noise_amplitude )
       {   }
 
-      void operator() ( const std::shared_ptr< Surface >& surface );
+      void operator() ( const std::shared_ptr< TriSurface >& surface );
 
       std::string   get_name() const { return "Wave"; }
   };
@@ -270,7 +270,7 @@ namespace flat
 
       ~PdmFileReader() { m_stream.close(); }
 
-      void operator() ( const std::shared_ptr< Surface >& surface );
+      void operator() ( const std::shared_ptr< TriSurface >& surface );
 
       std::string   get_name() const { return m_filename; }
   };
@@ -326,7 +326,7 @@ flat::PdmFileReader< VertexPredicate, TexturePredicate >
 }
 
 template< typename VertexPredicate, typename TexturePredicate >
-void flat::PdmFileReader< VertexPredicate, TexturePredicate >::operator() ( const std::shared_ptr< Surface >& surface )
+void flat::PdmFileReader< VertexPredicate, TexturePredicate >::operator() ( const std::shared_ptr< TriSurface >& surface )
 {
   assert( num_vertices() == surface->num_vertices() );
 
@@ -340,7 +340,7 @@ void flat::PdmFileReader< VertexPredicate, TexturePredicate >::operator() ( cons
 
     if( sample_type & VERTEX )
     {
-      Surface::vertex_handle current_vertex = surface->vertex( vertex_index++ );
+      TriSurface::vertex_handle current_vertex = surface->vertex( vertex_index++ );
       current_vertex.set_location( vertex_location );
       current_vertex.set_texture_coordinate( vertex_texture_coordinate );
 

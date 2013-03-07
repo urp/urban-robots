@@ -104,7 +104,7 @@ namespace gl
 
     private:
 
-      std::shared_ptr< const flat::Surface >	m_surface;
+      std::shared_ptr< const flat::TriSurface >	m_surface;
 
       mutable bool 	m_gl_texture_initialized;
       mutable GLuint	m_gl_texture_handle;
@@ -118,7 +118,7 @@ namespace gl
 
     public:
 
-      SurfaceDrawable( const std::shared_ptr< const flat::Surface >& surface )
+      SurfaceDrawable( const std::shared_ptr< const flat::TriSurface >& surface )
       : m_vertex_mode ( SOLID_VERTEX_MODE )
       , m_edge_mode   ( SOLID_EDGE_MODE )
       , m_face_mode   ( SOLID_FACE_MODE )
@@ -138,10 +138,10 @@ namespace gl
 
       virtual void  gl_draw_others() const {	};
 
-      void set_surface( const std::shared_ptr< flat::Surface >& surface )
+      void set_surface( const std::shared_ptr< flat::TriSurface >& surface )
       { m_surface = surface; invalidate(); }
 
-      const std::shared_ptr< const flat::Surface >& get_surface() const { return m_surface; }
+      const std::shared_ptr< const flat::TriSurface >& get_surface() const { return m_surface; }
 
       // specifying gl::Drawable::gl_draw
       virtual void gl_draw()
@@ -242,7 +242,7 @@ namespace gl
   {
     public:
 
-      SharedSurfaceDrawable( const std::shared_ptr< flat::Surface >& surface )
+      SharedSurfaceDrawable( const std::shared_ptr< flat::TriSurface >& surface )
       : SurfaceDrawable( surface )	{ std::clog << "gl::SharedSurfaceDrawable::SharedSurfaceDrawable" << std::endl; }
 
       virtual ~SharedSurfaceDrawable()   { std::clog << "gl::SharedSurfaceDrawable::~SharedSurfaceDrawable" << std::endl; }

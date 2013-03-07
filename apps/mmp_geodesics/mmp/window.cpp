@@ -23,7 +23,7 @@
 size_t mmp::Window::next_id=0;
 
 mmp::Window::Window(   Window*                            p
-                         , const Surface::edge_descriptor& e
+                         , const TriSurface::edge_descriptor& e
                          , const coord_t&    b0, const coord_t&    b1
                          , const distance_t& d0, const distance_t& d1
                          , const vertex_descriptor& psv, const distance_t& psdist )

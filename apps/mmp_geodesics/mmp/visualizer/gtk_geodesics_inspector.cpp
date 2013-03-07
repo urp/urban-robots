@@ -126,7 +126,7 @@ void gtk::GeodesicsInspector::toggle_iteration()
 
 }
 
-void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::shared_ptr< const Surface > surface )
+void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::shared_ptr< const TriSurface > surface )
 {
   assert( &geodesics->get_surface() == surface.get() );
 

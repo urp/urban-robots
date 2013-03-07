@@ -35,7 +35,7 @@
   namespace mmp
   {
     using flat::PointCloud;
-    using flat::Surface;
+    using flat::TriSurface;
 
     // forward
     class Window;
@@ -51,8 +51,8 @@
     {
       public:
 
-	typedef Surface::edge_descriptor	edge_descriptor;
-        typedef Surface::vertex_descriptor	vertex_descriptor;
+	typedef TriSurface::edge_descriptor	edge_descriptor;
+        typedef TriSurface::vertex_descriptor	vertex_descriptor;
 
 	typedef enum { INNER_SIDELOBE = 3, OUTER_SIDELOBE = 5, PROJECTED = 8, SIDELOBE = 1 } types;
 
@@ -89,7 +89,7 @@
         }
 
 	Window( Window* p
-              , const Surface::edge_descriptor& e
+              , const TriSurface::edge_descriptor& e
 	      , const coord_t&    b0, const coord_t&    b1
 	      , const distance_t& d0, const distance_t& d1
               , const vertex_descriptor& psv
@@ -101,7 +101,7 @@
         Window() = delete;
 
         static Window*	create_initial( const vertex_descriptor& source
-                                      , const Surface::edge_descriptor& edge
+                                      , const TriSurface::edge_descriptor& edge
 				      , const coord_t&    b0, const coord_t&    b1
 				      , const distance_t& d0, const distance_t& d1 )
 	{
@@ -118,7 +118,7 @@
 
 
         static Window*	create_projected( Window*                            	  parent
-					, const Surface::edge_descriptor& 	  edge
+					, const TriSurface::edge_descriptor& 	  edge
 					, const coord_t&    b0, const coord_t&    b1
 					, const distance_t& d0, const distance_t& d1  )
         {
@@ -134,14 +134,14 @@
 
         template< side_t PSVertexSide >
         static Window* create_side_lobe( Window* 				 parent
-                                       , const Surface::edge_handle& 		 edge
+                                       , const TriSurface::edge_handle& 		 edge
 			               , const coord_t&    b0, const coord_t&    b1
 			               , const distance_t& d0, const distance_t& d1
 				       , const vertex_descriptor& 		 psvertex )
         {
           assert( PSVertexSide == LEFT
-		  ? psvertex == Surface::edge_handle(parent->edge, edge.mesh()).source().descriptor()
-		  : psvertex == Surface::edge_handle(parent->edge, edge.mesh()).target().descriptor() );
+		  ? psvertex == TriSurface::edge_handle(parent->edge, edge.mesh()).source().descriptor()
+		  : psvertex == TriSurface::edge_handle(parent->edge, edge.mesh()).target().descriptor() );
 
 	  assert( parent );
 
@@ -376,7 +376,7 @@
     }
 
     // TODO: remove?
-    inline bool is_outer_sidelobe( const Window& window, const Surface::edge_handle& edge )
+    inline bool is_outer_sidelobe( const Window& window, const TriSurface::edge_handle& edge )
     {
       assert( window.edge == edge.descriptor() );
 

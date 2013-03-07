@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
 
   //----| model - surface
 
-  typedef flat::Surface	surface_t;
+  typedef flat::TriSurface	surface_t;
 
   std::shared_ptr<surface_t> surface;
 
@@ -125,7 +125,7 @@ int main (int argc, char *argv[])
   }
 
   // TODO: untangle (even gtk::GeodesicsInspector is in there)
-  surface->initial_distances.compute_distances( surface, Surface::distance_function::ALL );
+  surface->initial_distances.compute_distances( surface, TriSurface::distance_function::ALL );
 
   //----| export distance matrix
   if( vm.count( export_dist_param ) )

@@ -51,7 +51,7 @@ void gl::SurfaceDrawable::gl_init_textures()	const
 {
 	std::clog << "flat::gl::SurfaceDrawable::gl_init_texture" << std::endl;
 
-  const Surface::texture_type& texture = get_surface()->texture();
+  const TriSurface::texture_type& texture = get_surface()->texture();
 
   glEnable( GL_TEXTURE_2D );
 
@@ -195,7 +195,7 @@ bool	gl::SurfaceDrawable::gl_draw_vertices( const mode_t& mode )		const
         for( auto its = get_surface()->vertex_handles(); its.first != its.second; ++its.first )
         {
           const location_t loc = its.first->location();
-          const Surface::texture_type& texture = get_surface()->texture();
+          const TriSurface::texture_type& texture = get_surface()->texture();
           const vertex_texture_coord_t::type texcoord = its.first->texture_coordinate();
 
           col = texture.get_pixel( std::round( texcoord[0] * ( get<0>(texture.size) - 1 ) )
@@ -222,15 +222,15 @@ bool	gl::SurfaceDrawable::gl_draw_edges( const mode_t& mode )    const
 
   if( mode == SOLID_EDGE_MODE )
   {
-    typedef std::vector< std::pair< Surface::vertex_descriptor, Surface::vertex_descriptor > > edges_t;
+    typedef std::vector< std::pair< TriSurface::vertex_descriptor, TriSurface::vertex_descriptor > > edges_t;
 
     edges_t edges( get_surface()->num_full_edges() );
 
-    for( Surface::vertex_descriptor id = 0; id < get_surface()->num_vertices(); id++ )
+    for( TriSurface::vertex_descriptor id = 0; id < get_surface()->num_vertices(); id++ )
     {
-      std::vector< Surface::vertex_descriptor > adj( std::move( get_surface()->neighbors( id ) ) );
+      std::vector< TriSurface::vertex_descriptor > adj( std::move( get_surface()->neighbors( id ) ) );
       std::for_each( adj.begin(), adj.end()
-                   , [ &edges, &id ] ( Surface::vertex_descriptor adj ) { edges.push_back( edges_t::value_type( id , adj ) ); }
+                   , [ &edges, &id ] ( TriSurface::vertex_descriptor adj ) { edges.push_back( edges_t::value_type( id , adj ) ); }
                    );
     }
 
@@ -272,13 +272,13 @@ bool    gl::SurfaceDrawable::gl_draw_faces( const mode_t& mode )    const
 
       for( auto its = get_surface()->face_handles(); its.first != its.second; its.first++ )
       {
-        const Surface::edge_handle e0 = its.first->edge();
-        const Surface::edge_handle e1 = e0.next();
-        const Surface::edge_handle e2 = e1.next();
+        const TriSurface::edge_handle e0 = its.first->edge();
+        const TriSurface::edge_handle e1 = e0.next();
+        const TriSurface::edge_handle e2 = e1.next();
 
-        const Surface::vertex_handle v0 = e0.source();
-        const Surface::vertex_handle v1 = e1.source();
-        const Surface::vertex_handle v2 = e2.source();
+        const TriSurface::vertex_handle v0 = e0.source();
+        const TriSurface::vertex_handle v1 = e1.source();
+        const TriSurface::vertex_handle v2 = e2.source();
 
         const location_t normal = its.first->normal();
 
@@ -325,13 +325,13 @@ void    gl::SurfaceDrawable::gl_draw_textured_faces()   const
 
   for( auto its = get_surface()->face_handles(); its.first != its.second; its.first++ )
   {
-    const Surface::edge_handle e0 = its.first->edge();
-    const Surface::edge_handle e1 = e0.next();
-    const Surface::edge_handle e2 = e1.next();
+    const TriSurface::edge_handle e0 = its.first->edge();
+    const TriSurface::edge_handle e1 = e0.next();
+    const TriSurface::edge_handle e2 = e1.next();
 
-    const Surface::vertex_handle v0 = e0.source();
-    const Surface::vertex_handle v1 = e1.source();
-    const Surface::vertex_handle v2 = e2.source();
+    const TriSurface::vertex_handle v0 = e0.source();
+    const TriSurface::vertex_handle v1 = e1.source();
+    const TriSurface::vertex_handle v2 = e2.source();
 
     const location_t normal = its.first->normal();
 

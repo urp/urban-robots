@@ -21,7 +21,7 @@
 
 using namespace flat;
 
-void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< Surface >& surface )
+void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< TriSurface >& surface )
 {
   const size_t& m = std::get<0>( vertices_size );
   const size_t& n = std::get<1>( vertices_size );
@@ -31,15 +31,15 @@ void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< Surfac
   std::clog << "SimpleRectlinearTriangulator()\t|"
             << " creating the triangulation of size (" << m << "," << n << ") ..." << std::endl;
 
-  for( Surface::vertex_descriptor descriptor = m + 1 ; descriptor < m*n; ++descriptor )
+  for( TriSurface::vertex_descriptor descriptor = m + 1 ; descriptor < m*n; ++descriptor )
   {
     if( descriptor % m )
     {
       //----|triangulation of the quad-face
-      const Surface::vertex_descriptor a = descriptor;	    	//  c<--b
-      const Surface::vertex_descriptor b = descriptor     - m;	//  |\  ^
-      const Surface::vertex_descriptor c = descriptor - 1 - m;	//  v \ |
-      const Surface::vertex_descriptor d = descriptor - 1;    	//  d-->a = vertex(i,j)
+      const TriSurface::vertex_descriptor a = descriptor;	    	//  c<--b
+      const TriSurface::vertex_descriptor b = descriptor     - m;	//  |\  ^
+      const TriSurface::vertex_descriptor c = descriptor - 1 - m;	//  v \ |
+      const TriSurface::vertex_descriptor d = descriptor - 1;    	//  d-->a = vertex(i,j)
 
       # if defined DBG_FLAT_SIMPLE_RECTLINEAR_TRIAGULATOR__PER_QUAD
 	  std::clog << "SimpleRectlinearTriangulator()\t|"
@@ -54,7 +54,7 @@ void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< Surfac
   std::clog << "SimpleRectlinearTriangulator()\t|"  << "complete"<<std::endl;
 }
 
-void RandomHeightGenerator::add_noise( const std::shared_ptr< Surface >& surface, const coord_t amplitude )
+void RandomHeightGenerator::add_noise( const std::shared_ptr< TriSurface >& surface, const coord_t amplitude )
 {
   for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
   { location_t location( vit.first->location() );
@@ -63,14 +63,14 @@ void RandomHeightGenerator::add_noise( const std::shared_ptr< Surface >& surface
   }
 }
 
-void RandomHeightGenerator::operator() ( const std::shared_ptr< Surface >& surface )
+void RandomHeightGenerator::operator() ( const std::shared_ptr< TriSurface >& surface )
 {
   assert( num_vertices() == surface->num_vertices() );
   assert( texture_size() == surface->texture().size );
 
   for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
   {
-    const Surface::vertex_descriptor descriptor = vit.first->descriptor();
+    const TriSurface::vertex_descriptor descriptor = vit.first->descriptor();
     const size_t  i = descriptor % std::get<0>( vertex_field_size() );
     const size_t  j = descriptor / std::get<0>( vertex_field_size() );
 
@@ -89,14 +89,14 @@ void RandomHeightGenerator::operator() ( const std::shared_ptr< Surface >& surfa
   add_noise( surface, noise_amplitude );
 }
 
-void WaveGenerator::operator() ( const std::shared_ptr< Surface >& surface )
+void WaveGenerator::operator() ( const std::shared_ptr< TriSurface >& surface )
 {
   assert( num_vertices() == surface->num_vertices() );
   assert( texture_size() == surface->texture().size );
 
   for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
   {
-    const Surface::vertex_descriptor descriptor = vit.first->descriptor();
+    const TriSurface::vertex_descriptor descriptor = vit.first->descriptor();
 
     const size_t  i = descriptor % std::get<1>( vertex_field_size() );
     const size_t  j = descriptor / std::get<0>( vertex_field_size() );

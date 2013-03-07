@@ -1153,7 +1153,7 @@ bool  Geodesics::sanity_check()  const
   return ok;
 }
 
-bool mmp::vertex_pair_check( const std::shared_ptr< Surface >& surface, const distance_t& tolerance )
+bool mmp::vertex_pair_check( const std::shared_ptr< TriSurface >& surface, const distance_t& tolerance )
 {
   const size_t vertex_count = surface->num_vertices();
 

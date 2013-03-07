@@ -59,18 +59,18 @@ void	flat::PointCloud::comp_min_max_z()	const
   m_max_location[2] = max( zacc );
 }
 
-Surface::Surface( const vertices_size_type  num_vertices
+TriSurface::TriSurface( const vertices_size_type  num_vertices
                 , const size_pair& 			texture_size
                 , const std::string&        name )
 : PointCloud( num_vertices ), m_name( name ), m_texture( texture_size )
 {
-  std::clog << "flat::Surface::Surface\t|"
+  std::clog << "flat::TriSurface::TriSurface\t|"
             << " vertex size (" << num_vertices << ')'
             << " texture size (" << std::get<0>(texture_size) << ", " << std::get<1>(texture_size) << ')'
             << std::endl;
 }
 
-void Surface::distance_function::compute_all_to_all( const std::shared_ptr< Surface >& surface )
+void TriSurface::distance_function::compute_all_to_all( const std::shared_ptr< TriSurface >& surface )
 {
   if( neighborhood & ALL ) return;
 
@@ -86,7 +86,7 @@ void Surface::distance_function::compute_all_to_all( const std::shared_ptr< Surf
   {
     mmp::Geodesics gi( *surface, source );
     // TODO: prevent propagation to vertices which allready have distance information (j <= i )
-    //       ??? by removing (boundary
+    //       ??? by removing (boundary) vertices
 
       # if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
     if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
@@ -103,23 +103,23 @@ void Surface::distance_function::compute_all_to_all( const std::shared_ptr< Surf
   neighborhood |= ALL;
 }
 
-void Surface::distance_function::compute_all_to_neighbors( const std::shared_ptr< Surface >& surface )
+void TriSurface::distance_function::compute_all_to_neighbors( const std::shared_ptr< TriSurface >& surface )
 {
   if( neighborhood & NEIGHBORS ) return;
 
   const std::vector< vertex_pair >   pairs( std::move( surface->neighbors() ) );
 
   std::for_each( pairs.begin(), pairs.end()
-               , [&]( const Surface::vertex_pair& pair )
+               , [&]( const TriSurface::vertex_pair& pair )
                  { distance_matrix( pair.first, pair.second ) = surface->distance( pair.first, pair.second ); }
                );
   neighborhood |= NEIGHBORS;
 }
 
 
-void Surface::distance_function::compute_distances( const std::shared_ptr< Surface >& surface, neighborhood_mask_type nb )
+void TriSurface::distance_function::compute_distances( const std::shared_ptr< TriSurface >& surface, neighborhood_mask_type nb )
 {
-  std::clog << "flat::Surface::compute_distances"
+  std::clog << "flat::TriSurface::compute_distances"
             << std::endl;
 
   std::time_t start_time = std::clock();
@@ -133,12 +133,12 @@ void Surface::distance_function::compute_distances( const std::shared_ptr< Surfa
 
   std::time_t end_time = std::clock();
 
-  std::clog << "flat::Surface::compute_distances\t|"
+  std::clog << "flat::TriSurface::compute_distances\t|"
             << "complete - after " << ( (end_time - start_time)/double(CLOCKS_PER_SEC) )
             << std::endl;
 }
 
-std::vector< Surface::vertex_pair > Surface::neighbors() const
+std::vector< TriSurface::vertex_pair > TriSurface::neighbors() const
 {
   std::vector< vertex_pair > neighbor_pairs;
   neighbor_pairs.reserve( 3 * num_vertices() );
@@ -153,13 +153,13 @@ std::vector< Surface::vertex_pair > Surface::neighbors() const
                  );
   }
 
-  std::clog << "flat::Surface::neighbors\t| complete - " <<  neighbor_pairs.size() << " springs created" << std::endl;
+  std::clog << "flat::TriSurface::neighbors\t| complete - " <<  neighbor_pairs.size() << " springs created" << std::endl;
 
   return neighbor_pairs;
 }
 
-std::pair< flat::coord_t, Surface::distance_function::neighborhood_mask_type >
-flat::Surface::get_squared_distance_error()    const
+std::pair< flat::coord_t, TriSurface::distance_function::neighborhood_mask_type >
+flat::TriSurface::get_squared_distance_error()    const
 {
   namespace acc = boost::accumulators;
 

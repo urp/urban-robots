@@ -24,7 +24,7 @@
 
 using namespace flat;
 
-std::vector< Surface::vertex_pair > QuadSurface::neighbors() const
+std::vector< TriSurface::vertex_pair > QuadSurface::neighbors() const
 {
   const size_t& m  = std::get<0>( vertices_size() );
   const size_t& n  = std::get<1>( vertices_size() );
