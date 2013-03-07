@@ -104,14 +104,14 @@ int main (int argc, char *argv[])
   {
     if( vm[ generator_param ].as< std::string >() == "random" )
     {
-      flat::RandomHeightGenerator    	 generator( { 10, 10 }, .1 );
+      flat::RandomHeightGenerator    	   generator( { 10, 10 }, .1 );
       flat::SimpleRectlinearTriangulator triangulator( generator.vertex_field_size() );
       flat::NoTransform                  transform;
       surface = surface_t::create_with_generator( generator, triangulator, transform );
     } else
     if( vm[ generator_param ].as< std::string >() == "wave" )
     {
-      flat::WaveGenerator         		 generator( { 20, 20 }, .05 );
+      flat::WaveGenerator         		   generator( { 20, 20 }, .05 );
       flat::SimpleRectlinearTriangulator triangulator( generator.vertex_field_size() );
       flat::NoTransform                  transform;
       surface = surface_t::create_with_generator( generator, triangulator, transform );
@@ -124,6 +124,7 @@ int main (int argc, char *argv[])
     return 0;
   }
 
+  // TODO: untangle (even gtk::GeodesicsInspector is in there)
   surface->initial_distances.compute_distances( surface, Surface::distance_function::ALL );
 
   //----| export distance matrix

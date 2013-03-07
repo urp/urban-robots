@@ -86,6 +86,7 @@ void Surface::distance_function::compute_all_to_all( const std::shared_ptr< Surf
   {
     mmp::Geodesics gi( *surface, source );
     // TODO: prevent propagation to vertices which allready have distance information (j <= i )
+    //       ??? by removing (boundary
 
       # if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
     if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
