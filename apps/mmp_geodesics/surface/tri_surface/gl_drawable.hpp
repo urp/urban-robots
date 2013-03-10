@@ -121,7 +121,7 @@ namespace gl
       SurfaceDrawable( const std::shared_ptr< const flat::TriSurface >& surface )
       : m_vertex_mode ( SOLID_VERTEX_MODE )
       , m_edge_mode   ( SOLID_EDGE_MODE )
-      , m_face_mode   ( SOLID_FACE_MODE )
+      , m_face_mode   ( INVISIBLE_FACE_MODE )
       , m_vertex_modes( { GAUSSIAN_CURVATURE_VERTEX_MODE, HEIGHT_VERTEX_MODE, INVISIBLE_VERTEX_MODE, SOLID_VERTEX_MODE, TEXTURE_VERTEX_MODE } )
       , m_edge_modes  ( { INVISIBLE_EDGE_MODE, SOLID_EDGE_MODE } )
       , m_face_modes  ( { INVISIBLE_FACE_MODE, SOLID_FACE_MODE, TEXTURE_FACE_MODE } )

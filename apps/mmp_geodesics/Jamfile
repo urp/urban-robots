@@ -2,16 +2,20 @@ project apps/mmp_geodesics
 : requirements <include>/$(TOP)/apps/mmp_geodesics/
 ;
 
-local mmp_linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
-local mmp_cflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --cflags gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
+local linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
+local cflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --cflags gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
 
 exe mmp-geodesics
 :	mmp_geodesics_main.cpp
+
+#---| open gl stuff
 
 	gl/tools.cpp
 
 	gtk/gl_view/gl_canvas.cpp
 	gtk/gl_view/gl_view.cpp
+
+#---| mmp geodesics
 
 	mmp/window.cpp
 	mmp/eventpoint.cpp
@@ -24,9 +28,12 @@ exe mmp-geodesics
 	mmp/visualizer/gtk_geodesics_inspector.cpp
 	mmp/visualizer/cairo_visualizer.cpp
 
+#---| surface
+
+	surface/distance_function/distance_function.cpp
+	surface/point_cloud/point_cloud.cpp
 	surface/tri_surface/tri_surface.cpp
 	surface/tri_surface/gl_drawable.cpp
-
 	surface/quad_surface/quad_surface.cpp
 	surface/quad_surface/gl_drawable.cpp
 
@@ -35,6 +42,6 @@ exe mmp-geodesics
 	/robots//boost-signals
 	/robots//boost-options
 
-: <cflags>$(mmp_cflags)
-	<linkflags>$(mmp_linkflags)
+: <cflags>$(cflags)
+  <linkflags>$(linkflags)
 ;

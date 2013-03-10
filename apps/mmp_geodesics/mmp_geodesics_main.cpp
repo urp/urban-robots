@@ -15,17 +15,19 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# include "mmp/geodesics.hpp"
+# include "surface/distance_function/distance_function.hpp"
 # include "surface/tri_surface/tri_surface.hpp"
 # include "surface/quad_surface/quad_surface.hpp"
 # include "surface/generators.hpp"
 
 # include <boost/program_options.hpp>
 
-# define CLI_MEASURE__GL_OUTPUT
+# define USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
 
-# if defined CLI_MEASURE__GL_OUTPUT
-/*TODO???*/#   include "gtk/gl_view/gl_view.hpp"
-/*TODO???*/#   include "surface/tri_surface/gl_drawable.hpp"
+# if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
+#   include "mmp/visualizer/gtk_geodesics_inspector.hpp"
+#   include "surface/tri_surface/gl_drawable.hpp"
 # endif
 
 int main (int argc, char *argv[])
@@ -39,13 +41,6 @@ int main (int argc, char *argv[])
   std::cerr << std::boolalpha;
 
   std::cout << "cli-measure - Copyright (C) Peter Urban 2011" << std::endl;
-
-  # if defined CLI_MEASURE__GL_OUTPUT
-  // init gtkmm
-  Gtk::Main kit(argc, argv);
-  // init gtkglextmm.
-  Gtk::GL::init(argc, argv);
-  # endif
 
   //----| parse commandline
   // Declare the supported options.
@@ -124,8 +119,45 @@ int main (int argc, char *argv[])
     return 0;
   }
 
-  // TODO: untangle (even gtk::GeodesicsInspector is in there)
-  surface->initial_distances.compute_distances( surface, TriSurface::distance_function::ALL );
+  distance_function distances;
+
+
+
+  # if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
+
+  // initialize gtkmm
+  Gtk::Main kit(argc, argv);
+  // initialize gtkglextmm.
+  Gtk::GL::init(argc, argv);
+
+  std::auto_ptr< gtk::GeodesicsInspector > obs;
+
+  typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
+  distance_matrix_type distance_matrix( surface->num_vertices() );
+
+  // TODO: add geodesic inspector - via po!!!
+
+  for( TriSurface::vertex_descriptor source = 0; source < surface->num_vertices(); source++ )
+  {
+    mmp::Geodesics gi( *surface, source );
+
+    if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
+    else obs->initialize( &gi, surface );
+    obs->run_propagation();
+
+    for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
+      distance_matrix( source, query ) = gi.query_distance( query );
+
+  }
+
+  distances.set_distances( distance_matrix, distance_function::ALL );
+
+  # else
+
+  distances.compute( surface, distance_function::ALL );
+
+  # endif
+
 
   //----| export distance matrix
   if( vm.count( export_dist_param ) )
@@ -133,7 +165,7 @@ int main (int argc, char *argv[])
     std::string     path( vm[export_dist_param].as<std::string>() );
     std::ofstream   distfile( path );
     std::clog << "exporting distance matrix to file \"" << path << '\"'<< std::endl;
-    distfile << surface->initial_distances;
+    distfile << distances;
     distfile.close();
   }
 

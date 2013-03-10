@@ -26,137 +26,10 @@
 # pragma once
 
 # include "common.hpp"
-# include "surface/he_mesh.hpp"
+# include "surface/point_cloud/point_cloud.hpp"
 
 namespace flat
 {
-
-  template< class MeshT > class VertexHandle;
-
-  // additional vertex properties
-  struct vertex_texture_coord_t { typedef boost::vertex_property_tag kind;
-				  typedef utk::veca< float, 2 > type;
-				};
-  template< typename MeshT >
-  std::ostream&   operator<<( std::ostream&, flat::VertexHandle<MeshT> const& );
-
-  // vertex handle
-  template< class MeshT >
-  class VertexHandle : public he::DefaultVertexHandle< MeshT >
-  {
-    public:
-
-      typedef typename MeshT::vertex_descriptor vertex_descriptor;
-      typedef typename MeshT::vertex_handle     vertex_handle;
-      typedef typename MeshT::edge_handle       edge_handle;
-
-      typedef typename boost::property_map<typename MeshT::graph_t, vertex_texture_coord_t >::const_type  const_texture_coord_map_t;
-
-      typedef typename boost::property_traits<const_texture_coord_map_t>::value_type  color_t;
-
-      friend std::ostream& operator<< <MeshT>( std::ostream&, VertexHandle<MeshT> const& );
-
-    public:
-
-      VertexHandle( const vertex_descriptor& v, const MeshT& m )
-      : he::DefaultVertexHandle<MeshT>(v,m)		{ 	}
-
-      VertexHandle( const he::DefaultVertexHandle< MeshT >& o )
-      : he::DefaultVertexHandle<MeshT>(o)		{	}
-
-      const vertex_texture_coord_t::type&	texture_coordinate()	const
-      {
-        return this->mesh().template get_property_map< vertex_texture_coord_t >() [ *this ];
-      }
-
-      void set_texture_coordinate( const vertex_texture_coord_t::type& value )
-      {
-        return this->mesh().template put< vertex_texture_coord_t >( this->descriptor(), value );
-      }
-  };
-
-  // the mesh type
-  typedef he::Mesh< VertexHandle, he::DefaultEdgeHandle, he::DefaultFaceHandle
-		  , boost::property< vertex_texture_coord_t, vertex_texture_coord_t::type >
-                  , boost::no_property, boost::no_property >
-	  surface_mesh_t;
-
-  // a mesh without edges and faces, only vertices.
-  class PointCloud : public surface_mesh_t
-  {
-    private:
-
-      mutable location_t m_min_location;
-      mutable location_t m_max_location;
-
-      void comp_min_max_xy()	const;
-      void comp_min_max_z()	const;
-
-    protected:
-
-	  PointCloud( vertices_size_type vertex_count )
-	  : surface_mesh_t( vertex_count )
-	  , m_min_location(   std::numeric_limits<coord_t>::infinity() )
-	  , m_max_location( - std::numeric_limits<coord_t>::infinity() )
-	  {	}
-
-    public:
-
-      virtual   ~PointCloud()	{	}
-
-      const distance_t	distance( vertex_descriptor a, vertex_descriptor b)	const
-      { return utk::distance( vertex( a ).location(), vertex( b ).location() ); }
-
-      virtual void prepare_step()  { set_min_max(); }
-
-
-      void set_min_max( const location_ref_t& min = location_t( std::numeric_limits<coord_t>::infinity())
-		       , const location_ref_t& max = location_t(-std::numeric_limits<coord_t>::infinity()) )
-      { m_min_location = min;
-	m_max_location = max;
-      }
-
-      void set_min_max_z( const coord_t min =  std::numeric_limits<coord_t>::infinity()
-			, const coord_t max = -std::numeric_limits<coord_t>::infinity() )
-      { m_min_location.z() = min;
-	m_max_location.z() = max;
-      }
-
-      const coord_t& min_height()    const
-      {
-	if( m_min_location.z() == std::numeric_limits<coord_t>::infinity() )
-          comp_min_max_z();
-        return m_min_location.z();
-      }
-
-      const coord_t& max_height()	const
-      {
-	if( m_max_location.z() == - std::numeric_limits<coord_t>::infinity() )
-          comp_min_max_z();
-        return m_max_location.z();
-      }
-
-      // TODO use bounding box interface
-      location_t min_location()	const
-      {
-	if( ( m_min_location.xy() == std::numeric_limits<coord_t>::infinity() ) == true )
-	  comp_min_max_xy();
-	if( m_min_location.z() == std::numeric_limits<coord_t>::infinity() )
-          comp_min_max_z();
-        return m_min_location;
-      }
-
-      location_t max_location()  const
-      {
-	if( ( m_max_location.xy() == - std::numeric_limits<coord_t>::infinity() ) == true )
-          comp_min_max_xy();
-        if( m_max_location.z() == - std::numeric_limits<coord_t>::infinity() )
-          comp_min_max_z();
-        return m_max_location;
-      }
-
-  };
-
 
   class TriSurface : public PointCloud
   {
@@ -200,45 +73,7 @@ namespace flat
         { return get_pixel( ( s + t * size.first ) * num_components ); }
       };
 
-      struct distance_function
-      {
-        typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
 
-        typedef enum { NONE = 0, NEIGHBORS = 1, ALL = 2 } neighborhood_type;
-        typedef int neighborhood_mask_type;
-
-        neighborhood_mask_type  neighborhood;
-
-        distance_matrix_type distance_matrix;
-
-        //TODO move construction
-        distance_function( const distance_function& d ) : neighborhood( d.neighborhood ), distance_matrix( d.distance_matrix ) { }
-        //TODO: distance_function( distance_function&& d ) : neighborhood( d.neighborhood ), distance_matrix( d.distance_matrix ) { }
-        distance_function() : neighborhood( NONE )  {   }
-
-        void compute_distances( const std::shared_ptr<TriSurface>&, neighborhood_mask_type );
-
-        distance_matrix_type::const_reference operator() ( vertex_descriptor a, vertex_descriptor b )   const
-        {
-          return distance_matrix(a,b);
-        }
-
-        void set_distances( const distance_matrix_type& matrix, neighborhood_mask_type neighbors )
-        { distance_matrix = matrix;
-          neighborhood = neighbors;
-        }
-
-        private:
-          void compute_all_to_all( const std::shared_ptr< TriSurface >& );
-          void compute_all_to_neighbors( const std::shared_ptr< TriSurface >& );
-      };
-
-    public: // initial (geodesic) distances
-
-      distance_function initial_distances;
-
-      friend std::istream&   operator>>( std::istream&, TriSurface::distance_function& );
-      friend std::ostream&   operator<<( std::ostream&, TriSurface::distance_function const& );
     private:
 
       std::string  m_name;
@@ -259,8 +94,8 @@ namespace flat
 
       template< typename Generator, typename Triangulator, typename Transform >
       static std::shared_ptr< TriSurface > create_with_generator( Generator&    generator
-                                                             , Triangulator& triangulator
-                                                             , Transform&    transform )
+								, Triangulator& triangulator
+								, Transform&    transform )
       {
         std::shared_ptr< TriSurface > surface( new TriSurface( generator.num_vertices(), generator.texture_size(), generator.get_name() ) );
 
@@ -269,8 +104,6 @@ namespace flat
         triangulator( surface );
 
         transform( surface );
-
-        surface->initial_distances.compute_distances( surface, distance_function::NEIGHBORS );
 
         return surface;
       }
@@ -310,35 +143,7 @@ namespace flat
       void remove_triangulation()
       { clear_edges(); }
 
-      std::pair< coord_t, distance_function::neighborhood_mask_type > get_squared_distance_error() const;
-
   };
 
-
-  inline std::ostream&   operator<<( std::ostream& os, TriSurface::distance_function const& distances  )
-  {
-    os << "nb " << distances.neighborhood << ' ' << distances.distance_matrix;
-    return os;
-  }
-
-  inline std::istream&   operator>>( std::istream& is, TriSurface::distance_function& distances  )
-  {
-    std::string token;
-    is >> token;
-    if( token != "nb" )
-      std::cerr << "ERROR in distance function input operator - "
-                << "expected token \"nb\" at the beginning of the stream." << std::endl;
-    is >> distances.neighborhood >> distances.distance_matrix;
-    return is;
-  }
-
-  template< typename MeshT >
-  std::ostream&   operator<<( std::ostream& os, flat::VertexHandle<MeshT> const& vertex )
-  {
-    os << "vertex "    << vertex.descriptor()
-       << " location " << vertex.location()
-       << " texcoord " << vertex.texture_coordinate();
-    return os;
-  }
 
 }

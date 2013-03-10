@@ -45,7 +45,6 @@ namespace flat
       static std::shared_ptr< QuadSurface > create_with_generator( Generator&                   generator
                                                                  , Triangulator&                triangulator
                                                                  , Transform&                   transform
-                                                                 , TriSurface::distance_function   distances = distance_function()
                                                                  )
       {
         std::shared_ptr< QuadSurface > surface( new QuadSurface( generator.vertex_field_size(), generator.texture_size(), generator.get_name() ) );
@@ -55,11 +54,6 @@ namespace flat
         triangulator( surface );
 
         transform( surface );
-
-        if( distances.neighborhood != distance_function::NONE )
-          surface->initial_distances = distances ;
-        else
-          surface->initial_distances.compute_distances( surface, distance_function::NEIGHBORS );
 
         return surface;
       }
@@ -82,7 +76,7 @@ namespace flat
         //std::clog << "flat::QuadSurface::get_neighbors" << std::endl;
 
         const size_t m = std::get<0>( vertices_size() );
-		const size_t n = std::get<1>( vertices_size() );
+        const size_t n = std::get<1>( vertices_size() );
         const bool upper = v < m;
         const bool lower = v >= m * ( n - 1 );
         const bool left  = v % m == 0;
@@ -90,16 +84,16 @@ namespace flat
 
         if( !upper )
         { if( Query & NB8_UPPER_LEFT  && !left  ) nbs.push_back( v - m - 1 );
-	    if( Query & NB8_UPPER )                 nbs.push_back( v - m     );
-	    if( Query & NB8_UPPER_RIGHT && !right ) nbs.push_back( v - m + 1 );
+          if( Query & NB8_UPPER )                 nbs.push_back( v - m     );
+          if( Query & NB8_UPPER_RIGHT && !right ) nbs.push_back( v - m + 1 );
         }
 
         if( Query & NB8_RIGHT && !right ) nbs.push_back( v + 1 );
 
         if( !lower )
         { if( Query & NB8_LOWER_RIGHT && !right ) nbs.push_back( v + m + 1 );
-	    if( Query & NB8_LOWER )                 nbs.push_back( v + m     );
-	    if( Query & NB8_LOWER_LEFT  && !left  ) nbs.push_back( v + m - 1 );
+          if( Query & NB8_LOWER )                 nbs.push_back( v + m     );
+          if( Query & NB8_LOWER_LEFT  && !left  ) nbs.push_back( v + m - 1 );
         }
 
         if( Query & NB8_LEFT && !left )   nbs.push_back( v - 1 );
