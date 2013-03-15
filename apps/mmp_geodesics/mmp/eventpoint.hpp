@@ -55,8 +55,8 @@ namespace mmp
   {
     public:
 
-      typedef enum { LEFT_END = 1, RIGHT_END = 2, FRONTIER = 4, ALL = 7 } pos_flags;
-      typedef enum { LEFT_COLINEAR = 8, RIGHT_COLINEAR = 16 }             colinear_flags;
+      typedef enum { NONE = 0, LEFT_END = 1, RIGHT_END = 2, FRONTIER = 4, ALL = 7 } pos_flags;
+      typedef enum { LEFT_COLINEAR = 8, RIGHT_COLINEAR = 16 } colinear_flags;
 
       //TODO: use std::bitset
       typedef int flags_t;

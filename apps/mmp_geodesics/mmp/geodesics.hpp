@@ -35,6 +35,8 @@
 
 // debugging
 
+//# define MMP__USE_LABELING_EVENTS
+
 //# define DBG_MMP__USE_CAIRO
 
 //# define DBG_FLAT_MMP_FORCE_SANITY_CHECK
@@ -334,17 +336,18 @@ mmp::EventPoint* mmp::Geodesics::delete_ac_window( ac_t& ac, winlist_t& wlist, c
 template< mmp::EventPoint::flags_t PosFlags >
 mmp::EventPoint*  mmp::Geodesics::update_event_points( Window* w, const ps_t& ps )
 {
-  assert( PosFlags & ( EventPoint::LEFT_END | EventPoint::RIGHT_END ) );
 
   EventPoint::Grabber< event_queue_t::iterator, PosFlags | EventPoint::FRONTIER > evgrab( event_queue.begin(), event_queue.end(), w );
 
   event_queue_t::iterator evf = evgrab.frontier;
 
-  if( PosFlags & EventPoint::LEFT_END )
+  constexpr bool check_delete_left = PosFlags & EventPoint::LEFT_END;
+  if( check_delete_left )
     if( evgrab.left != event_queue.end() && evgrab.left != evf )
       delete_event( evgrab.left );
 
-  if( PosFlags & EventPoint::RIGHT_END )
+  constexpr bool check_delete_right = PosFlags & EventPoint::RIGHT_END;
+  if( check_delete_right )
     if( evgrab.right != event_queue.end() && evgrab.right != evf )
       delete_event( evgrab.right );
 
@@ -367,9 +370,9 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
       && adjacent->window()->source_distance< side_traits<Side>::opposite >() < ev.window()->source_distance< Side >() )
   {
     assert( !ev.colinear<Side>() || adjacent->window()->edge == ev.window()->predeccessor()->edge);
-    assert( ev.colinear<Side>()
-           || ( edge_handle( adjacent->window()->edge, get_surface() ).target() == edge_handle( ev.window()->edge, get_surface() ).target() )
-           || ( edge_handle( adjacent->window()->edge, get_surface() ).source() == edge_handle( ev.window()->edge, get_surface() ).source() )
+    assert(  ev.colinear<Side>()
+          || ( edge_handle( adjacent->window()->edge, get_surface() ).target() == edge_handle( ev.window()->edge, get_surface() ).target() )
+          || ( edge_handle( adjacent->window()->edge, get_surface() ).source() == edge_handle( ev.window()->edge, get_surface() ).source() )
           );
 
     # if defined DBG_FLAT_MMP_PULL_EVENT
@@ -381,11 +384,15 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
     //handle_event( adj );
     propagate_window( *adjacent );
 
-    // reinsert endpoint events if colinear frontier point is endpoint
+    # if defined MMP__USE_LABELING_EVENTS
+    // reinsert endpoint event if colinear frontier point (of adjacent event) is endpoint
+    // so that vertices can be labeled correctly
     if( adjacent->flags() & EventPoint::LEFT_END )
 	  event_queue.push( new EventPoint( EventPoint::LEFT_END, adjacent->window(), adjacent->distance() ) );
     if( adjacent->flags() & EventPoint::RIGHT_END )
 	  event_queue.push( new EventPoint( EventPoint::RIGHT_END, adjacent->window(), adjacent->distance() ) );
+    # endif
+
     delete_event( adjacent );
 
     assert( !ev.adjacent<Side>() || ev.adjacent<Side>()->window()->edge == ev.window()->edge );
@@ -396,15 +403,15 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
 
 template< mmp::side_t Side >
 std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
-  mmp::Geodesics::project_bound( EventPoint& 		    ev
-			       , const edge_descriptor&     e1
-			       , const edge_descriptor&     e2
-			       , const utk::ray<coord_t,2>& e1ray
-			       , const utk::ray<coord_t,2>& e2ray
-			       , const coord_t		    e0l
-			       , const coord_t		    e1l
-			       , const coord_t		    e2l
-			       , const ps_t&		    ps
+  mmp::Geodesics::project_bound( EventPoint& 	ev
+			       , const edge_descriptor&         e1
+			       , const edge_descriptor&         e2
+			       , const utk::ray<coord_t,2>&     e1ray
+			       , const utk::ray<coord_t,2>&     e2ray
+			       , const coord_t		              e0l
+			       , const coord_t		              e1l
+			       , const coord_t		              e2l
+			       , const ps_t&		                ps
 			       )
 {
   const Window*	srcwin = ev.window();
@@ -419,27 +426,27 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
 
   # if defined DBG_FLAT_MMP_PROJECT_BOUNDS
   if( adjacent ) std::clog << "mmp::Geodesics::project_bound\t| "<< side_traits<Side>::string()
-	                       << ' ' << ( colinear ? "colinear" : "crossing" ) << ' ' << *adjacent << std::endl;
+                           << ' ' << ( colinear ? "colinear" : "crossing" ) << ' ' << *adjacent << std::endl;
   # endif
 
   assert( !adjacent || adjacent->adjacent< side_traits<Side>::opposite >() == &ev );
   assert( !colinear || colinear->colinear< side_traits< Side >::opposite >() );
 
-  Window* 	  adjacent_win =  adjacent ? adjacent->window() : 0;
+  Window* adjacent_win =  adjacent ? adjacent->window() : 0;
 
-  coord_t 			new_bound;
-  edge_descriptor 	new_edge;
+  coord_t 			  new_bound;
+  edge_descriptor new_edge;
 
   if( colinear && srcwin->edge == adjacent_win->predeccessor()->edge )
   {
     // colinear window was already propagated away from window edge ( it is one step ahead )
-	# if defined DBG_FLAT_MMP_PROJECT_BOUNDS
-	std::clog << "mmp::Geodesics::project_window\t|"
-			  << " taking intersection from adjacent window "
-	  		  << std::endl;
-	# endif
-	new_bound = adjacent_win->bound< side_traits<Side>::opposite >();
-	new_edge  = adjacent_win->edge;
+    # if defined DBG_FLAT_MMP_PROJECT_BOUNDS
+    std::clog << "mmp::Geodesics::project_window\t|"
+              << " taking intersection from adjacent window "
+              << std::endl;
+    # endif
+    new_bound = adjacent_win->bound< side_traits<Side>::opposite >();
+    new_edge  = adjacent_win->edge;
 
     //TODO: colinear_ps_correction( left, right, psl, psr, pslerr, psrerr );
 
@@ -448,29 +455,29 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
   {
 
     assert( ps.y() > 0 );
-	const coord2_t b( srcwin->bound<Side>(), 0 );
+    const coord2_t b( srcwin->bound<Side>(), 0 );
 
-	utk::plane<coord_t,2> psb = utk::plane_from_ray( utk::ray<coord_t,2>( b, ps ) );
+    utk::plane<coord_t,2> psb = utk::plane_from_ray( utk::ray<coord_t,2>( b, ps ) );
 
-	edge_info e1info = { e1, e1l,   0,   0, e1ray };
-	edge_info e2info = { e2, e2l, e0l, e2l, e2ray };
+    edge_info e1info = { e1, e1l,   0,   0, e1ray };
+    edge_info e2info = { e2, e2l, e0l, e2l, e2ray };
 
-	std::pair< edge_info, edge_info > edges( Side == LEFT
-                                             ? std::make_pair( e2info, e1info )
-	                                         : std::make_pair( e1info, e2info ) );
+    std::pair< edge_info, edge_info > edges( Side == LEFT
+                                           ? std::make_pair( e2info, e1info )
+                                           : std::make_pair( e1info, e2info ) );
 
     // intersect with first edge
-	new_bound = utk::intersection( edges.first.ray , psb );
-	new_edge  = edges.first.descriptor;
-	// check if intersection is valid - intersect second edge otherwise
-	if( new_bound < coord_t(0) || new_bound >= edges.first.length )
-	{
-      new_bound = b[0] == edges.second.srcbound
-                  ? edges.second.edgebound
-				  : utk::intersection( edges.second.ray, psb );
+    new_bound = utk::intersection( edges.first.ray , psb );
+    new_edge  = edges.first.descriptor;
+    // check if intersection is valid - intersect second edge otherwise
+    if( new_bound < coord_t(0) || new_bound >= edges.first.length )
+    {
+        new_bound = b[0] == edges.second.srcbound
+                    ? edges.second.edgebound
+                    : utk::intersection( edges.second.ray, psb );
 
-	  new_edge = edges.second.descriptor;
-	}
+      new_edge = edges.second.descriptor;
+    }
 
     # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
     // crossing window was already propagated away from window edge ( it is one step ahead ))
@@ -482,11 +489,11 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
         if( side_traits< Side >::smaller_equal( adjacent_opp_bound, new_bound ) )
         {
           # if defined DBG_FLAT_MMP_PROJECT_BOUNDS
-	      std::clog << "mmp::Geodesics::project_window\t|"
-			        << " divergent bounds - window(" << side_traits<Side>::string() << ") = " << new_bound
+          std::clog << "mmp::Geodesics::project_window\t|"
+                    << " divergent bounds - window(" << side_traits<Side>::string() << ") = " << new_bound
                     << " adjacent(" << side_traits< side_traits<Side>::opposite >::string() << ") = " << adjacent_opp_bound
                     << std::endl;
-	      # endif
+          # endif
 
           // !!! TODO: use weighted/mean + make colinear ? ( + pscorrection? )
 
@@ -498,10 +505,10 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
 
   # if defined DBG_FLAT_MMP_PROJECT_BOUNDS
   std::clog << "mmp::Geodesics::project_bound\t| "<< side_traits<Side>::string()
-			<< " intersection " << new_bound
-			<< " edge " << new_edge
-			<< ( is_vertex<Side>( srcwin->bound<Side>(), e0l ) ? " (vertex)" : "")
-			<< std::endl;
+            << " intersection " << new_bound
+            << " edge " << new_edge
+            << ( is_vertex<Side>( srcwin->bound<Side>(), e0l ) ? " (vertex)" : "")
+            << std::endl;
   # endif
   return { new_bound, new_edge };
 }
@@ -587,8 +594,7 @@ void mmp::couple_edge_events( EventPoint* source
     // initialy couple projected and (left outer) side lobe window
     if( sidelobe.event )
     {
-      // TODO:
-      //assert( !sidelobe.event->adjacent< EdgeSide >() );
+      // TODO:assert( !sidelobe.event->adjacent< EdgeSide >() );
       # if defined DBG_FLAT_MMP_EVENTPOINT_COUPLING
       std::clog << "mmp::couple_edge_events\t\t| " << "(projected)"
                 << " initialy couple " << side_traits< OppEdgeSide >::string() << " sidelobe"

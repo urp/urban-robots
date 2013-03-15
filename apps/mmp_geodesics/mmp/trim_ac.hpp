@@ -264,13 +264,20 @@ mmp::trim_ac( Window* candidate
     if( bisector.type & ( bisector_result::CANDIDATE_DOMINATES | bisector_result::TRIM ) )
     {
       ac_window.set< OppSide >( bisector.point, psac);
-      ac_trim.first = geodesics.update_event_points< Side==LEFT ? EventPoint::RIGHT_END : EventPoint::LEFT_END >( &ac_window, psac );
+
+      # if defined MMP__USE_LABELING_EVENTS
+      constexpr EventPoint::flags_t update_side = Side==LEFT ? EventPoint::RIGHT_END : EventPoint::LEFT_END;
+      # else
+      constexpr EventPoint::flags_t update_side = EventPoint::NONE;
+      # endif
+
+      ac_trim.first = geodesics.update_event_points< update_side >( &ac_window, psac );
     }
 
     assert( ac_window.bound<OppSide>() == candidate->bound<Side>() );
 
   } // of cut/trim section
-  else ac_trim.first = 0; // forget neighbor of deleted window - because it not toutches the candidate
+  else ac_trim.first = 0; // forget neighbor of deleted window - because it not touching the candidate
 
   return ac_trim;
 } // of function trim_ac

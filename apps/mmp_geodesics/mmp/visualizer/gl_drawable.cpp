@@ -562,7 +562,9 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
                  {
                    const bool is_top_ev = ev == top_ev;
 
+                   # if defined MMP__INSERT_BOUNDARY_EVENTS
                    if( ev->flags() & EventPoint::FRONTIER )
+                   # endif
                    {
                      gl_draw_wavefront_indicators( ev, cross_indicator_color, colin_indicator_color );
 

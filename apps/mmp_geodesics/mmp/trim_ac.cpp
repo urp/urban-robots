@@ -21,8 +21,8 @@
 
 using namespace mmp;
 
-coord_t mmp::impl::linear_linear_window_bisector( const Window& a , const Window& b
-                   			                          , const ps_t&   a_ps, const ps_t& b_ps )
+coord_t mmp::impl::linear_linear_window_bisector( const Window&    a, const Window& b
+                   			                          , const ps_t& a_ps, const ps_t& b_ps )
 {
   assert( a.has_ps_vertex<LEFT>() != b.has_ps_vertex<LEFT>() );
 
@@ -41,8 +41,8 @@ coord_t mmp::impl::linear_linear_window_bisector( const Window& a , const Window
   return p;
 }
 
-coord_t mmp::impl::linear_curved_window_bisector( const Window& linear , const Window& curved
-                   			                          , const ps_t&   linear_ps, const ps_t&   curved_ps )
+coord_t mmp::impl::linear_curved_window_bisector( const Window& linear   , const Window& curved
+                   			                          , const ps_t& linear_ps, const ps_t&   curved_ps )
 {
   using utk::sqr;
   // on which side does the pseudosource of the linear distance function lie

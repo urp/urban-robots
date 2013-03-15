@@ -146,6 +146,8 @@ EventPoint*  Geodesics::insert_event_points( Window* win, const ps_t& ps )
   const bool fpl = fp == win->bound<LEFT>();
   const bool fpr = fp == win->bound<RIGHT>();
 
+  # if defined MMP__USE_LABELING_EVENTS
+
   std::pair< EventPoint*, EventPoint* > its;
 
   its.first = event_queue.push( new EventPoint( (fpl ? EventPoint::FRONTIER : 0)|EventPoint::LEFT_END,  win, win->source_distance< LEFT>() ) );
@@ -156,6 +158,18 @@ EventPoint*  Geodesics::insert_event_points( Window* win, const ps_t& ps )
     return event_queue.push( new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) ) );
 
   return fpl ? its.first : its.second;
+
+  # else
+
+  if( fpl )
+    return event_queue.push( new EventPoint( EventPoint::FRONTIER|EventPoint::LEFT_END,  win, win->source_distance< LEFT >() ) );
+  else if( fpr )
+    return event_queue.push( new EventPoint( EventPoint::FRONTIER|EventPoint::RIGHT_END,  win, win->source_distance< RIGHT >() ) );
+
+  return event_queue.push( new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) ) );
+
+  # endif
+
 }
 
 
@@ -264,8 +278,10 @@ void	Geodesics::initialize()
               << " ring edge - " << *wring
               << std::endl;
     # endif
+
     windows[ring].push_back( wring );
-	insert_event_points( wring, wring->pseudosource() );
+
+    insert_event_points( wring, wring->pseudosource() );
 
     Window* win = Window::create_initial( source(), in, coord_t(0), in.length(), in.length(), distance_t(0) );
     # if defined DBG_FLAT_MMP_INITIALIZE
@@ -293,23 +309,35 @@ void	Geodesics::handle_event( EventPoint* ev )
 
   // permanently label vertex events
 
+  # if defined MMP__USE_LABELING_EVENTS
   const bool  left_bound  = ( ev->flags() & EventPoint:: LEFT_END ) && ev->point() == coord_t(0);
   const bool  right_bound = ( ev->flags() & EventPoint::RIGHT_END ) && utk::close_ulps( ev->point(), eh.length() );
+  # else
+  const bool  left_bound  = ev->window()->bound<LEFT>() == coord_t(0);
+  const bool  right_bound = utk::close_ulps( ev->window()->bound<RIGHT>(), eh.length() );
+  # endif
 
   if( left_bound || right_bound )
   {
     distance_t& label = vertex_labels[ left_bound ? eh.source() : eh.target() ];
 
+
+    # if defined MMP__USE_LABELING_EVENTS
+    const distance_t& distance = ev->distance();
+    if( !std::isfinite(label) ) label = distance;
+    else                        assert( distance >= label || utk::close_ulps( distance, label ) );
+    # else
+    const distance_t& distance = left_bound ? ev->window()->source_distance<LEFT>() : ev->window()->source_distance<RIGHT>();
+    if( label > distance ) label = distance;
+    # endif
+
     # if defined DBG_FLAT_MMP_HANDLE_EVENTS
     std::clog << "\t\t\t\t\t|"
               << " labeling " << (left_bound ? eh.source() : eh.target()) << " (" << label << ")"
-              << " with " << ev->distance()
-              << " error "<< ( ev->distance() - label )
+              << " with " << distance
+              << " error "<< ( distance - label )
               << std::endl;
     # endif
-
-    if( !std::isfinite(label) ) label = ev->distance();
-    else                        assert( ev->distance() >= label || utk::close_ulps( ev->distance(), label ) );
   }
 
   // propagate frontier event points
@@ -382,7 +410,7 @@ void	Geodesics::propagate_paths()
   assert( sanity_check() );
   # endif
   std::clog << "mmp::Geodesics::propagate_paths\t|"
-			<< "complete - source " << source()
+            << "complete - source " << source()
             << " with " << mmp::Window::next_id << " windows created in total"
             << std::endl;
 }
@@ -394,8 +422,8 @@ void    Geodesics::propagate_window( EventPoint& ev)
   Window* srcwin = ev.window();
   # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
   std::clog << "mmp::Geodesics::propagate_window"
-           << "\t|*propagate " << *srcwin
-           << std::endl;
+            << "\t|*propagate " << *srcwin
+            << std::endl;
   # endif
   //:::|edge information
 

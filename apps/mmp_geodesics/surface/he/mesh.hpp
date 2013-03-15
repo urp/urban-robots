@@ -76,8 +76,8 @@ namespace he
 
       static std::pair< type, type > create_range( const std::pair<IteratorT,IteratorT>& its, const MeshT& mesh )
       {
-	    assert( its.first != its.second );
-	    return { type( its.first, its.first, its.second, mesh ), type( its.first, its.second, its.second, mesh ) };
+        assert( its.first != its.second );
+        return { type( its.first, its.first, its.second, mesh ), type( its.first, its.second, its.second, mesh ) };
       }
 
       type&	operator= ( const DefaultPrimitiveIterator& o )  { m_current = o; }
@@ -90,15 +90,15 @@ namespace he
       type	operator++(int)
       {
         type current( *this );
-	     forward();
-	return current;
+        forward();
+        return current;
       }
 
       type	operator--(int)
       {
         type current( *this );
-	backward();
-	return current;
+        backward();
+        return current;
       }
 
       HandleT&		operator* ()	        { return handle(); }
@@ -118,12 +118,12 @@ namespace he
 
   // a mesh implemented by using the boost m_graph library
   template< template<class> class VertexHandleT
-	  , template<class> class EdgeHandleT
-	  , template<class> class FaceHandleT
-	  , class CustomVertexProperties = boost::no_property
-	  , class CustomEdgeProperties 	 = boost::no_property
+          , template<class> class EdgeHandleT
+          , template<class> class FaceHandleT
+          , class CustomVertexProperties = boost::no_property
+          , class CustomEdgeProperties 	 = boost::no_property
           , class CustomGraphProperties  = boost::no_property
-  		  >
+          >
   class Mesh
   {
     public: // type definitions
@@ -137,12 +137,12 @@ namespace he
 
       struct impl_face_type
       {
-	typedef std::size_t  face_index_t;
-	edge_descriptor edge;
-	face_index_t	  index;
-	impl_face_type() = default;
-	impl_face_type( const edge_descriptor& e, const face_index_t& i )	: edge( e ), index( i )	{	}
-	bool    operator== ( const impl_face_type& other )    const   { return index == other.index; }
+        typedef std::size_t  face_index_t;
+        edge_descriptor edge;
+        face_index_t	  index;
+        impl_face_type() = default;
+        impl_face_type( const edge_descriptor& e, const face_index_t& i )	: edge( e ), index( i )	{	}
+        bool operator== ( const impl_face_type& other ) const { return index == other.index; }
       };
 
       typedef impl_face_type    face_descriptor;
@@ -153,9 +153,9 @@ namespace he
 
       struct HDS // the half edge data structure
       {	vertex_descriptor	source_vertex;
-	edge_descriptor		next_edge;
-	edge_descriptor		opposite_edge;	// equal to owning edge if no opposite edge exists
-	face_descriptor  	face;
+        edge_descriptor		next_edge;
+        edge_descriptor		opposite_edge;	// equal to owning edge if no opposite edge exists
+        face_descriptor  	face;
       };
 
       typedef std::size_t 			index_t;
@@ -169,9 +169,9 @@ namespace he
 
       // graph type storing vertices and edges
       typedef boost::adjacency_list< boost::vecS, boost::vecS, boost::directedS
-				   , vertex_properties
-				   , boost::property< edge_hds_t, HDS, edge_properties >
-				   , graph_properties > graph_t;
+                                   , vertex_properties
+                                   , boost::property< edge_hds_t, HDS, edge_properties >
+                                   , graph_properties > graph_t;
 
       // face storage type - later accessed from half-edge datastructure
       typedef std::vector<face_descriptor>  face_vector_t;
@@ -180,13 +180,13 @@ namespace he
 
       typedef typename boost::graph_traits<graph_t>::vertices_size_type vertices_size_type;
       typedef typename boost::graph_traits<graph_t>::edges_size_type    edges_size_type;
-      typedef size_t													faces_size_type;
+      typedef size_t													                          faces_size_type;
 
       // primitive handles
 
       typedef VertexHandleT< type >	    vertex_handle;
-      typedef EdgeHandleT  < type >	    edge_handle;
-      typedef FaceHandleT  < type >	    face_handle;
+      typedef   EdgeHandleT< type >	    edge_handle;
+      typedef   FaceHandleT< type >	    face_handle;
 
       friend class VertexHandleT< type >;
       friend class EdgeHandleT  < type >;
