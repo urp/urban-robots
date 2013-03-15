@@ -27,7 +27,7 @@
 //# define DBG_FLAT_MMP_RRIORITY_QUEUE_VALUES
 //# define DBG_FLAT_MMP_RRIORITY_QUEUE_SORTING
 
-# include <list>
+# include <vector>
 # include <functional>
 # include <iostream>
 # include <algorithm>
@@ -36,140 +36,72 @@
 namespace mmp
 {
   // priority queue which allows deletion of elements
-  template<typename T, typename Compare = std::less<T> >
+  template<typename T, typename Container = std::vector<T>,  typename Compare = std::less<T> >
   class PriorityQueue
   {
     public:
 
-      typedef std::list<T> container_t;
+      typedef Container container_t;
 
       typedef typename container_t::value_type value_type;
 
-      typedef typename container_t::iterator			iterator;
+      typedef typename container_t::iterator		iterator;
       typedef typename container_t::const_iterator    	const_iterator;
       typedef typename container_t::reverse_iterator		reverse_iterator;
       typedef typename container_t::const_reverse_iterator	const_reverse_iterator;
 
-      typedef typename container_t::reference			reference;
-      typedef typename container_t::const_reference		const_reference;
+      typedef typename container_t::reference		reference;
+      typedef typename container_t::const_reference	const_reference;
       typedef typename container_t::pointer           	pointer;
       typedef typename container_t::difference_type   	difference_type;
       typedef typename container_t::size_type         	size_type;
 
-    private:
-
-      container_t	list;
-      bool		sortd;
-      Compare         compare;
-
-      void do_sort()
-      {
-	# if defined DBG_FLAT_MMP_RRIORITY_QUEUE_SORTING
-	std::clog << "mmp::PriorityQueue::do_sort\t| sorting" << std::endl;
-	# endif
-	list.sort( compare );
-	sortd = true;
-      }
-
-    public:
+      container_t	container;
+      Compare         	compare;
 
       PriorityQueue( const Compare& comp = Compare() )
-      : list(), sortd( true ), compare( comp )
+      : container(), compare( comp )
       {	}
 
       //iterators
 
-      iterator begin()
-      {
-	/*sort();*/
-	sortd = false;
-	return list.begin();
-      }
+      iterator begin() { return container.begin(); }
 
-      const_iterator begin() const
-      {
-	/*sort();*/
-	return list.begin();
-      }
+      const_iterator begin() const { return container.begin(); }
 
-      iterator end()
-      {
-	/*sort();*/
-	sortd = false;
-	return list.end();
-      }
+      iterator end() { return container.end(); }
 
-      const_iterator	end() const
-      {
-	/*sort();*/
-	return list.end();
-      }
+      const_iterator end() const { return container.end(); }
 
-      reverse_iterator	rbegin()
-      { /*sort();*/
-	sortd = false;
-	return list.rbegin();
-      }
+      reverse_iterator rbegin() { return container.rbegin(); }
 
-      const_reverse_iterator  rbegin() const
-      {
-	/*sort();*/
-	return list.rbegin();
-      }
+      const_reverse_iterator rbegin() const { return container.rbegin(); }
 
-      reverse_iterator rend()
-      {
-	/*sort();*/ sortd = false;
-	return list.rend();
-      }
+      reverse_iterator rend() { return container.rend(); }
 
-      const_reverse_iterator	rend() const
-      {
-	/*sort();*/
-	return list.rend();
-      }
+      const_reverse_iterator rend() const { return container.rend(); }
 
-      const bool	empty()	const { return list.empty(); }
+      const bool empty() const { return container.empty(); }
 
-      const size_t	size() const { return list.size(); }
-
-      const bool&	sorted() const { return sortd; }
-
-      void sort()
-      { if( not sorted() ) do_sort(); }
+      const size_t size() const { return container.size(); }
 
       reference top()
-      { assert( not empty() );
-	sort();
-	sortd = false;
-	return list.front();
+      {
+	assert( not empty() );
+	return container.front();
       }
 
       const_reference top() const
-      { assert( not empty() ); return * std::min_element( begin(), end(), compare ); }
-
-      reference bottom()
-      {
-	sort();
-	sortd = false;
-	assert( not empty() );
-	return list.back();
-      }
-      const_reference bottom() const
       {
 	assert( not empty() );
-	return * std::max_element( begin(), end(), compare );
+	return container.front();
       }
-
-      //iterator top_iterator()
-      //{ sort(); assert( !empty() ); return list.begin(); }
-
-      //const_iterator	top_iterator() const
-      //{ sort(); assert( !empty() ); return list.begin(); }
 
       value_type pop()
-      { const value_type v = top();
-	list.pop_front();
+      {
+	value_type v = top();
+	std::pop_heap( container.begin(), container.end(), compare );
+	container.pop_back();
 	return v;
       }
 
@@ -179,24 +111,10 @@ namespace mmp
 	std::clog << "mmp::PriorityQueue::push\t\t|"
 		  << " value " << v << std::endl;
 	# endif
-	list.push_back( v );
-	sortd = false;
+	container.push_back( v );
+	std::push_heap( container.begin(), container.end(), compare );
 	return v;
       }
-
-      // to be used with std::front_inserter TODO: replace by own InsertIterator
-      void push_front( const_reference v ) { push(v); }
-
-
-      iterator insert( iterator loc, const_reference v )
-      {
-	# if defined DBG_FLAT_MMP_RRIORITY_QUEUE_VALUES
-	std::clog << "mmp::PriorityQueue::insert\t|" << " value " << v << std::endl;
-	# endif
-
-	list.insert(loc,v); sortd = false; return loc;
-      }
-
 
       void remove( const_reference v )
       {
@@ -204,22 +122,31 @@ namespace mmp
 	std::clog << "mmp::PriorityQueue::remove\t\t|" << " value " << v << std::endl;
 	# endif
 
-	list.remove(v);
+	container.remove(v);
+
+	std::make_heap( container.begin(), container.end(), compare );
       }
 
-      template<class Pred>
-      void remove_if( const Pred& p ) { list.remove_if(p); }
+      template<class Predicate>
+      void remove_if( const Predicate& pred )
+      {
+	erase( std::remove_if( container.begin(), container.end(), pred), container.end() );
+      }
 
-      iterator erase( iterator loc )
+      void erase( iterator loc )
       {
 	# if defined DBG_FLAT_MMP_RRIORITY_QUEUE_VALUES
 	std::clog << "mmp::PriorityQueue::erase\t\t|"
 		  << " value " << *loc << std::endl;
 	# endif
-
-	return list.erase(loc);
+	container.erase(loc);
+	std::make_heap( container.begin(), container.end(), compare );
       }
-      //iterator erase( iterator first, iterator last )
-      //{ return list.erase(first, last); }
+
+      void erase( iterator first, iterator last )
+      {
+	container.erase(first, last);
+	std::make_heap( container.begin(), container.end(), compare );
+      }
   };
 }

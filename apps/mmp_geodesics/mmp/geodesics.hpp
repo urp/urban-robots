@@ -106,7 +106,7 @@ namespace mmp
 
     private:
 
-      typedef PriorityQueue<EventPoint*, EventPoint::less> event_queue_t;
+      typedef PriorityQueue< EventPoint*, std::vector<EventPoint*>, EventPoint::smaller_min_distance > event_queue_t;
       typedef std::list<Window*>	winlist_t;
 
       // stores a window list for every edge
@@ -245,18 +245,21 @@ namespace mmp
       const distance_t max_distance() const
       {
         if( ! event_queue.empty() )
-        { const Window& bottom = *event_queue.bottom()->window();
-          return bottom.subpath() + bottom.max_ps_distance( bottom.pseudosource() ).second;
+        { //const Window& bottom = *event_queue.bottom()->window();
+          //return bottom.subpath() + bottom.max_ps_distance( bottom.pseudosource() ).second;
+          return (*std::max_element( event_queue.begin(), event_queue.end(), EventPoint::greater_max_distance() ))->window()->max_source_distance().second ;
         }
 
         if( m_max_distance != 0 )
           return m_max_distance;
 
         for( auto listit = windows.storage_begin(); listit != windows.storage_end(); ++listit )
+        {
           std::for_each( listit->begin(), listit->end()
                        , [&] ( const Window* win )
-                         { m_max_distance = std::max( m_max_distance, win->subpath() + win->max_ps_distance( win->pseudosource() ).second ); }
+                         { m_max_distance = std::max( m_max_distance, win->max_source_distance().second ); }
                        );
+        }
         return m_max_distance;
       }
 

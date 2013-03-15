@@ -25,6 +25,7 @@
 # pragma once
 
 //:::|debugging
+
 //#define DBG_FLAT_MMP_EVENTPOINT_GRABBER
 //# define DBG_FLAT_MMP_EVENTPOINT_CONSTRUCTION
 //# define DBG_FLAT_MMP_EVENTPOINT_DESTRUCTION
@@ -41,7 +42,9 @@ namespace mmp
   //:::|forward declarations
   class EventPoint;
 
-  std::ostream& operator<<(std::ostream& os,const EventPoint& ev);
+  std::ostream& operator<<( std::ostream&, const EventPoint& );
+  bool    	operator< ( const EventPoint& a, const EventPoint& b );
+  bool    	operator> ( const EventPoint& a, const EventPoint& b );
 
   typedef std::pair< EventPoint*, EventPoint* >   ev_pair_t;
 
@@ -222,17 +225,17 @@ namespace mmp
 	if( fp == window()->bound< RIGHT >() ) { m_mask |= RIGHT_END; }
       }
 
-      // comparison operator reflecting the priority of EventPoints ( from lower distance to higher distances )
-      bool    operator<(const EventPoint& o)  const
-      { return /*utk::close_ulps( distance(), o.distance() ) ? !window()->has_ps_vertex() && o.window()->has_ps_vertex() :*/
-	       //std::max( window()->source_distance<LEFT>(), window()->source_distance<RIGHT>() ) < std::max( o.window()->source_distance<LEFT>(), o.window()->source_distance<RIGHT>() );
-	distance() < o.distance();
-      }
 
-      struct less
+      struct smaller_min_distance
       {
 	bool operator() ( EventPoint* a, EventPoint* b ) const
-	{ return *a < *b; }
+	{ return !(*a < *b); }
+      };
+
+      struct greater_max_distance
+      {
+	bool operator() ( EventPoint* a, EventPoint* b ) const
+	{ return *a > *b; }
       };
 
       struct WindowPredicate
@@ -277,5 +280,20 @@ namespace mmp
       }; // of Grabber
 
   }; // of EventPoint
+
+  // comparison operator reflecting the priority of EventPoints ( from lower distance to higher distances )
+  inline bool operator< ( const EventPoint& a, const EventPoint& b )
+  { return /*utk::close_ulps( distance(), o.distance() ) ? !window()->has_ps_vertex() && o.window()->has_ps_vertex() :*/
+	   //std::max( window()->source_distance<LEFT>(), window()->source_distance<RIGHT>() ) < std::max( o.window()->source_distance<LEFT>(), o.window()->source_distance<RIGHT>() );
+	   a.distance() < b.distance();
+  }
+
+  // comparison operator reflecting the priority of EventPoints ( from higher distance to lower distances )
+  inline bool operator> ( const EventPoint& a, const EventPoint& b )
+  {
+    return a.window()->max_source_distance().second > b.window()->max_source_distance().second;
+  }
+
+
 
 } // of mmp

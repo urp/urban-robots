@@ -29,6 +29,8 @@
 # include "mmp/common.hpp"
 
 # include "utk/ray.h"
+
+
 //# define DBG_FLAT_MMP_WINDOW_CONSTRUCTION
 //# define DBG_FLAT_MMP_WINDOW_DESTRUCTION
 
@@ -190,12 +192,14 @@
 	const coord_t& bound() const
 	{ return get< Side > ( m_bounds ); }
 
+
 	const std::pair< distance_t, distance_t >& ps_distances() const
 	{ return m_distances; }
 
 	std::pair< distance_t, distance_t >
 	source_distances() const
 	{ return std::make_pair( ps_distances().first + subpath(), ps_distances().second + subpath() ); }
+
 
 	template< side_t Side >
 	distance_t& ps_distance()
@@ -205,6 +209,7 @@
 	const distance_t& ps_distance() const
 	{ return get< Side > ( m_distances ); }
 
+
 	template< side_t Side >
 	bool has_ps_vertex()  const
 	{ return ps_distance<Side>() == 0; }
@@ -212,14 +217,17 @@
 	bool has_ps_vertex()  const
 	{ return has_ps_vertex< LEFT >() || has_ps_vertex< RIGHT >(); }
 
+
 	Window* predeccessor()  const
 	{ return parent; }
 
 	coord_t length() const
 	{ return bound<RIGHT>() - bound<LEFT>(); }
 
+
 	const distance_t& subpath() const
 	{ return d; }
+
 
 	template< side_t Side >
 	void set(const coord_t& newbound, const ps_t& ps)
@@ -235,13 +243,16 @@
 	  get<Side>( m_distances ) = bound_pair.second;
 	}
 
+
 	void invalidate()
 	{ get<  LEFT >( m_bounds ) = 0;
 	  get< RIGHT >( m_bounds ) = 0;
 	}
 
+
 	bool is_valid() const
 	{ return bound<LEFT>() < bound<RIGHT>(); }
+
 
 	ps_t pseudosource() const
 	{
@@ -300,7 +311,7 @@
 	{ return std::hypot( p - ps[0], ps[1] ); }
 
 	// returns the distance of the source to a point (on the windows edge)
-	distance_t	                source_distance(const coord_t& p, const ps_t& ps )  const
+	distance_t source_distance(const coord_t& p, const ps_t& ps )  const
 	{ return pseudosource_distance( p, ps ) + subpath(); }
 
 	// returns the distance of the source to the endpoints
@@ -310,7 +321,8 @@
 
         // the result is the frontier point and its distance to the pseudosource
 	std::pair< coord_t, distance_t >    min_ps_distance(const ps_t& ps)		const
-        { if(      ps[0] >= bound<RIGHT>() ) return std::make_pair( bound<RIGHT>(), ps_distance<RIGHT>() );
+        {
+	  if(      ps[0] >= bound<RIGHT>() ) return std::make_pair( bound<RIGHT>(), ps_distance<RIGHT>() );
           else if( ps[0] <= bound< LEFT>() ) return std::make_pair( bound< LEFT>(), ps_distance<LEFT>() );
 
 	  return std::make_pair( ps[0], ps[1] );
@@ -323,12 +335,12 @@
           return std::make_pair( psd.first, psd.second + subpath() );
         }
 
-        std::pair< coord_t, distance_t >    min_source_distance()               const
+        std::pair< coord_t, distance_t >    min_source_distance() const
         { return min_source_distance( pseudosource() ); }
 
 	// returns the maximal distance from the pseudosource to a point p inside [b0,bound<RIGHT>()]
-        // p will be either b0 or bound<RIGHT>()
-		std::pair< coord_t, distance_t >    max_ps_distance(const ps_t& ps)   	const
+        // p will be either bound<LEFT>() or bound<RIGHT>()
+	std::pair< coord_t, distance_t >    max_ps_distance(const ps_t& ps)   	const
         {
           const ps_coord_t fp = frontier_point( ps );
 
@@ -339,6 +351,22 @@
 		 : std::make_pair( bound<RIGHT>(), ps_distance<RIGHT>() );
   	}
 
+	std::pair< coord_t, distance_t >  max_ps_distance() const
+        { return max_ps_distance( pseudosource() ); }
+
+        // the result is the frontier point and its distance to the source
+	std::pair< coord_t, distance_t >  max_source_distance(const ps_t& ps) const
+        {
+	  const std::pair<coord_t,distance_t> max_psd = max_ps_distance( ps );
+	  return std::make_pair( max_psd.first, max_psd.second +subpath() );
+	}
+
+	std::pair< coord_t, distance_t >  max_source_distance() const
+        {
+	  return max_source_distance( pseudosource() );
+	}
+
+
     	bool	sanity_check()	const;
 
         types   type()  const
@@ -346,7 +374,9 @@
 	  return is_inner_sidelobe( *this )
                  ? INNER_SIDELOBE
                  : ( is_outer_sidelobe( *this )
-                     ? OUTER_SIDELOBE : PROJECTED );
+                   ? OUTER_SIDELOBE
+		   : PROJECTED
+		   ) ;
         }
 
     };// of class Window
