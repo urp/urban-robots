@@ -1,5 +1,5 @@
 /***************************************************************************
- *            mmp-visualizer-cairo.h
+ *            visualizer-cairo.h
  *
  *  Tue Jan 18 12:51:25 2011
  *  Copyright  2011  Peter Urban

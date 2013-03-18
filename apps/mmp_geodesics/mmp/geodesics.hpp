@@ -33,9 +33,9 @@
 
 # include "surface/tri_surface/tri_surface.hpp"
 
-// debugging
+# define MMP__USE_LABELING_EVENTS
 
-//# define MMP__USE_LABELING_EVENTS
+//:::| debugging
 
 //# define DBG_MMP__USE_CAIRO
 
@@ -44,12 +44,12 @@
 //# define DBG_FLAT_MMP_INITIALIZE
 //# define DBG_MMP_GEODESICS__DESTRUCTOR
 
-//# define DBG_FLAT_MMP_HANDLE_EVENTS
-//# define DBG_FLAT_MMP_PULL_EVENT
-//# define DBG_FLAT_MMP_PROJECT_BOUNDS
-//# define DBG_FLAT_MMP_PROPAGATE_WINDOW
-//# define DBG_FLAT_MMP_ACCESS_CHANNEL
-//# define DBG_FLAT_MMP_INSERT_WINDOW
+# define DBG_FLAT_MMP_HANDLE_EVENTS
+# define DBG_FLAT_MMP_PULL_EVENT
+# define DBG_FLAT_MMP_PROJECT_BOUNDS
+# define DBG_FLAT_MMP_PROPAGATE_WINDOW
+# define DBG_FLAT_MMP_ACCESS_CHANNEL
+# define DBG_FLAT_MMP_INSERT_WINDOW
 //# define DBG_FLAT_MMP_DELETE_AC_WINDOW
 //# define DBG_FLAT_MMP_QUERY_DISTANCE
 
@@ -72,11 +72,15 @@ namespace mmp
 
       typedef TriSurface  surface_type;
 
+      //---| mesh primitive descriptors and handles
+
       typedef surface_type::vertex_descriptor vertex_descriptor;
       typedef surface_type::edge_descriptor   edge_descriptor;
       typedef surface_type::edge_handle       edge_handle;
       typedef surface_type::face_descriptor   face_descriptor;
       typedef surface_type::face_handle       face_handle;
+
+      //---| edge_info
 
       struct edge_info
       {
@@ -88,19 +92,17 @@ namespace mmp
         const utk::ray<coord_t,2>& ray;    // TODO: what?
       };
 
-      // other typedefs
+      //---| insert result
 
-      // contains the frontier point and the event points
-      // of the last modified or deleted windows in the access channel
       struct insert_result
       {
         insert_result()
         : event( 0 ), trimmed( false, false ), ac_ev( 0, 0 )
         { }
 
-        EventPoint* event;
-        std::pair< bool, bool > trimmed;
-        ev_pair_t ac_ev;
+        EventPoint* event;                // the frontier event point of the newly inserted window
+        std::pair< bool, bool > trimmed;  // indicates on which sides the windows trimmed on insertion
+        ev_pair_t ac_ev;                  // the access channel of event->window()
       };
 
 
@@ -339,28 +341,28 @@ mmp::EventPoint* mmp::Geodesics::delete_ac_window( ac_t& ac, winlist_t& wlist, c
 template< mmp::EventPoint::flags_t PosFlags >
 mmp::EventPoint*  mmp::Geodesics::update_event_points( Window* w, const ps_t& ps )
 {
+  EventPoint::Grabber< event_queue_t::iterator, PosFlags | EventPoint::FRONTIER> evgrab( event_queue.begin(), event_queue.end(), w );
 
-  EventPoint::Grabber< event_queue_t::iterator, PosFlags | EventPoint::FRONTIER > evgrab( event_queue.begin(), event_queue.end(), w );
+  EventPoint* evf = 0;
 
-  event_queue_t::iterator evf = evgrab.frontier;
+  if( evgrab.frontier != event_queue.end() )
+  {
+    evf = *evgrab.frontier;
+    evf->update(ps); // update distance and endpoint flags
+  }
 
+  // TODO: make side invariant (templates)
   constexpr bool check_delete_left = PosFlags & EventPoint::LEFT_END;
   if( check_delete_left )
-    if( evgrab.left != event_queue.end() && evgrab.left != evf )
+    if( evgrab.left != event_queue.end() && *evgrab.left != evf )
       delete_event( evgrab.left );
 
   constexpr bool check_delete_right = PosFlags & EventPoint::RIGHT_END;
   if( check_delete_right )
-    if( evgrab.right != event_queue.end() && evgrab.right != evf )
+    if( evgrab.right != event_queue.end() && *evgrab.right != evf )
       delete_event( evgrab.right );
 
-  if( evf != event_queue.end() )
-  {
-    (*evf)->update(ps); // update distance and endpoint flags
-    return *evf;
-  }
-
-  return 0;
+  return evf;
 }
 
 // TODO: rename try_pull_event
@@ -372,17 +374,17 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
   if( adjacent && adjacent->window()->edge != ev.window()->edge
       && adjacent->window()->source_distance< side_traits<Side>::opposite >() < ev.window()->source_distance< Side >() )
   {
-    assert( !ev.colinear<Side>() || adjacent->window()->edge == ev.window()->predeccessor()->edge);
-    assert(  ev.colinear<Side>()
-          || ( edge_handle( adjacent->window()->edge, get_surface() ).target() == edge_handle( ev.window()->edge, get_surface() ).target() )
-          || ( edge_handle( adjacent->window()->edge, get_surface() ).source() == edge_handle( ev.window()->edge, get_surface() ).source() )
-          );
-
     # if defined DBG_FLAT_MMP_PULL_EVENT
     std::clog << "mmp::Geodesics::pull_event\t|"
               << '(' << side_traits<Side>::string() << ' ' << ( ev.colinear<Side>() ? "colinear" : "crossing" ) << " )" << *adjacent
               << std::endl;
     # endif
+
+    assert( !ev.colinear<Side>() || adjacent->window()->edge == ev.window()->predeccessor()->edge);
+    assert(  ev.colinear<Side>()
+          || ( edge_handle( adjacent->window()->edge, get_surface() ).target() == edge_handle( ev.window()->edge, get_surface() ).target() )
+          || ( edge_handle( adjacent->window()->edge, get_surface() ).source() == edge_handle( ev.window()->edge, get_surface() ).source() )
+          );
 
     //handle_event( adj );
     propagate_window( *adjacent );
@@ -518,13 +520,13 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
 
 template< mmp::side_t EdgeSide >
 void mmp::couple_edge_events( EventPoint* source
-			    , const Geodesics::insert_result& projected
-			    , const Geodesics::insert_result& sidelobe
-			    , const bool two_projected
-			    , const Geodesics::edge_handle& edge
-			    , const distance_t& opp_edge_length
-			    , const distance_t& base_edge_length
-			    )
+                            , const Geodesics::insert_result& projected
+                            , const Geodesics::insert_result& sidelobe
+                            , const bool two_projected
+                            , const Geodesics::edge_handle& edge
+                            , const distance_t& opp_edge_length
+                            , const distance_t& base_edge_length
+                            )
 {
   # if defined DBG_FLAT_MMP_EVENTPOINT_COUPLING
   std::clog << "mmp::couple_edge_events\t\t|"

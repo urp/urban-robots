@@ -24,14 +24,19 @@
 
 # pragma once
 
-//# define DBG_FLAT_MMP_TRIM_AC
-//# define DBG_FLAT_MMP_WINDOW_BISECTOR
-//# define DBG_FLAT_MMP_CHECK_BISECTOR
-//# define DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
-//# define DBG_FLAT_MMP_DOMINATE_CROSSING
+# define DBG_FLAT_MMP_TRIM_AC
+# define DBG_FLAT_MMP_WINDOW_BISECTOR
+# define DBG_FLAT_MMP_CHECK_BISECTOR
+# define DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
+# define DBG_FLAT_MMP_DOMINATE_CROSSING
 
 # include "mmp/common.hpp"
 # include "mmp/geodesics.hpp"
+
+# if defined DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
+# include "mmp/visualizer/cairo_visualizer.hpp"
+# endif
+
 
 namespace mmp
 {
@@ -300,7 +305,7 @@ mmp::bisector_result mmp::window_bisector( const Window&  candidate, const Windo
 
 
   if( boundscheck.second( candidate.bound< Side >(), ac_window.bound< Side >() ) )
-  { // candidate side bound contained in intersection
+  {
     assert( contained( candidate.bound< Side >(), is ) );
     if( candidate.source_distance< Side >() <= ac_window.source_distance( candidate.bound< Side >(), ac_ps ) )
     {
@@ -354,7 +359,7 @@ mmp::bisector_result mmp::window_bisector( const Window&  candidate, const Windo
 
   if( linear_ac && linear_candidate ) // linear - linear
   {
-    assert( ac_window.has_ps_vertex<LEFT>() != candidate.has_ps_vertex<LEFT>() );
+    assert( ac_window.has_ps_vertex<Side>() != candidate.has_ps_vertex<Side>() );
     //  return std::numeric_limits<coord_t>::quiet_NaN();
     p = impl::linear_linear_window_bisector( ac_window, candidate, ac_ps, candidate_ps );
 	utk::clamp( p, is.first, is.second );
@@ -378,7 +383,7 @@ mmp::bisector_result mmp::window_bisector( const Window&  candidate, const Windo
 
     if( p1c != p2c)
       return { p1c ? p12.first : p12.second , bisector_result::TRIM };
-   else if( p1c && p2c )
+    else if( p1c && p2c )
     {
       const distance_t p1d = distance_error( p12.first , ac_window, candidate, ac_ps, candidate_ps );
       const distance_t p2d = distance_error( p12.second, ac_window, candidate, ac_ps, candidate_ps );
@@ -388,10 +393,10 @@ mmp::bisector_result mmp::window_bisector( const Window&  candidate, const Windo
 
     # if defined FLAT_MMP_WINDOW_BISECTOR_INTERVAL_BOUNDS_SNAPPING
     { // snap to intersection bounds
-	  const bool np1nan = !std::isnan(p12.first);
-	  const bool np2nan = !std::isnan(p12.second);
-      const bool snap   =    ( np1nan && snap_check( p12.first  , get< Side >( is ) ) )
-						  || ( np2nan && snap_check( p12.second , get< Side >( is ) ) );
+      const bool np1nan = !std::isnan(p12.first);
+      const bool np2nan = !std::isnan(p12.second);
+      const bool snap   = ( np1nan && snap_check( p12.first  , get< Side >( is ) ) )
+			  || ( np2nan && snap_check( p12.second , get< Side >( is ) ) );
 
       if( snap )
       {
@@ -401,7 +406,7 @@ mmp::bisector_result mmp::window_bisector( const Window&  candidate, const Windo
 		  << std::endl;
       	# endif
 
-		return { candidate.bound< Side >(), bisector_result::CANDIDATE_DOMINATES };
+	return { candidate.bound< Side >(), bisector_result::CANDIDATE_DOMINATES };
       }
     } // of is bound snapping
     # endif
@@ -561,19 +566,17 @@ bool  mmp::check_bisector( const bisector_result& bisector
     }
   }
 
-
-  # if defined DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
-  std::vector<const Window*> winvec(2);
-  winvec[0] = &wOld;
-  winvec[1] = &wNew;
-
-  visualizer::cairo::draw_windows_to_file( winvec.begin(), winvec.end(), "trimming_failed" );
-  # endif
-
   if( !all_ok )
+  {
     std::clog << "mmp::check_bisector\t\t| bisector " << bisector.point << " side " << Side << std::endl
               << "\t\t\t\t\t| candidate " << candidate << std::endl
               << "\t\t\t\t\t| ac window " << ac_window << std::endl;
+
+    # if defined DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
+    std::vector<const Window*> winvec{ &ac_window, &candidate };
+    visualizer::cairo::draw_windows_to_file( winvec.begin(), winvec.end(), "trimming_failed" );
+    # endif
+  }
 
   return all_ok;
 }

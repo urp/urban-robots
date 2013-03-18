@@ -29,7 +29,7 @@
 # include <boost/accumulators/statistics/mean.hpp>
 
 # if defined DBG_MMP__USE_CAIRO
-# include "mmp/cairo_visualizer.hpp"
+# include "mmp/visualizer/cairo_visualizer.hpp"
 # endif
 
 using namespace mmp;
@@ -148,28 +148,39 @@ EventPoint*  Geodesics::insert_event_points( Window* win, const ps_t& ps )
 
   # if defined MMP__USE_LABELING_EVENTS
 
-  std::pair< EventPoint*, EventPoint* > its;
+  std::pair< EventPoint*, EventPoint* > its(nullptr,nullptr);
 
-  its.first = event_queue.push( new EventPoint( (fpl ? EventPoint::FRONTIER : 0)|EventPoint::LEFT_END,  win, win->source_distance< LEFT>() ) );
+  its.first = new EventPoint( (fpl ? EventPoint::FRONTIER : 0)|EventPoint::LEFT_END,  win, win->source_distance< LEFT>() );
+  event_queue.push( its.first );
 
-  its.second= event_queue.push( new EventPoint( (fpr ? EventPoint::FRONTIER : 0)|EventPoint::RIGHT_END, win, win->source_distance<RIGHT>() ) );
+  its.second= new EventPoint( (fpr ? EventPoint::FRONTIER : 0)|EventPoint::RIGHT_END, win, win->source_distance<RIGHT>() );
+  event_queue.push( its.second );
 
   if( !(fpl || fpr) ) // interior frontier point
-    return event_queue.push( new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) ) );
+  {
+    EventPoint* frontier = new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) );
+    event_queue.push( frontier );
+    return frontier;
+  }
 
   return fpl ? its.first : its.second;
 
   # else
 
-  if( fpl )
-    return event_queue.push( new EventPoint( EventPoint::FRONTIER|EventPoint::LEFT_END,  win, win->source_distance< LEFT >() ) );
-  else if( fpr )
-    return event_queue.push( new EventPoint( EventPoint::FRONTIER|EventPoint::RIGHT_END,  win, win->source_distance< RIGHT >() ) );
+  EventPoint* frontier_ev;
 
-  return event_queue.push( new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) ) );
+  if( fpl )
+    frontier_ev = new EventPoint( EventPoint::FRONTIER|EventPoint::LEFT_END,  win, win->source_distance< LEFT >() );
+  else if( fpr )
+    frontier_ev = new EventPoint( EventPoint::FRONTIER|EventPoint::RIGHT_END,  win, win->source_distance< RIGHT >() );
+  else
+    frontier_ev = new EventPoint( EventPoint::FRONTIER, win, win->source_distance( fp, ps ) );
+
+  event_queue.push( frontier_ev );
+
+  return frontier_ev;
 
   # endif
-
 }
 
 
@@ -319,8 +330,9 @@ void	Geodesics::handle_event( EventPoint* ev )
 
   if( left_bound || right_bound )
   {
-    distance_t& label = vertex_labels[ left_bound ? eh.source() : eh.target() ];
+    //TODO: MMP__USE_LABELING_EVENTS
 
+    distance_t& label = vertex_labels[ left_bound ? eh.source() : eh.target() ];
 
     # if defined MMP__USE_LABELING_EVENTS
     const distance_t& distance = ev->distance();
@@ -367,13 +379,18 @@ std::pair< Geodesics::winlist_t::iterator, ev_pair_t >  Geodesics::delete_window
   return std::make_pair( wlist.erase(loc), ac_ev );
 }
 
-
-ev_pair_t	Geodesics::delete_event( event_queue_t::iterator ev )
+//---| delete_event
+//
+ev_pair_t	Geodesics::delete_event( event_queue_t::iterator ev_it )
 {
-  //assert( (*ev)->adjacent<LEFT>() == 0 && (*ev)->adjacent<RIGHT>() == 0 );
-  ev_pair_t ac_ev = (*ev)->adjacent();
-  delete *ev; *ev = 0;
-  event_queue.erase( ev );
+  //TODO: will ac_ev be coupled again after deletion? otherwise we have pointers to deleted memory
+  //assert( (*ev_it)->adjacent<LEFT>() == 0 && (*ev_it)->adjacent<RIGHT>() == 0 );
+
+  ev_pair_t ac_ev = (*ev_it)->adjacent();
+  delete *ev_it;
+  *ev_it = 0;
+  event_queue.erase( ev_it );
+
   return ac_ev;
 }
 
@@ -525,13 +542,13 @@ void    Geodesics::propagate_window( EventPoint& ev)
   // intersection of rays from pseudosource (through left/right window bounds) with the opposite edges
   // and with the line parallel to e0 touching C
 
-  const bool  source_is_inner_sidelobe = is_inner_sidelobe( *srcwin ); //ps_close_to_edge(wps);
+  const bool  source_is_inner_sidelobe = is_inner_sidelobe( *srcwin );
 
   ps_t source_ps;
 
   // potentially created windows
 
-  Window* w11 = 0; // projected on e1     A------B
+  Window* w11 = 0; // projected on e1    A------B
   Window* w12 = 0; // side lobe on e1	w12 \    / w22
   Window* w21 = 0; // projected on e2	     \  /
   Window* w22 = 0; // side lobe on e2	   w11\/w21
@@ -624,7 +641,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
       std::clog << "\t\t\t\t\t| projected window is empty" << std::endl;
       # endif
 
-      // TODO: find out what this does
+      // remove ev from the wavefront
       # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
       ev.couple_adjacent();
       # endif
@@ -637,7 +654,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
     {
       const distance_t distance1 = utk::distance( source_ps, e2ray.at(bound1) );
 
-	  if( edge0 == e1.descriptor() ) // two windows (on each: e1 and e2)
+      if( edge0 == e1.descriptor() ) // two windows (on each: e1 and e2)
       {
         # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
          std::clog << "\t\t\t\t\t| two windows" << std::endl;
@@ -669,7 +686,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
       const distance_t distance0 = utk::distance( source_ps, e1ray.at(bound0) );
       const distance_t distance1 = utk::distance( source_ps, e1ray.at(bound1) );
 
-	  w11 = Window::create_projected( srcwin, e1, bound0, bound1, distance0, distance1 );
+      w11 = Window::create_projected( srcwin, e1, bound0, bound1, distance0, distance1 );
     }
 
     //:::|create side-lobes
@@ -694,12 +711,13 @@ void    Geodesics::propagate_window( EventPoint& ev)
 	  	  	    << ", e1 is boundary " << e1boundary << std::endl;
       # endif
 
-      assert( bound0 > 0 ); // TODO: do we need this 'if'?
-      { // outer sidelobe
+      // outer sidelobe
+      assert( bound0 > 0 );
+      {
         const distance_t distance0 =  w21 ? utk::distance( A, e2ray.at(bound0) ) : e0l;
         w22 = Window::create_side_lobe<LEFT>( srcwin, e2, coord_t(0), w21 ? w21->bound<LEFT>() : e2l, e1l, distance0, e0.source() );
       }
-	  // inner sidelobe
+      // inner sidelobe
       w12 = Window::create_side_lobe<LEFT>( srcwin, e1, coord_t(0), e1l, distance_t(0), e1l, e0.source());
     }
 
@@ -707,18 +725,19 @@ void    Geodesics::propagate_window( EventPoint& ev)
 
     if( edge1 == e1.descriptor() && ( fp_right || ( e2boundary && srcwin->bound<RIGHT>() == e0l) ) )
     {
-	  # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
+      # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
       std::clog << "\t\t\t\t\t| right side lobe"
 	            << ", angle at b1 = " << (e0.target().total_angle()/(2.*M_PI)) << "pi"
 	  	  	    << ", e2 is boundary " << e2boundary << std::endl;
-	  # endif
+      # endif
 
-	  assert( bound1 < e1l ); // TODO: do we need this 'if'
-      { // outer sidelobe
+      // outer sidelobe
+      assert( bound1 < e1l );
+      {
         const float distance1 = w11 ? utk::distance( B, e1ray.at(bound1) ) : e0l;
         w12 = Window::create_side_lobe<RIGHT>( srcwin, e1, w11 ? w11->bound<RIGHT>() : coord_t(0), e1l, distance1 ,e2l, e0.target() );
       }
-	  // inner sidelobe
+      // inner sidelobe
       w22 = Window::create_side_lobe<RIGHT>( srcwin, e2, coord_t(0) ,e2l, e2l, distance_t(0), e0.target() );
     }
 
@@ -742,8 +761,8 @@ void    Geodesics::propagate_window( EventPoint& ev)
 
   # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
   std::clog << "mmp::Geodesics::propagate_window" << "\t|complete - "
-			<< ( int( w11 != 0 ) + int( w12 != 0 ) + int( w21 != 0 ) + int( w22 != 0 ) ) << " candidate(s) -> "
-   			<< ( int( e11.event != 0 ) + int( e12.event != 0 ) + int( e21.event != 0 ) + int( e22.event != 0 ) ) << " new event(s)"
+            << ( int( w11 != 0 ) + int( w12 != 0 ) + int( w21 != 0 ) + int( w22 != 0 ) ) << " candidate(s) -> "
+            << ( int( e11.event != 0 ) + int( e12.event != 0 ) + int( e21.event != 0 ) + int( e22.event != 0 ) ) << " new event(s)"
             << std::endl;
   #endif
 }

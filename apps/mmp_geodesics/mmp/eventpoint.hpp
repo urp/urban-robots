@@ -27,10 +27,10 @@
 //:::|debugging
 
 //#define DBG_FLAT_MMP_EVENTPOINT_GRABBER
-//# define DBG_FLAT_MMP_EVENTPOINT_CONSTRUCTION
+# define DBG_FLAT_MMP_EVENTPOINT_CONSTRUCTION
 //# define DBG_FLAT_MMP_EVENTPOINT_DESTRUCTION
-//# define DBG_FLAT_MMP_EVENTPOINT_COUPLING
-//# define DBG_FLAT_MMP_EVENTPOINT_DECOUPLING
+# define DBG_FLAT_MMP_EVENTPOINT_COUPLING
+# define DBG_FLAT_MMP_EVENTPOINT_DECOUPLING
 
 #include "mmp/common.hpp"
 
@@ -191,11 +191,12 @@ namespace mmp
 	if( adjacent<Side>() )
 	{
 	  # if defined DBG_FLAT_MMP_EVENTPOINT_DECOUPLING
-		      /*std::clog << "mmp::EventPoint::decouple\t\t| ("
-					<< side_traits<Side>::string()
-					<< ") from " << this->window()->id << " adjacent " << *adjacent< Side >()
-					<< std::endl;*/
+	  std::clog << "mmp::EventPoint::decouple\t\t| ("
+		    << side_traits<Side>::string()
+		    << ") from " << this->window()->id << " adjacent " << *adjacent< Side >()
+		    << std::endl;*/
 	  #endif
+
 	  assert( adjacent<Side>()->template adjacent< side_traits<Side>::opposite >() == this );
 
 	  adjacent<Side>()->template set_adjacent< side_traits<Side>::opposite >( 0 );
@@ -213,13 +214,13 @@ namespace mmp
 
       // update distance
       // mark as endpoint if frontier point is identical to a boundary
-      void    update(const ps_t& ps)
+      void update(const ps_t& ps)
       {
 	assert( flags() & FRONTIER );
 
 	coord_t fp;
 
-	boost::tie( fp, m_distance ) = window()->min_source_distance(ps);
+	std::tie( fp, m_distance ) = window()->min_source_distance(ps);
 
 	if( fp == window()->bound<  LEFT >() ) { m_mask |= LEFT_END; }
 	if( fp == window()->bound< RIGHT >() ) { m_mask |= RIGHT_END; }

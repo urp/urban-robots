@@ -27,12 +27,13 @@ std::ostream& mmp::operator<<( std::ostream& os, const EventPoint& ev )
   os << "event point"
      << "(" << ev.window()->id
      << ":";
-  if(ev.flags()&EventPoint::LEFT_END ) os << 'l';
-  if(ev.flags()&EventPoint::RIGHT_END) os << 'r';
-  if(ev.flags()&EventPoint::FRONTIER ) os << 'f';
+  if( ev.flags() & EventPoint::LEFT_END  ) os << 'l';
+  if( ev.flags() & EventPoint::RIGHT_END ) os << 'r';
+  if( ev.flags() & EventPoint::FRONTIER  ) os << 'f';
 
   os << ") point " << ev.point()
      << " distance " << ev.distance();
+
   # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
   if( ev.adjacent<LEFT>() )
   {
@@ -98,24 +99,27 @@ void	mmp::couple( EventPoint* const left, EventPoint* const right, const bool co
   assert( left );
   assert( right );
 
+  // check valid edges
+  assert(   !colinear
+        || left->window()->edge                  == right->window()->edge
+        || left->window()->predeccessor()->edge  == right->window()->edge
+        || left->window()->edge                  == right->window()->predeccessor()->edge
+        );
+
+  // if events are on same edge, their windows have to touch
+  assert(   left->window()->edge                  != right->window()->edge
+        || left->window()->bound< RIGHT >() == right->window()->bound< LEFT >()
+        );
+
+
   # if defined DBG_FLAT_MMP_EVENTPOINT_COUPLING
-  std::clog << "mmp::couple_adjacent\t\t| "
+  std::clog << "mmp::couple\t\t| "
 			<< " window(" <<  left->window()->id << ") "
       << "<- " << ( colinear ? '=' : 'X') << " ->"
 			<< " window(" << right->window()->id << ") "
 			<< std::endl;
   # endif
 
-  // check valid edges
-  assert(   !colinear
-         || left->window()->edge                  == right->window()->edge
-         || left->window()->predeccessor()->edge  == right->window()->edge
-         || left->window()->edge                  == right->window()->predeccessor()->edge );
-
-
-  // if events are on same edge, their windows have to touch
-  assert(   left->window()->edge                  != right->window()->edge
-         || left->window()->bound< RIGHT >() == right->window()->bound< LEFT >() );
 
   left->decouple<RIGHT>();
   right->decouple<LEFT>();

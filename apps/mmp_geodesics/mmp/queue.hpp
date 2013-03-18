@@ -105,15 +105,15 @@ namespace mmp
 	return v;
       }
 
-      const_reference push( const_reference v )
+      void push( const_reference v )
       {
 	# if defined DBG_FLAT_MMP_RRIORITY_QUEUE_VALUES
 	std::clog << "mmp::PriorityQueue::push\t\t|"
 		  << " value " << v << std::endl;
 	# endif
 	container.push_back( v );
+
 	std::push_heap( container.begin(), container.end(), compare );
-	return v;
       }
 
       void remove( const_reference v )

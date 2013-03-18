@@ -24,8 +24,8 @@
 
 # pragma once
 
-# define DBG_GTK_GL_RENDER_TARGETS
-# define DBG_GTK_GL_CANVAS
+//# define DBG_GTK_GL_RENDER_TARGETS
+//# define DBG_GTK_GL_CANVAS
 
 # include <gtkmm.h>
 # include <gtkglmm.h>
