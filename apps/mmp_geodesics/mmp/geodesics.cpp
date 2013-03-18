@@ -643,7 +643,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
 
       // remove ev from the wavefront
       # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
-      ev.couple_adjacent();
+      ev.remove_from_wavefront();
       # endif
       return;
     }

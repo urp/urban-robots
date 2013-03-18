@@ -33,7 +33,7 @@
 
 # include "surface/tri_surface/tri_surface.hpp"
 
-# define MMP__USE_LABELING_EVENTS
+//# define MMP__USE_LABELING_EVENTS
 
 //:::| debugging
 
@@ -338,33 +338,50 @@ mmp::EventPoint* mmp::Geodesics::delete_ac_window( ac_t& ac, winlist_t& wlist, c
 }
 
 
-template< mmp::EventPoint::flags_t PosFlags >
+template< mmp::EventPoint::flags_t Flags >
 mmp::EventPoint*  mmp::Geodesics::update_event_points( Window* w, const ps_t& ps )
 {
-  EventPoint::Grabber< event_queue_t::iterator, PosFlags | EventPoint::FRONTIER> evgrab( event_queue.begin(), event_queue.end(), w );
+  EventPoint::Grabber< event_queue_t::iterator, Flags | EventPoint::FRONTIER> evgrab( event_queue.begin(), event_queue.end(), w );
 
   EventPoint* evf = 0;
 
+  // update frontier point
   if( evgrab.frontier != event_queue.end() )
   {
     evf = *evgrab.frontier;
-    evf->update(ps); // update distance and endpoint flags
+
+    Window* window = evf->window();
+
+    // update distance
+    coord_t fp;
+    std::tie( fp, evf->distance() ) = window->min_source_distance(ps);
+
+    // mark as endpoint if (possibly new) frontier point is identical to a boundary
+    if(  Flags & EventPoint::LEFT_END
+      && fp == window->bound<  LEFT >()
+      )
+    { evf->flags() |= EventPoint::LEFT_END; }
+
+    if(  Flags & EventPoint::RIGHT_END
+      && fp == window->bound< RIGHT >()
+      )
+    { evf->flags() |= EventPoint::RIGHT_END; }
+
   }
 
   // TODO: make side invariant (templates)
-  constexpr bool check_delete_left = PosFlags & EventPoint::LEFT_END;
-  if( check_delete_left )
+  if( Flags & EventPoint::LEFT_END )
     if( evgrab.left != event_queue.end() && *evgrab.left != evf )
       delete_event( evgrab.left );
 
-  constexpr bool check_delete_right = PosFlags & EventPoint::RIGHT_END;
-  if( check_delete_right )
+  if( Flags & EventPoint::RIGHT_END )
     if( evgrab.right != event_queue.end() && *evgrab.right != evf )
       delete_event( evgrab.right );
 
   return evf;
 }
 
+// pull an event to keep the wavefront together
 // TODO: rename try_pull_event
 template< mmp::side_t Side >
 void mmp::Geodesics::pull_event( EventPoint& ev )
@@ -380,22 +397,30 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
               << std::endl;
     # endif
 
+    // if shared bound is colinear, adjacent window must be one step behind (on predeccessor edge)
     assert( !ev.colinear<Side>() || adjacent->window()->edge == ev.window()->predeccessor()->edge);
+
+    // if windows are crossing, window have to belong to the same triangle
     assert(  ev.colinear<Side>()
           || ( edge_handle( adjacent->window()->edge, get_surface() ).target() == edge_handle( ev.window()->edge, get_surface() ).target() )
           || ( edge_handle( adjacent->window()->edge, get_surface() ).source() == edge_handle( ev.window()->edge, get_surface() ).source() )
           );
 
-    //handle_event( adj );
+    # if defined MMP__USE_LABELING_EVENTS
+
     propagate_window( *adjacent );
 
-    # if defined MMP__USE_LABELING_EVENTS
     // reinsert endpoint event if colinear frontier point (of adjacent event) is endpoint
     // so that vertices can be labeled correctly
     if( adjacent->flags() & EventPoint::LEFT_END )
 	  event_queue.push( new EventPoint( EventPoint::LEFT_END, adjacent->window(), adjacent->distance() ) );
     if( adjacent->flags() & EventPoint::RIGHT_END )
 	  event_queue.push( new EventPoint( EventPoint::RIGHT_END, adjacent->window(), adjacent->distance() ) );
+
+    # else
+
+    handle_event( adjacent );
+
     # endif
 
     delete_event( adjacent );
@@ -455,7 +480,8 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
 
     //TODO: colinear_ps_correction( left, right, psl, psr, pslerr, psrerr );
 
-  }else
+  }
+  else
   # endif // of FLAT_MMP_MAINTAIN_WAVEFRONT
   {
 
@@ -474,12 +500,13 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
     // intersect with first edge
     new_bound = utk::intersection( edges.first.ray , psb );
     new_edge  = edges.first.descriptor;
+
     // check if intersection is valid - intersect second edge otherwise
     if( new_bound < coord_t(0) || new_bound >= edges.first.length )
     {
-        new_bound = b[0] == edges.second.srcbound
-                    ? edges.second.edgebound
-                    : utk::intersection( edges.second.ray, psb );
+      new_bound = b[0] == edges.second.srcbound
+                  ? edges.second.edgebound
+                  : utk::intersection( edges.second.ray, psb );
 
       new_edge = edges.second.descriptor;
     }
@@ -517,6 +544,8 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
   # endif
   return { new_bound, new_edge };
 }
+
+
 
 template< mmp::side_t EdgeSide >
 void mmp::couple_edge_events( EventPoint* source
@@ -581,7 +610,6 @@ void mmp::couple_edge_events( EventPoint* source
     {
       assert( !sidelobe.event );
 
-      //ate potentially colinear/sidelobe window ?
       EventPoint* ac_ev = get<OppEdgeSide>( projected.ac_ev );
 
       const bool colinear_flag = ac_ev->window()->edge == edge.descriptor() // TODO: pull_event ???
@@ -593,6 +621,7 @@ void mmp::couple_edge_events( EventPoint* source
                 << " couple " << side_traits< OppEdgeSide >::string() << " candidate-adjacent " << *ac_ev
                 << std::endl;
       # endif
+
       projected.event->couple< OppEdgeSide >( ac_ev, colinear_flag );
     }
 
@@ -605,6 +634,7 @@ void mmp::couple_edge_events( EventPoint* source
                 << " initialy couple " << side_traits< OppEdgeSide >::string() << " sidelobe"
                 << std::endl;
       # endif
+
       projected.event->couple< OppEdgeSide >( sidelobe.event, true );
     }
     else
@@ -616,6 +646,7 @@ void mmp::couple_edge_events( EventPoint* source
                 << " couple " << side_traits< OppEdgeSide >::string() << " source-adjacent " << *source->adjacent< OppEdgeSide >()
                 << std::endl;
       # endif
+
       projected.event->couple< OppEdgeSide >( source->adjacent< OppEdgeSide >(), source->colinear< OppEdgeSide >() != 0 );
     }
 
@@ -627,16 +658,18 @@ void mmp::couple_edge_events( EventPoint* source
                 << " couple " << side_traits< EdgeSide >::string() << " candidate-adjacent " << *get< EdgeSide >( projected.ac_ev )
                 << std::endl;
       # endif
+
       projected.event->couple< EdgeSide >( get< EdgeSide >( projected.ac_ev ), false );
     }
     else // couple keep source-adjacent towards baseline
     if( source->adjacent< EdgeSide >() && !get<EdgeSide>( projected.trimmed ) )
     {
-       # if defined DBG_FLAT_MMP_EVENTPOINT_COUPLING
+      # if defined DBG_FLAT_MMP_EVENTPOINT_COUPLING
       std::clog << "mmp::couple_edge_events\t\t| " << "(projected)"
                 << " couple " << side_traits< EdgeSide >::string() << " source-adjacent " << *source->adjacent< EdgeSide >()
                 << std::endl;
       # endif
+
       projected.event->couple< EdgeSide >( source->adjacent< EdgeSide >(), source->colinear< EdgeSide >() != 0 );
     }
 

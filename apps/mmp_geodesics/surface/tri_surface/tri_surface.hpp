@@ -43,7 +43,7 @@ namespace flat
 
       struct texture_type
       {
-	typedef	color_channel_t	channel_type;
+        typedef	color_channel_t	channel_type;
 
         static const size_t num_components = 4;
 
@@ -58,13 +58,13 @@ namespace flat
         : size( o_size ), pixmap( std::get<0>(o_size) * std::get<1>(o_size) * num_components )
         {   }
 
-	void set_pixel( size_t pixel_index
-		      , const rgba_color_ref_t& color
+        void set_pixel( size_t pixel_index
+                      , const rgba_color_ref_t& color
 		      )
-	{
-	  for( size_t i = 0; i < num_components; ++i )
-	   pixmap[ pixel_index * num_components + i ] = color[i];
-	}
+        {
+          for( size_t i = 0; i < num_components; ++i )
+           pixmap[ pixel_index * num_components + i ] = color[i];
+        }
 
         const rgba_color_t get_pixel( const size_t index ) const
         { return rgba_color_t( pixmap[ index + 0 ], pixmap[ index + 1 ], pixmap[ index + 2 ], pixmap[ index + 3 ] ); }
@@ -131,8 +131,8 @@ namespace flat
 
       virtual void prepare_step()
       {
-	set_curvature_extrema();
-	PointCloud::prepare_step();
+        set_curvature_extrema();
+        PointCloud::prepare_step();
       }
 
       // triangulation

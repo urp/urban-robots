@@ -77,8 +77,9 @@ namespace mmp
 
       ev_pair_t m_adjacent;
 
-      // TODO: optimize flag modification
-      template< side_t Side > void    set_adjacent( EventPoint* ev, bool colinear = false )
+
+      template< side_t Side >
+      void    set_adjacent( EventPoint* ev, bool colinear = false )
       {
 	assert( ev || colinear == false );
 
@@ -133,6 +134,8 @@ namespace mmp
 
       Window* window() const { return m_window; }
 
+      // TODO: rename m_mask to flags and make it public
+      flags_t& flags() { return m_mask;  }
       const flags_t& flags() const { return m_mask;  }
 
       coord_t point(const ps_t& ps) const
@@ -148,6 +151,8 @@ namespace mmp
       coord_t point()	const { return point( window()->pseudosource() ); }
 
       // source distance to frontier point
+      // TODO: rename m_distance to distance and make it public
+      distance_t& distance() { return m_distance; }
       const distance_t& distance() const { return m_distance; }
 
       # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
@@ -169,14 +174,14 @@ namespace mmp
 	if( Side == RIGHT ) mmp::couple( this, adjacent, colinear_flag );
       }
 
-      bool couple_adjacent()
+      bool remove_from_wavefront()
       {
-	const ev_pair_t adj = adjacent();
+	const ev_pair_t& adj = adjacent();
 	if( get<LEFT>(adj) && get<RIGHT>(adj) )
 	{
 	  # if defined DBG_FLAT_MMP_EVENTPOINT_DECOUPLING
-	  std::clog << "mmp::EventPoint::couple_adjacent\t| removing "
-		    << *this << " from wavefront" << std::endl;
+	  std::clog << "mmp::EventPoint::remove_from_wavefront\t| coupling adjacent events "
+		    << *this << std::endl;
 	  mmp::couple( get<LEFT>(adj), get<RIGHT>(adj), false );
 	  # endif
 
@@ -194,7 +199,7 @@ namespace mmp
 	  std::clog << "mmp::EventPoint::decouple\t\t| ("
 		    << side_traits<Side>::string()
 		    << ") from " << this->window()->id << " adjacent " << *adjacent< Side >()
-		    << std::endl;*/
+		    << std::endl;
 	  #endif
 
 	  assert( adjacent<Side>()->template adjacent< side_traits<Side>::opposite >() == this );
@@ -212,19 +217,6 @@ namespace mmp
 
       # endif
 
-      // update distance
-      // mark as endpoint if frontier point is identical to a boundary
-      void update(const ps_t& ps)
-      {
-	assert( flags() & FRONTIER );
-
-	coord_t fp;
-
-	std::tie( fp, m_distance ) = window()->min_source_distance(ps);
-
-	if( fp == window()->bound<  LEFT >() ) { m_mask |= LEFT_END; }
-	if( fp == window()->bound< RIGHT >() ) { m_mask |= RIGHT_END; }
-      }
 
 
       struct smaller_min_distance
