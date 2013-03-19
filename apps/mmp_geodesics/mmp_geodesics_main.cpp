@@ -91,26 +91,42 @@ int main (int argc, char *argv[])
   if( vm.count( surface_file_param ) )
   {
     std::string path( vm[ surface_file_param ].as< std::string >() );
-    flat::PdmFileReader generator( path );
-    flat::SimpleRectlinearTriangulator          triangulator( generator.vertex_field_size() );
-    flat::CenterRescaleTransform                transform( utk::vec3b(true), utk::vec3b(true) );
-    surface = surface_t::create_with_generator( generator, triangulator, transform );
+
+    //:::| read surface from pdm file
+
+    flat::PdmFileReader< surface_t > file_reader(path);
+
+    surface = file_reader();
+
+    flat::CenterRescaleTransform transform( utk::vec3b(true), utk::vec3b(true) );
+
+    transform( surface );
+
   }else
   if( vm.count( generator_param ) )
   {
+
+    size_pair field_size = { 10, 10 };
+    surface = surface_t::create_with_size( field_size.first * field_size.second );
+
+    flat::RegularGridTransform grid_transform( field_size );
+    grid_transform( surface);
+
+    flat::SimpleRectlinearTriangulator triangulator( field_size );
+    triangulator( surface );
+
+
     if( vm[ generator_param ].as< std::string >() == "random" )
     {
-      flat::RandomHeightGenerator    	   generator( { 10, 10 }, .1 );
-      flat::SimpleRectlinearTriangulator triangulator( generator.vertex_field_size() );
-      flat::NoTransform                  transform;
-      surface = surface_t::create_with_generator( generator, triangulator, transform );
-    } else
-    if( vm[ generator_param ].as< std::string >() == "wave" )
+      flat::DisturbTransform noise_trafo{ 0.1 };
+      noise_trafo( surface );
+
+    }
+    else if( vm[ generator_param ].as< std::string >() == "wave" )
     {
-      flat::WaveGenerator         		   generator( { 20, 20 }, .05 );
-      flat::SimpleRectlinearTriangulator triangulator( generator.vertex_field_size() );
-      flat::NoTransform                  transform;
-      surface = surface_t::create_with_generator( generator, triangulator, transform );
+      flat::WaveTransform wave_trafo;
+      wave_trafo( surface );
+
     }else
     { std::cerr << "ERROR - unknown surface generator \"" << vm[ generator_param ].as<std::string>() << "\" specified." << std::endl;
       return 0;

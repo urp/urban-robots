@@ -58,13 +58,16 @@ namespace flat
 
     public:
 
+
       VertexHandle( const vertex_descriptor& v, const MeshT& m )
-      : he::DefaultVertexHandle<MeshT>(v,m)		{ 	}
+      : he::DefaultVertexHandle<MeshT>(v,m)
+      { }
 
       VertexHandle( const he::DefaultVertexHandle< MeshT >& o )
-      : he::DefaultVertexHandle<MeshT>(o)		{	}
+      : he::DefaultVertexHandle<MeshT>(o)
+      { }
 
-      const vertex_texture_coord_t::type&	texture_coordinate()	const
+      const vertex_texture_coord_t::type& texture_coordinate()	const
       {
         return this->mesh().template get_property_map< vertex_texture_coord_t >() [ *this ];
       }
@@ -93,8 +96,6 @@ namespace flat
 	  surface_mesh_t;
 
 
-
-
   // a mesh without edges and faces, only vertices.
   class PointCloud : public surface_mesh_t
   {
@@ -106,12 +107,17 @@ namespace flat
       void comp_min_max_xy()	const;
       void comp_min_max_z()	const;
 
+    public:
+
+      std::string  name;
+
     protected:
 
-	  PointCloud( vertices_size_type vertex_count )
+	  PointCloud( vertices_size_type vertex_count, const std::string& name = "Untitled PointCloud" )
 	  : surface_mesh_t( vertex_count )
 	  , m_min_location(   std::numeric_limits<coord_t>::infinity() )
 	  , m_max_location( - std::numeric_limits<coord_t>::infinity() )
+	  , name(name)
 	  {	}
 
     public:

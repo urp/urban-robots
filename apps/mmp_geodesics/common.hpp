@@ -59,7 +59,7 @@ namespace flat
 
   //:::|basic typedefs
 
-  //using utk::size_t;
+  typedef size_t size_type;
 
   typedef std::pair < size_t, size_t >  size_pair;
 
@@ -105,7 +105,8 @@ namespace flat
   //:::|linear algebra
 
   template< typename T >
-  boost::numeric::ublas::triangular_matrix< T, boost::numeric::ublas::lower >	 cholesky_decomposition( const boost::numeric::ublas::symmetric_matrix< T, boost::numeric::ublas::upper >& A)
+  boost::numeric::ublas::triangular_matrix< T, boost::numeric::ublas::lower >
+  cholesky_decomposition( const boost::numeric::ublas::symmetric_matrix< T, boost::numeric::ublas::upper >& A)
   {
     std::clog<<"flat::cholesky_decomposition"<<std::endl<<std::flush;
     assert(A.size1()==A.size2());
@@ -160,14 +161,14 @@ namespace flat
     using namespace boost::numeric::ublas;
 
     std::clog << "flat::pseudoinverse" << "\t| computing ..."//<<std::endl<<V
-			  << std::endl << std::flush;
+	      << std::endl << std::flush;
 
     // TODO regularizer. right name?
 
     triangular_matrix< T, lower > L( cholesky_decomposition< T >( X ) );
 
-    std::clog << "flat::pseudoinverse" << "\t| L"
-	      << std::endl << L << std::endl << std::flush;
+    std::clog << "flat::pseudoinverse" << "\t| L" << std::endl
+	      << L << std::endl << std::flush;
 
     auto Xinverse = solve( L, solve( L, identity_matrix< T >( X.size1() ), lower_tag() ), lower_tag() );
 

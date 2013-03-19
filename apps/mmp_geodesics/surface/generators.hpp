@@ -39,6 +39,14 @@ namespace flat
     void operator () ( const std::shared_ptr< PointCloud> & )    const  {   };
   };
 
+  struct DisturbTransform
+  {
+    coord_t amplitude;
+
+    void add_noise( const std::shared_ptr< PointCloud >& surface, const coord_t amplitude ) const;
+
+    void operator() ( const std::shared_ptr< PointCloud> & ) const;
+  };
 
   // - shifts the surface such that the pivot (position averaged over all samples)
   // fit into the cube [pivot-0.5,pivot+.5]^3) along dimensions n for which rescale_flag[n]==true
@@ -52,91 +60,66 @@ namespace flat
     CenterRescaleTransform( const utk::vecn3b& 	center, const utk::vecn3b& 	rescale )
     : center_flags( center ), rescale_flags( rescale )  {   }
 
-    void operator () ( const std::shared_ptr< PointCloud> & )    const;
+    void operator() ( const std::shared_ptr< PointCloud> & ) const;
   };
 
   struct RectlinearTriangulator
   {
-    size_pair	vertices_size;
+    size_pair	vertex_field_size;
 
-    RectlinearTriangulator( const size_pair& vertices_size )
-    : vertices_size( vertices_size ) {   }
+    RectlinearTriangulator( const size_pair& vertex_field_size )
+    : vertex_field_size( vertex_field_size ) {   }
 
     virtual void operator() ( const std::shared_ptr< TriSurface >& surface )	= 0;
   };
 
   struct SimpleRectlinearTriangulator : public RectlinearTriangulator
   {
-    SimpleRectlinearTriangulator( const size_pair& vertices_size )
-    : RectlinearTriangulator( vertices_size ) {   }
+    SimpleRectlinearTriangulator( const size_pair& vertex_field_size )
+    : RectlinearTriangulator( vertex_field_size ) {   }
 
     void operator() ( const std::shared_ptr< TriSurface >& surface );
   };
 
-  struct TextureGenerator
-  {
-    protected:
-      size_pair			m_texture_size;
-
-    public:
-
-      TextureGenerator( const size_pair& texture_size )
-      : m_texture_size( texture_size ) {   };
-
-      const size_pair& texture_size() const { return m_texture_size; }
-  };
-
-
-  struct RectlinearFieldGenerator
+  struct RegularGridTransform
   {
     protected:
 
-      size_pair	m_vertices_size;
-
-      RectlinearFieldGenerator() : m_vertices_size{ 0, 0 } {   }
+      RegularGridTransform() : vertex_field_size{ 0, 0 } {   }
 
     public:
 
-      RectlinearFieldGenerator( const size_pair& vertices_size )
-      : m_vertices_size( vertices_size ) {   }
+      size_pair	vertex_field_size;
 
-      virtual void  operator() ( const std::shared_ptr< TriSurface >& ) = 0;
+      void arrange_as_regular_grid( const std::shared_ptr< PointCloud >& surface );
 
-      virtual std::string get_name() const = 0;
+      RegularGridTransform( const size_pair& field_size )
+      : vertex_field_size( field_size ) {  }
 
-      const size_pair&	vertex_field_size() const { return m_vertices_size; }
+      virtual void  operator() ( const std::shared_ptr< PointCloud >& surface )
+      {
+        arrange_as_regular_grid( surface );
+      }
 
-      const typename TriSurface::vertices_size_type 	num_vertices()	const
-      { return std::get<0>( m_vertices_size ) * std::get<1>( m_vertices_size ); }
+      virtual std::string get_name() const  { return "regular_grid_generator"; }
+
+      const typename PointCloud::vertices_size_type	num_vertices()	const
+      { return std::get<0>( vertex_field_size ) * std::get<1>( vertex_field_size ); }
+
   };
 
 
   //----| point cloud generators
+  //---| TODO: Let a Transformation do the job
 
-  struct RandomHeightGenerator : public RectlinearFieldGenerator, public TextureGenerator
+  struct WaveTransform
   {
-      coord_t   noise_amplitude;
-
-      static void add_noise( const std::shared_ptr< TriSurface >&, const coord_t );
-
-      RandomHeightGenerator( const size_pair& size, const coord_t& amplitude )
-      : RectlinearFieldGenerator( size ), TextureGenerator( size )
-      , noise_amplitude( amplitude ) {    }
-
-      void operator() ( const std::shared_ptr< TriSurface >& surface );
-
-      std::string   get_name() const { return "HeightField"; }
-  };
-
-  struct WaveGenerator : public RandomHeightGenerator
-  {
-      WaveGenerator( const size_pair& size, const coord_t& noise_amplitude = 0 )
-      : RandomHeightGenerator( size, noise_amplitude )
+      WaveTransform( )
       {   }
 
-      void operator() ( const std::shared_ptr< TriSurface >& surface );
+      virtual void operator() ( const std::shared_ptr< PointCloud >& surface );
 
-      std::string   get_name() const { return "Wave"; }
+      virtual std::string   get_name() const { return "Wave"; }
   };
 
 }

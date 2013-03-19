@@ -23,27 +23,29 @@ using namespace flat;
 
 void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< TriSurface >& surface )
 {
-  const size_t& m = std::get<0>( vertices_size );
-  const size_t& n = std::get<1>( vertices_size );
+  const size_t& m = std::get<0>( vertex_field_size );
+  const size_t& n = std::get<1>( vertex_field_size );
 
-  assert( m * n == surface->num_vertices() );
+  auto num_vertices = surface->num_vertices();
+
+  assert( m * n == num_vertices );
 
   std::clog << "SimpleRectlinearTriangulator()\t|"
             << " creating the triangulation of size (" << m << "," << n << ") ..." << std::endl;
 
-  for( TriSurface::vertex_descriptor descriptor = m + 1 ; descriptor < m*n; ++descriptor )
+  for( TriSurface::vertex_descriptor descriptor = m + 1 ; descriptor < num_vertices; ++descriptor )
   {
     if( descriptor % m )
     {
       //----|triangulation of the quad-face
-      const TriSurface::vertex_descriptor a = descriptor;	    	//  c<--b
+      const TriSurface::vertex_descriptor a = descriptor;       	//  c<--b
       const TriSurface::vertex_descriptor b = descriptor     - m;	//  |\  ^
       const TriSurface::vertex_descriptor c = descriptor - 1 - m;	//  v \ |
       const TriSurface::vertex_descriptor d = descriptor - 1;    	//  d-->a = vertex(i,j)
 
       # if defined DBG_FLAT_SIMPLE_RECTLINEAR_TRIAGULATOR__PER_QUAD
-	  std::clog << "SimpleRectlinearTriangulator()\t|"
-		    << " quad (" << a << "," << b << "," << c << "," << d << ")" << std::endl;
+      std::clog << "SimpleRectlinearTriangulator()\t|"
+                << " quad (" << a << "," << b << "," << c << "," << d << ")" << std::endl;
       # endif
 
       surface->create_face( a, c, d ); //right face
@@ -54,69 +56,61 @@ void    SimpleRectlinearTriangulator::operator() ( const std::shared_ptr< TriSur
   std::clog << "SimpleRectlinearTriangulator()\t|"  << "complete"<<std::endl;
 }
 
-void RandomHeightGenerator::add_noise( const std::shared_ptr< TriSurface >& surface, const coord_t amplitude )
-{
-  for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
-  { location_t location( vit.first->location() );
-    location[2] += amplitude * ( uniform_real<coord_t>() - .5 );
-    vit.first->set_location( location );
-  }
-}
-
-void RandomHeightGenerator::operator() ( const std::shared_ptr< TriSurface >& surface )
+void RegularGridTransform::arrange_as_regular_grid( const std::shared_ptr< PointCloud >& surface )
 {
   assert( num_vertices() == surface->num_vertices() );
-  assert( texture_size() == surface->texture().size );
 
   for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
   {
     const TriSurface::vertex_descriptor descriptor = vit.first->descriptor();
-    const size_t  i = descriptor % std::get<0>( vertex_field_size() );
-    const size_t  j = descriptor / std::get<0>( vertex_field_size() );
+    const size_t  i = descriptor % std::get<0>( vertex_field_size );
+    const size_t  j = descriptor / std::get<0>( vertex_field_size );
 
-    const coord_t x = i / coord_t( std::get<0>( vertex_field_size() ) - 1 ) ;
-    const coord_t y = j / coord_t( std::get<1>( vertex_field_size() ) - 1 ) ;
+    const coord_t x = i / coord_t( std::get<0>( vertex_field_size ) - 1 ) ;
+    const coord_t y = j / coord_t( std::get<1>( vertex_field_size ) - 1 ) ;
     const coord_t z = 0.;
 
     vit.first->set_location( location_t( x - .5, y - .5, z ) );
     vit.first->set_texture_coordinate( vertex_texture_coord_t::type( x, y ) );
 
-    const color_channel_t col( (i+j) % 2 );
-
-    surface->texture().set_pixel( descriptor, rgba_color_t( col, col, col, 1. ) );
   }
-
-  add_noise( surface, noise_amplitude );
 }
 
-void WaveGenerator::operator() ( const std::shared_ptr< TriSurface >& surface )
+void WaveTransform::operator() ( const std::shared_ptr< PointCloud >& surface )
 {
-  assert( num_vertices() == surface->num_vertices() );
-  assert( texture_size() == surface->texture().size );
-
   for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
   {
-    const TriSurface::vertex_descriptor descriptor = vit.first->descriptor();
+    location_t loc = vit.first->location();
 
-    const size_t  i = descriptor % std::get<1>( vertex_field_size() );
-    const size_t  j = descriptor / std::get<0>( vertex_field_size() );
+    loc[2] += std::sin( loc[1]+.5 );
 
-    const coord_t x = i / coord_t( get<0>( vertex_field_size() ) - 1 ) ;
-    const coord_t y = j / coord_t( get<1>( vertex_field_size() ) - 1 ) ;
-    const coord_t z = .2 * ( std::sin( x * 1.5 * M_PI ) + x );
-
-    vit.first->set_location( location_t( x - .5 , y - .5 , z ) );
+    vit.first->set_location( loc );
 
     std::clog << "flat::WaveGenerator\t| vertex " << *vit.first << std::endl;
 
-    vit.first->set_texture_coordinate( vertex_texture_coord_t::type( x, y ) );
-
-    const color_channel_t	col( (i+j) % 2 );
-
-    surface->texture().set_pixel( descriptor, rgba_color_t( col, col, col, 1. ) );
+    vit.first->set_texture_coordinate( vertex_texture_coord_t::type( loc.x(), loc.y() ) );
   }
-  add_noise( surface, RandomHeightGenerator::noise_amplitude );
 }
+
+
+void DisturbTransform::add_noise( const std::shared_ptr< PointCloud >& surface, const coord_t amplitude ) const
+{
+  for( auto vit = surface->vertex_handles(); vit.first != vit.second; ++vit.first )
+  {
+    location_t location( vit.first->location() );
+
+    location[2] += amplitude * ( uniform_real<coord_t>() - .5 );
+
+    vit.first->set_location( location );
+  }
+}
+
+void DisturbTransform::operator() ( const std::shared_ptr< PointCloud > & cloud )   const
+{
+  add_noise( cloud, amplitude );
+}
+
+
 
 // - shifts the surface such that the pivot (position averaged over all samples)
 // fit into the cube [pivot-0.5,pivot+.5]^3) along dimensions n for which rescale_flag[n]==true
@@ -127,8 +121,8 @@ void	CenterRescaleTransform::operator() ( const std::shared_ptr< PointCloud> & c
 {
   std::clog << "flat::CenterRescaleTransform"
             << "\t|center flags " << center_flags
-	    << "\t|fit-box flags " << rescale_flags
-	    << std::endl;
+            << "\t|fit-box flags " << rescale_flags
+            << std::endl;
 
   location_t  old_min = cloud->min_location();
   location_t  old_max = cloud->max_location();
@@ -144,10 +138,10 @@ void	CenterRescaleTransform::operator() ( const std::shared_ptr< PointCloud> & c
 	                 );
 
   const coord_t invscale = std::max( rescale_flags[0] ? extent[0] : 1
-				   , std::max( rescale_flags[1] ? extent[1] : 1
-					     , rescale_flags[2] ? extent[2] : 1
-					     )
-				   );
+                                   , std::max( rescale_flags[1] ? extent[1] : 1
+                                             , rescale_flags[2] ? extent[2] : 1
+                                             )
+                                   );
 
   for( auto vertex_it = cloud->vertex_handles(); vertex_it.first != vertex_it.second; vertex_it.first++ )
   {

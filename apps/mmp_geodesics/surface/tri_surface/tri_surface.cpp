@@ -27,13 +27,11 @@ using namespace flat;
 
 
 TriSurface::TriSurface( const vertices_size_type  num_vertices
-                      , const size_pair& 			texture_size
                       , const std::string&        name )
-: PointCloud( num_vertices ), m_name( name ), m_texture( texture_size )
+: PointCloud( num_vertices, name )
 {
   std::clog << "flat::TriSurface::TriSurface\t|"
-            << " vertex size (" << num_vertices << ')'
-            << " texture size (" << std::get<0>(texture_size) << ", " << std::get<1>(texture_size) << ')'
+            << " num vertices (" << num_vertices << ')'
             << std::endl;
 }
 

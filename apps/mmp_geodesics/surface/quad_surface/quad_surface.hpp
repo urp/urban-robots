@@ -31,38 +31,28 @@ namespace flat
 
   class QuadSurface	: public TriSurface
   {
-      size_pair m_vertices_size;
+
 
       QuadSurface( const size_pair& vertex_size
-	     , const size_pair& texture_size
 	     , const std::string& name )
-      : TriSurface( std::get<0>(vertex_size) * std::get<1>(vertex_size), texture_size, name ), m_vertices_size( vertex_size )
+      : TriSurface( std::get<0>(vertex_size) * std::get<1>(vertex_size), name ), vertex_field_size( vertex_size )
       {   }
 
     public:
 
+      size_pair vertex_field_size;
+
       template< typename Generator, typename Triangulator, typename Transform >
-      static std::shared_ptr< QuadSurface > create_with_generator( Generator&                   generator
-                                                                 , Triangulator&                triangulator
-                                                                 , Transform&                   transform
-                                                                 )
+      static std::shared_ptr< QuadSurface > create_with_field_size( const size_pair& field_size, const std::string& name = "untitled QuadSurface" )
       {
-        std::shared_ptr< QuadSurface > surface( new QuadSurface( generator.vertex_field_size(), generator.texture_size(), generator.get_name() ) );
-
-        generator( surface );
-
-        triangulator( surface );
-
-        transform( surface );
+        std::shared_ptr< QuadSurface > surface( new QuadSurface( field_size, name ) );
 
         return surface;
       }
 
       virtual ~QuadSurface() { }
 
-      const size_pair& 	vertices_size()	const	{ return m_vertices_size; }
-
-      std::vector< vertex_descriptor >      neighbors( const vertex_descriptor vertex ) const
+      std::vector< vertex_descriptor > neighbors( const vertex_descriptor vertex ) const
       {
         return std::move( get_neighbors< NB8_LEFT | NB8_LOWER | NB8_RIGHT | NB8_UPPER >( vertex ) );
       }
@@ -75,8 +65,8 @@ namespace flat
 
         //std::clog << "flat::QuadSurface::get_neighbors" << std::endl;
 
-        const size_t m = std::get<0>( vertices_size() );
-        const size_t n = std::get<1>( vertices_size() );
+        const size_t m = std::get<0>( vertex_field_size );
+        const size_t n = std::get<1>( vertex_field_size );
         const bool upper = v < m;
         const bool lower = v >= m * ( n - 1 );
         const bool left  = v % m == 0;

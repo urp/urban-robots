@@ -220,12 +220,12 @@ namespace he
 
       struct append_return_type
       {
-	face_descriptor	face;
-	edge_descriptor	edge_ab, edge_bc, edge_ca;
+        face_descriptor	face;
+        edge_descriptor	edge_ab, edge_bc, edge_ca;
       };
 
       append_return_type append_half_edge_face( const vertex_descriptor& a, const vertex_descriptor& b, const vertex_descriptor& c
-			 		      , const edge_properties& ab_prop, const edge_properties& bc_prop, const edge_properties& ca_prop );
+                                              , const edge_properties& ab_prop, const edge_properties& bc_prop, const edge_properties& ca_prop );
 
     public:
 
@@ -234,8 +234,8 @@ namespace he
       Mesh( vertices_size_type vertex_count = 0
       , const graph_properties& graph_props = graph_properties() )
       : m_graph( vertex_count, graph_props )
-      , m_face_vec(), m_num_half_edges( 0 ), m_num_full_edges( 0 ) {   }
-
+      , m_face_vec(), m_num_half_edges( 0 ), m_num_full_edges( 0 )
+      {   }
 
       graph_t&           get_graph()       { return m_graph; }
       const graph_t&     get_graph() const { return m_graph; }
@@ -326,47 +326,47 @@ namespace he
 
       void clear()
       { m_graph.clear();
-	m_face_vec.clear();
+        m_face_vec.clear();
       }
 
       void clear_edges()
       {
         boost::remove_edge_if( [] ( const edge_descriptor& ) { return true; }, m_graph );
-	m_face_vec.clear();
+        m_face_vec.clear();
       }
 
       vertex_handle create_vertex( const typename type::vertex_properties& p = typename type::vertex_properties() )
       {
         const vertex_handle nv( boost::add_vertex( p , type::m_graph ), *this );
 
-	# if defined DBG_HE_MESH_CREATE_VERTEX
+        # if defined DBG_HE_MESH_CREATE_VERTEX
         std::clog << "he::Mesh::create_vertex\t|"
                   <<" descriptor #" << nv.descriptor()
                   <<" location " << nv.location() << std::endl;
-	# endif
+        # endif
 
         return nv;
       }
 
       struct create_face_return_type
       { face_handle	face;
-	    edge_handle edge_ab, edge_bc, edge_ca;
+        edge_handle edge_ab, edge_bc, edge_ca;
       };
 
       create_face_return_type create_face( const vertex_descriptor& a
-					 , const vertex_descriptor& b
-					 , const vertex_descriptor& c
-					 , const typename type::edge_properties& ab_prop = typename type::edge_properties()
-					 , const typename type::edge_properties& bc_prop = typename type::edge_properties()
-					 , const typename type::edge_properties& ca_prop = typename type::edge_properties() )
+                                         , const vertex_descriptor& b
+                                         , const vertex_descriptor& c
+                                         , const typename type::edge_properties& ab_prop = typename type::edge_properties()
+                                         , const typename type::edge_properties& bc_prop = typename type::edge_properties()
+                                         , const typename type::edge_properties& ca_prop = typename type::edge_properties() )
       {
         append_return_type added = append_half_edge_face(a,b,c,ab_prop,bc_prop,ca_prop);
 
         return { face_handle( added.face   , *this)
-	       , edge_handle( added.edge_ab, *this)
-	       , edge_handle( added.edge_bc, *this)
-	       , edge_handle( added.edge_ca, *this)
-	       };
+               , edge_handle( added.edge_ab, *this)
+               , edge_handle( added.edge_bc, *this)
+               , edge_handle( added.edge_ca, *this)
+               };
       }
 
       vertex_handle vertex(const vertex_descriptor& d)	const	{ return vertex_handle(d,*this); }

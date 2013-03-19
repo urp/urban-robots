@@ -26,8 +26,8 @@ using namespace flat;
 
 std::vector< TriSurface::vertex_pair > QuadSurface::neighbors() const
 {
-  const size_t& m  = std::get<0>( vertices_size() );
-  const size_t& n  = std::get<1>( vertices_size() );
+  const size_t& m  = std::get<0>( vertex_field_size );
+  const size_t& n  = std::get<1>( vertex_field_size );
   assert( m > 1 && n > 1 );
 
   const size_t num_pairs = ( /*interior*/ 8 * (m-2)*(n-2) + /*boundaries*/ 5 * (2*m+2*n-8)  + /*corners*/ 3 * 4 ) / 2;

@@ -26,7 +26,8 @@
 
 # include "common.hpp"
 
-# include "surface/tri_surface/tri_surface.hpp"
+# include "surface/generators.hpp"
+
 
 # include <boost/lexical_cast.hpp>
 
@@ -42,7 +43,8 @@ namespace flat
 {
   //----| PdmFileReader
 
-  class PdmFileReader : public RectlinearFieldGenerator, public TextureGenerator
+  template< typename Surface >
+  class PdmFileReader
   {
     public:
 
@@ -61,27 +63,16 @@ namespace flat
 
     private:
 
-      typedef enum { END = 4 }  sample_type_t;
-      typedef int   sample_mask_t;
+      void read_file_header( std::istream& stream );
 
-      std::string   m_filename;
-      std::ifstream m_stream;
-
-      size_t m_index;
-
-      size_pair m_field_size;
-
-      rgba_color_t                 	texture_color;
-      location_t                    vertex_location;
-      vertex_texture_coord_t::type  vertex_texture_coordinate;
-
-      void next_sample();
-
-      bool advance_index()  { return ++m_index < ( get<0>(m_field_size) * get<1>(m_field_size) ); }
-
-      bool read_sample();
+      void read_sample( std::istream& stream, const std::shared_ptr< Surface >&, size_t ) const;
 
     public:
+
+      std::string   path;
+
+      size_pair vertex_field_size;
+
 
       PdmFileReader() = delete;
 
@@ -89,11 +80,9 @@ namespace flat
 
       PdmFileReader( const std::string& path ) throw( unknown_magic_number_exception );
 
-      ~PdmFileReader() { m_stream.close(); }
+      std::shared_ptr< Surface > operator() ();
 
-      void operator() ( const std::shared_ptr< TriSurface >& surface );
-
-      std::string   get_name() const { return m_filename; }
+      std::string   get_name() const { return path; }
   };
 
 }
@@ -101,102 +90,100 @@ namespace flat
 //==============================================================================
 // IMPLEMENTATION
 
+template< typename Surface >
+flat::PdmFileReader< Surface >::PdmFileReader( const std::string& path ) throw( unknown_magic_number_exception )
+: path( path ), vertex_field_size{ 0, 0 }
+{ }
 
-flat::PdmFileReader::PdmFileReader( const std::string& path ) throw( unknown_magic_number_exception )
-: RectlinearFieldGenerator( { 0, 0 } ), TextureGenerator( { 0, 0 } )
-, m_filename( path ), m_stream()
-, m_index( 0 ), m_field_size( 0, 0 ), texture_color( 1. )
+template< typename Surface >
+void flat::PdmFileReader< Surface >::read_file_header( std::istream& stream )
 {
-  m_stream.exceptions( std::ifstream::failbit | std::ifstream::badbit );
-
-  m_stream.open( path.c_str() );
-
   std::string   token;
 
-  # if defined DBG_FLAT_PDM_FILE_READER
-  std::clog << "flat::PdmFileReader::PdmFileReader\t|" << " path \"" << path << '\"' << std::endl;
-  # endif
-
   // check magic number
-  m_stream >> token;
+  stream >> token;
   if( token != "P9" )
   {
-    m_stream.close();
     throw unknown_magic_number_exception( token, path );
   }
 
   size_pair field_size{ 0, 0 };
   // read grid dimensions
-  m_stream >> token >> token >> get<1>( m_field_size ) >> get<0>( m_field_size ) >> token;
+  stream >> token >> token >> get<1>( vertex_field_size ) >> get<0>( vertex_field_size ) >> token;
 
   # if defined DBG_FLAT_PDM_FILE_READER
-  std::clog << "flat::PdmFileReader::PdmFileReader\t|" << " size (" << get<0>( m_field_size ) << ',' << get<1>( m_field_size ) << ')' << std::endl;
+  std::clog << "flat::PdmFileReader< Surface >::PdmFileReader\t|" << " size (" << get<0>( vertex_field_size ) << ',' << get<1>( vertex_field_size ) << ')' << std::endl;
   # endif
 
-  assert( get<0>( m_field_size ) > 1 && get<1>( m_field_size ) > 1 );
+  assert( get<0>( vertex_field_size ) > 1 && get<1>( vertex_field_size ) > 1 );
 
-  // resize storage
-  m_vertices_size = m_field_size;
-  m_texture_size  = m_field_size;
-
-  m_stream.ignore( 256, '\n' );
+  stream.ignore( 256, '\n' );
 
 }
 
-
-void flat::PdmFileReader::operator() ( const std::shared_ptr< TriSurface >& surface )
-{
-  assert( num_vertices() == surface->num_vertices() );
-
-  size_t vertex_index = 0, texture_index = 0;
-
-  do // iterate over all samples in file
-  {
-    next_sample();
-
-    TriSurface::vertex_handle current_vertex = surface->vertex( vertex_index++ );
-    current_vertex.set_location( vertex_location );
-    current_vertex.set_texture_coordinate( vertex_texture_coordinate );
-
-    # if defined DBG_FLAT_PDM_FILE_READER_VERTEX_SAMPLE
-    std::clog << "flat::PdmFileReader()\t| " << " sample " << m_index
-              << current_vertex  << std::endl;
-    # endif
-
-    surface->texture().set_pixel( texture_index++, texture_color );
-
-    # if defined DBG_FLAT_PDM_FILE_READER_TEXTURE_SAMPLE
-    std::clog << "flat::PdmFileReader()\t| " << " sample " << m_index
-              << " pixel " + boost::lexical_cast< std::string >( texture_index )
-              << " " << texture_color << std::endl;
-    # endif
-
-  } while( advance_index() );// of while next sample
-
-}
-
-
-void flat::PdmFileReader::next_sample()
-{
-  read_sample();
-}
-
-
-bool flat::PdmFileReader::read_sample()
+template< typename Surface >
+void flat::PdmFileReader< Surface >::read_sample( std::istream& stream, const std::shared_ptr< Surface >& surface, size_t index ) const
 {
   std::string token;
+  location_t                    vertex_location;
+  vertex_texture_coord_t::type  vertex_texture_coordinate;
 
-  // reading line from file
-  std::getline( m_stream, token, '\n' );
+  std::getline( stream, token, '\n' );
 
-  // extract position and color
   std::istringstream ss( token );
 
   ss >> vertex_location[0] >> vertex_location[1] >> vertex_location[2];
-  ss >> texture_color[0] >> texture_color[1] >> texture_color[2];
 
-  vertex_texture_coordinate[0] = ( m_index % get<0>( m_field_size ) ) / ( get<0>(m_field_size) - 1. );
-  vertex_texture_coordinate[1] = ( m_index / get<0>( m_field_size ) ) / ( get<1>(m_field_size) - 1. );
+  // skip color info
+  ss >> token >> token >> token;
+  //ss >> texture_color[0] >> texture_color[1] >> texture_color[2];
 
-  return true;
+  // set vertex info in surface
+
+  vertex_texture_coordinate[0] = ( index % get<0>( vertex_field_size ) ) / ( get<0>(vertex_field_size) - 1. );
+  vertex_texture_coordinate[1] = ( index / get<0>( vertex_field_size ) ) / ( get<1>(vertex_field_size) - 1. );
+
+  typename Surface::vertex_handle vertex = surface->vertex( index );
+  vertex.set_location( vertex_location );
+  vertex.set_texture_coordinate( vertex_texture_coordinate );
+
+  # if defined DBG_FLAT_PDM_FILE_READER_VERTEX_SAMPLE
+  std::clog << "flat::PdmFileReader< Surface >()\t| " << " sample " << index
+            << current_vertex  << std::endl;
+  # endif
+
+}
+
+
+template< typename Surface >
+std::shared_ptr< Surface > flat::PdmFileReader< Surface >::operator() ( )
+{
+  # if defined DBG_FLAT_PDM_FILE_READER
+  std::clog << "flat::PdmFileReader< Surface >::PdmFileReader\t|" << " path \"" << path << '\"' << std::endl;
+  # endif
+
+  size_t index = 0;
+
+  std::ifstream stream;
+
+  stream.exceptions( std::ifstream::failbit | std::ifstream::badbit );
+
+  stream.open( path.c_str() );
+
+  read_file_header( stream );
+
+  const size_t num_vertices = get<0>( vertex_field_size ) * get<1>( vertex_field_size );
+
+  std::shared_ptr< Surface > surface = Surface::create_with_size( num_vertices );
+
+  do { read_sample( stream, surface, index ); }
+  while( ++index < num_vertices );
+
+  stream.close();
+
+  flat::SimpleRectlinearTriangulator triangulator( vertex_field_size );
+
+  triangulator( surface );
+
+  return surface;
 }

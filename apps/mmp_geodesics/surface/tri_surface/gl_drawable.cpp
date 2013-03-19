@@ -49,7 +49,7 @@ const gl::SurfaceDrawable::mode_t gl::SurfaceDrawable::TEXTURE_FACE_MODE   = "te
 
 void gl::SurfaceDrawable::gl_init_textures()	const
 {
-	std::clog << "flat::gl::SurfaceDrawable::gl_init_texture" << std::endl;
+/*	std::clog << "flat::gl::SurfaceDrawable::gl_init_texture" << std::endl;
 
   const TriSurface::texture_type& texture = get_surface()->texture();
 
@@ -70,6 +70,7 @@ void gl::SurfaceDrawable::gl_init_textures()	const
   glTexParameteri( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST );
 
   glTexImage2D( GL_TEXTURE_2D, 0, GL_RGBA, texture.size.first, texture.size.second, 0, GL_RGBA, GL_FLOAT, &texture.pixmap[0] );
+  */
 }
 
 void gl::SurfaceDrawable::gl_draw_gaussian_curvature_vertices() const
@@ -181,7 +182,7 @@ bool	gl::SurfaceDrawable::gl_draw_vertices( const mode_t& mode )		const
 
   if( mode == TEXTURE_VERTEX_MODE )
   {
-    // draw position samples using a single color
+    /*
     rgb_color_t	col;
 
     glPushMatrix();
@@ -209,6 +210,7 @@ bool	gl::SurfaceDrawable::gl_draw_vertices( const mode_t& mode )		const
 
     glPopMatrix();
     return true;
+    */
   }
 
   return false;
@@ -297,6 +299,7 @@ bool    gl::SurfaceDrawable::gl_draw_faces( const mode_t& mode )    const
 
   if( mode == TEXTURE_FACE_MODE )
   {
+    /*
     if( ! m_gl_texture_initialized )
     {
       gl_init_textures();
@@ -307,6 +310,7 @@ bool    gl::SurfaceDrawable::gl_draw_faces( const mode_t& mode )    const
     //glDeleteTextures( 1, & m_gl_texture_handle );
 
     return true;
+    */
   }
   return false;
 }
