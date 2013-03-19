@@ -20,6 +20,7 @@
 # include "surface/tri_surface/tri_surface.hpp"
 # include "surface/quad_surface/quad_surface.hpp"
 # include "surface/generators.hpp"
+# include "surface/io/pdm/pdm_file_reader.hpp"
 
 # include <boost/program_options.hpp>
 
@@ -90,7 +91,7 @@ int main (int argc, char *argv[])
   if( vm.count( surface_file_param ) )
   {
     std::string path( vm[ surface_file_param ].as< std::string >() );
-    flat::PdmFileReader<flat::stride_predicate> generator( path, flat::stride_predicate( {80, 80} ) );
+    flat::PdmFileReader generator( path );
     flat::SimpleRectlinearTriangulator          triangulator( generator.vertex_field_size() );
     flat::CenterRescaleTransform                transform( utk::vec3b(true), utk::vec3b(true) );
     surface = surface_t::create_with_generator( generator, triangulator, transform );
