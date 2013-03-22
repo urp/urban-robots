@@ -71,7 +71,7 @@ void RegularGridTransform::arrange_as_regular_grid( const std::shared_ptr< Point
     const coord_t z = 0.;
 
     vit.first->set_location( location_t( x - .5, y - .5, z ) );
-    vit.first->set_texture_coordinate( vertex_texture_coord_t::type( x, y ) );
+    vit.first->set_texture_coordinate( vertex_texture_coord_t::value_type( x, y ) );
 
   }
 }
@@ -88,7 +88,7 @@ void WaveTransform::operator() ( const std::shared_ptr< PointCloud >& surface )
 
     std::clog << "flat::WaveGenerator\t| vertex " << *vit.first << std::endl;
 
-    vit.first->set_texture_coordinate( vertex_texture_coord_t::type( loc.x(), loc.y() ) );
+    vit.first->set_texture_coordinate( vertex_texture_coord_t::value_type( loc.x(), loc.y() ) );
   }
 }
 

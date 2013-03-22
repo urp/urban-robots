@@ -371,7 +371,7 @@ namespace he
 
       vertex_handle vertex(const vertex_descriptor& d)	const	{ return vertex_handle(d,*this); }
 
-      std::pair<edge_handle,bool> edge( const vertex_descriptor& source, const vertex_descriptor& target ) const
+      std::pair<edge_descriptor,bool> edge( const vertex_descriptor& source, const vertex_descriptor& target ) const
       {
         //std::clog<<"he::Mesh::edge\t|source "<<source<<"\t|target "<<target<<std::flush;
 
@@ -379,7 +379,7 @@ namespace he
 
         //std::clog<<"\t|retrieved "<<e.second<<std::endl<<std::flush;
 
-        return { edge_handle( edge.first, *this ), edge.second };
+        return edge;// { edge_handle( edge.first, *this ), edge.second };
       }
 
   }; // of Mesh
@@ -460,12 +460,12 @@ namespace he
 
       const location_t& location() const
       {
-	return this->mesh().template get_property_map< typename Storage::vertex_location_t >()[ this->descriptor() ];
+        return this->mesh().template get_property_map< typename Storage::vertex_location_t >()[ this->descriptor() ];
       }
 
       void set_location( const location_t& location )
       {
-	this->mesh().template put< typename Storage::vertex_location_t >( this->descriptor(), location );
+        this->mesh().template put< typename Storage::vertex_location_t >( this->descriptor(), location );
       }
 
       std::pair< out_edge_iterator, out_edge_iterator >
@@ -478,28 +478,28 @@ namespace he
 
       angle_t total_angle() const
       {
-	angle_t angle = 0;
-	for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
+        angle_t angle = 0;
+        for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
           angle += out_its.first->previous().next_inner_angle();
         //std::cout << "he::DefaultEdgeHandle::total_angle\t|" << angle << std::endl;
-	return angle;
+        return angle;
 
       }
 
       area_t one_ring_area()
       {
-	area_t area = 0;
-	for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
+        area_t area = 0;
+        for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
           area += out_its.first->face().area();
         //std::cout << "he::DefaultEdgeHandle::area\t|" << area << std::endl;
-	return area;
+        return area;
       }
 
       bool is_boundary_vertex()
       {
-	for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
+        for( auto out_its = out_edge_handles(); out_its.first != out_its.second; out_its.first++ )
           if( !out_its.first->opposite().second ) return true;
-	    return false;
+        return false;
       }
   };
 
@@ -519,10 +519,12 @@ namespace he
 
       // type of location stored in the graph
       typedef typename boost::property_map< typename Storage::graph_t, typename Storage::vertex_location_t >::type::value_type
-											    location_t;
+        location_t;
+
       // type of half edge data structure
       typedef typename boost::property_map< typename Storage::graph_t, typename Storage::edge_hds_t >::const_type
-											    hds_map_t;
+				hds_map_t;
+
       typedef typename hds_map_t::value_type	hds_t;
       typedef typename hds_map_t::reference		hds_ref_t;
       // type of edge index
@@ -531,13 +533,13 @@ namespace he
 
       friend std::ostream&	operator<<( std::ostream& os, const DefaultEdgeHandle<Storage>& eh )
       {
-	os << "edge "      << eh.descriptor()
-	   << " next "     << eh.next().descriptor()
-	   << " id "       << eh.index()
-	   << " op "       << eh.opposite().second
-	   << " vertices " << eh.source().descriptor() << " -> " << eh.target().descriptor()
-	   << " length "   << eh.length();
-	return os;
+        os << "edge "      << eh.descriptor()
+           << " next "     << eh.next().descriptor()
+           << " id "       << eh.index()
+           << " op "       << eh.opposite().second
+           << " vertices " << eh.source().descriptor() << " -> " << eh.target().descriptor()
+           << " length "   << eh.length();
+        return os;
       }
 
     private:
@@ -548,38 +550,38 @@ namespace he
     public:
 
       DefaultEdgeHandle( const edge_descriptor& edge, const Storage& mesh )
-      : PrimitiveSlot<edge_descriptor,Storage>( edge, mesh ),
-	m_he( mesh.template get<typename Storage::edge_hds_t>( edge ) )	{ 	}
+      : PrimitiveSlot<edge_descriptor,Storage>( edge, mesh )
+      , m_he( mesh.template get<typename Storage::edge_hds_t>( edge ) )	{ 	}
 
       vertex_handle source() const
       {
-	return vertex_handle( m_he.source_vertex, this->mesh() );
+        return vertex_handle( m_he.source_vertex, this->mesh() );
       }
 
       vertex_handle target() const
       {
-	return vertex_handle( next().source().descriptor() , this->mesh() );
+        return vertex_handle( next().source().descriptor() , this->mesh() );
       }
 
       edge_handle next() const
       {
-	return edge_handle( m_he.next_edge, this->mesh() );
+        return edge_handle( m_he.next_edge, this->mesh() );
       }
 
       edge_handle previous() const
       {
-	return next().next();
+        return next().next();
       }
 
       std::pair< edge_handle, bool > opposite()	const
       {
-	edge_handle opp( m_he.opposite_edge, this->mesh() );
-	return { opp, this->operator!=( opp ) };
+        edge_handle opp( m_he.opposite_edge, this->mesh() );
+        return { opp, this->operator!=( opp ) };
       }
 
       face_handle face() const
       {
-	return face_handle( m_he.face, this->mesh());
+        return face_handle( m_he.face, this->mesh());
       }
 
       index_t index() const
@@ -606,9 +608,9 @@ namespace he
 
       bool operator==(const edge_handle& o)const
       {
-	assert( ( o.descriptor() == this->descriptor() ) == ( o.source().descriptor() == source().descriptor()
-							      && o.target().descriptor() == target().descriptor() ) );
-	return o.descriptor() == this->descriptor();
+        assert(  ( o.descriptor() == this->descriptor() ) == (  o.source().descriptor() == source().descriptor()
+                                                             && o.target().descriptor() == target().descriptor() ) );
+        return o.descriptor() == this->descriptor();
       }
 
       bool operator!=(const edge_handle& o)const
@@ -639,14 +641,14 @@ namespace he
 
       edge_handle	edge()	const
       {
-	return edge_handle( PrimitiveSlot< face_descriptor, Storage >::descriptor().edge
-			  , PrimitiveSlot< face_descriptor, Storage >::mesh() );
+        return edge_handle( PrimitiveSlot< face_descriptor, Storage >::descriptor().edge
+                          , PrimitiveSlot< face_descriptor, Storage >::mesh() );
       }
 
       edge_handle	edge( const utk::size_t i )	const
       {
-	assert( i < 3 );
-	return i == 0 ? edge() : ( i == 1 ? edge().next() : edge().next().next() );
+        assert( i < 3 );
+        return i == 0 ? edge() : ( i == 1 ? edge().next() : edge().next().next() );
       }
 
       vertex_handle	vertex( const utk::size_t i )	const	{ return edge(i).source(); }
@@ -665,7 +667,7 @@ namespace he
 template< template<class> class V, template<class> class E, template<class> class F, class VProp, class EProp, class GProp	>
 typename he::Mesh<V,E,F,VProp,EProp,GProp>::append_return_type
 he::Mesh<V,E,F,VProp,EProp,GProp>::append_half_edge_face( const vertex_descriptor& a, const vertex_descriptor& b, const vertex_descriptor& c
-							  , const edge_properties& ab_prop, const edge_properties& bc_prop, const edge_properties& ca_prop )
+                                                        , const edge_properties& ab_prop, const edge_properties& bc_prop, const edge_properties& ca_prop )
 {
   // add half edges surrounding the face
   const std::pair<edge_descriptor,bool> ab = boost::add_edge( a, b, boost::property<edge_hds_t, HDS, edge_properties>( HDS(), ab_prop ), m_graph );
@@ -683,27 +685,29 @@ he::Mesh<V,E,F,VProp,EProp,GProp>::append_half_edge_face( const vertex_descripto
   const std::pair<edge_descriptor,bool> bc_op = boost::edge( c, b, m_graph );
   const std::pair<edge_descriptor,bool> ca_op = boost::edge( a, c, m_graph );
 
-  // add half-edge data-structure - use the edge descriptor to mark invalid edges
+  // add half-edge data-structure - own edge descriptor marks invalid edges
   HDS	ab_hds, bc_hds,	ca_hds;
 
   if(ab_op.second)
   {
     ab_hds = { a, bc.first, ab_op.first, f };
     boost::get( edge_hds_t(), m_graph )[ab_op.first].opposite_edge = ab.first;
-  }else { ab_hds = { a, bc.first, ab.first, f }; ++m_num_full_edges; }
+  } else
+  { ab_hds = { a, bc.first, ab.first, f }; ++m_num_full_edges; }
 
   if(bc_op.second)
   {
     bc_hds = { b, ca.first, bc_op.first, f };
     boost::get( edge_hds_t(), m_graph )[bc_op.first].opposite_edge = bc.first;
-  }else { bc_hds = { b, ca.first, bc.first, f }; ++m_num_full_edges; }
+  } else
+  { bc_hds = { b, ca.first, bc.first, f }; ++m_num_full_edges; }
 
   if(ca_op.second)
   {
     ca_hds = { c, ab.first, ca_op.first, f };
     boost::get( edge_hds_t(), m_graph )[ca_op.first].opposite_edge = ca.first;
-  }
-  else { ca_hds = { c, ab.first, ca.first, f }; ++m_num_full_edges; }
+  } else
+  { ca_hds = { c, ab.first, ca.first, f }; ++m_num_full_edges; }
 
   boost::put( edge_hds_t(), m_graph, ab.first, ab_hds );
   boost::put( edge_hds_t(), m_graph, bc.first, bc_hds );

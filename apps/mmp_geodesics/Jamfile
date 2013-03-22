@@ -37,6 +37,7 @@ exe mmp-geodesics
 	surface/quad_surface/quad_surface.cpp
 	surface/quad_surface/gl_drawable.cpp
 
+	surface/io/ply/ply.cpp
 	surface/generators.cpp
 
 	/robots//boost-signals

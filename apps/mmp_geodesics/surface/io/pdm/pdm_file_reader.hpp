@@ -125,8 +125,8 @@ template< typename Surface >
 void flat::PdmFileReader< Surface >::read_sample( std::istream& stream, const std::shared_ptr< Surface >& surface, size_t index ) const
 {
   std::string token;
-  location_t                    vertex_location;
-  vertex_texture_coord_t::type  vertex_texture_coordinate;
+  location_t                          vertex_location;
+  vertex_texture_coord_t::value_type  vertex_texture_coordinate;
 
   std::getline( stream, token, '\n' );
 

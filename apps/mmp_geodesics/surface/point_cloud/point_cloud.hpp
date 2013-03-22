@@ -35,7 +35,7 @@ namespace flat
 
   // additional vertex properties
   struct vertex_texture_coord_t { typedef boost::vertex_property_tag kind;
-				  typedef utk::veca< float, 2 > type;
+				  typedef utk::veca< float, 2 > value_type;
 				};
   template< typename MeshT >
   std::ostream&   operator<<( std::ostream&, flat::VertexHandle<MeshT> const& );
@@ -67,12 +67,12 @@ namespace flat
       : he::DefaultVertexHandle<MeshT>(o)
       { }
 
-      const vertex_texture_coord_t::type& texture_coordinate()	const
+      const vertex_texture_coord_t::value_type& texture_coordinate()	const
       {
         return this->mesh().template get_property_map< vertex_texture_coord_t >() [ *this ];
       }
 
-      void set_texture_coordinate( const vertex_texture_coord_t::type& value )
+      void set_texture_coordinate( const vertex_texture_coord_t::value_type& value )
       {
         return this->mesh().template put< vertex_texture_coord_t >( this->descriptor(), value );
       }
@@ -91,7 +91,7 @@ namespace flat
 
   // the mesh type
   typedef he::Mesh< VertexHandle, he::DefaultEdgeHandle, he::DefaultFaceHandle
-		  , boost::property< vertex_texture_coord_t, vertex_texture_coord_t::type >
+		  , boost::property< vertex_texture_coord_t, vertex_texture_coord_t::value_type >
                   , boost::no_property, boost::no_property >
 	  surface_mesh_t;
 

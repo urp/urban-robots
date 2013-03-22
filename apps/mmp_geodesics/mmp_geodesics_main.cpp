@@ -21,6 +21,8 @@
 # include "surface/quad_surface/quad_surface.hpp"
 # include "surface/generators.hpp"
 # include "surface/io/pdm/pdm_file_reader.hpp"
+# include "surface/io/ply/ply_file_reader.hpp"
+# include "surface/io/obj/obj_file_reader.hpp"
 
 # include <boost/program_options.hpp>
 
@@ -94,7 +96,7 @@ int main (int argc, char *argv[])
 
     //:::| read surface from pdm file
 
-    flat::PdmFileReader< surface_t > file_reader(path);
+    flat::ObjFileReader< surface_t > file_reader(path);
 
     surface = file_reader();
 
@@ -136,9 +138,10 @@ int main (int argc, char *argv[])
     return 0;
   }
 
+
+  //:::| compute distances
+
   distance_function distances;
-
-
 
   # if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
 
@@ -149,8 +152,8 @@ int main (int argc, char *argv[])
 
   std::auto_ptr< gtk::GeodesicsInspector > obs;
 
-  typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
-  distance_matrix_type distance_matrix( surface->num_vertices() );
+  //typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
+  //distance_matrix_type distance_matrix( surface->num_vertices() );
 
   // TODO: add geodesic inspector - via po!!!
 
@@ -162,12 +165,12 @@ int main (int argc, char *argv[])
     else obs->initialize( &gi, surface );
     obs->run_propagation();
 
-    for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
-      distance_matrix( source, query ) = gi.query_distance( query );
+    //for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
+    //  distance_matrix( source, query ) = gi.query_distance( query );
 
   }
 
-  distances.set_distances( distance_matrix, distance_function::ALL );
+  //distances.set_distances( distance_matrix, distance_function::ALL );
 
   # else
 
