@@ -94,11 +94,26 @@ int main (int argc, char *argv[])
   {
     std::string path( vm[ surface_file_param ].as< std::string >() );
 
+    // TODO make filereaders polymorphic
+
+    if(path.substr( path.find_last_of(".") + 1) == "ply")
+    {
+      flat::PlyFileReader< surface_t > file_reader(path);
+      surface = file_reader();
+    }
+    else if(path.substr( path.find_last_of(".") + 1) == "obj")
+    {
+      flat::ObjFileReader< surface_t > file_reader(path);
+      surface = file_reader();
+    }
+    else if(path.substr( path.find_last_of(".") + 1) == "pdm")
+    {
+      flat::PdmFileReader< surface_t > file_reader(path);
+      surface = file_reader();
+    }
+
     //:::| read surface from pdm file
 
-    flat::ObjFileReader< surface_t > file_reader(path);
-
-    surface = file_reader();
 
     flat::CenterRescaleTransform transform( utk::vec3b(true), utk::vec3b(true) );
 

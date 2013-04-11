@@ -1,5 +1,5 @@
 project apps/mmp_geodesics
-: requirements <include>/$(TOP)/apps/mmp_geodesics/
+: requirements <include>/$(TOP)/apps/mmp_geodesics/ <define>NDEBUG
 ;
 
 local linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;

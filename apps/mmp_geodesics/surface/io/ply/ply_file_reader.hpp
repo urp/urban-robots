@@ -52,6 +52,7 @@ namespace flat
     private:
 
       std::shared_ptr< Surface > read_vertices( PlyFile* in_file );
+      void read_faces( PlyFile* in_file, const std::shared_ptr< Surface >& surface );
       void read_tristrips( PlyFile* in_file, const std::shared_ptr< Surface >& surface );
     public:
 
@@ -107,6 +108,7 @@ std::shared_ptr< Surface > flat::PlyFileReader< Surface >::operator() ( )
   std::shared_ptr< Surface > surface = read_vertices( in_file );
 
   read_tristrips( in_file, surface );
+  read_faces( in_file, surface );
 
   close_ply( in_file );
 
@@ -169,7 +171,7 @@ std::shared_ptr< Surface > flat::PlyFileReader< Surface >::read_vertices( PlyFil
 
 //:::| tristrips
 
-struct ply_tristrip
+struct ply_vertex_indices
 {
     int  num_vertices;
     int* vertex_indices;
@@ -187,7 +189,7 @@ void flat::PlyFileReader< Surface >::read_tristrips( PlyFile* in_file, const std
   if( pos == in_file->num_elem_types )
   {
     std::cout << "flat::PlyFileReader::read_tristrips\t| no tristrip elements" << std::endl;
-    assert( false );
+    return;
   }
 
   int num_tristrips;
@@ -199,8 +201,8 @@ void flat::PlyFileReader< Surface >::read_tristrips( PlyFile* in_file, const std
   # endif
 
   static constexpr PlyProperty tristrip_props[1] = { /* list of property information for a tristrip */
-                                                     {"vertex_indices", Int32, Int32, offsetof(ply_tristrip,vertex_indices)
-                                                     , 1              , Int32, Int32, offsetof(ply_tristrip,num_vertices)
+                                                     {"vertex_indices", Int32, Int32, offsetof(ply_vertex_indices,vertex_indices)
+                                                     , 1              , Int32, Int32, offsetof(ply_vertex_indices,num_vertices)
                                                      }
                                                    };
 
@@ -209,7 +211,7 @@ void flat::PlyFileReader< Surface >::read_tristrips( PlyFile* in_file, const std
 
   for( int vert = 0; vert < num_tristrips; vert++ )
   {
-    ply_tristrip strip;
+    ply_vertex_indices strip;
     ply_get_element( in_file, static_cast< void* >( &strip ) );
 
     # if defined DBG_FLAT_PLY_FILE_READER
@@ -232,18 +234,88 @@ void flat::PlyFileReader< Surface >::read_tristrips( PlyFile* in_file, const std
         int b = *(index+1);
         int c = *(index+2);
 
+        // determine orientation of the half-edges
+
         const std::pair<typename Surface::edge_descriptor,bool> ab = surface->edge( a, b );
         if( ab.second )
         {
-          const std::pair<typename Surface::edge_descriptor,bool> ba = surface->edge( b, a );
-          assert(!ba.second);
-
+          assert(!surface->edge( b, a ).second);
           std::swap(a,b);
         }
+
+        // insert face
 
         surface->create_face( a, b, c );
       }
     }
+  }
+
+}
+
+template< typename Surface >
+void flat::PlyFileReader< Surface >::read_faces( PlyFile* in_file, const std::shared_ptr< Surface >& surface )
+{
+  PlyElement** element = std::find_if( in_file->elems, in_file->elems + in_file->num_elem_types
+                                     , [](PlyElement* elem){ return equal_strings( elem->name, "face" ); }
+                                     );
+
+  std::size_t pos = std::distance( in_file->elems, element );
+
+  if( pos == in_file->num_elem_types )
+  {
+    std::cout << "flat::PlyFileReader::read_faces\t| no tristrip elements" << std::endl;
+    assert( false );
+  }
+
+  int num_faces;
+
+  setup_element_read_ply( in_file, pos, &num_faces );
+
+  # if defined DBG_FLAT_PLY_FILE_READER
+  std::cout << "flat::PlyFileReader::read_faces\t| reading " << num_faces << " face " << std::endl;
+  # endif
+
+  static constexpr PlyProperty face_props[1] = { /* list of property information for a tristrip */
+                                                 {"vertex_indices", Int32, Int32, offsetof(ply_vertex_indices,vertex_indices)
+                                                 , 1              , Uint8, Int32, offsetof(ply_vertex_indices,num_vertices)
+                                                 }
+                                               };
+
+
+  setup_property_ply (in_file, const_cast< PlyProperty* >(&face_props[0]) );
+
+  for( int vert = 0; vert < num_faces; vert++ )
+  {
+    ply_vertex_indices face;
+    ply_get_element( in_file, static_cast< void* >( &face ) );
+
+    # if defined DBG_FLAT_PLY_FILE_READER
+    std::cout << "flat::PlyFileReader::read_faces\t| got " << face.num_vertices << " vertex indices " << std::endl;
+    # endif
+
+    assert( strip.num_vertices == 3 );
+
+    std::clog <<  "a " << *(face.vertex_indices)
+              << " b " << *(face.vertex_indices+1)
+              << " c " << *(face.vertex_indices+2) << std::endl;
+
+    int a = *(face.vertex_indices);
+    int b = *(face.vertex_indices+1);
+    int c = *(face.vertex_indices+2);
+
+    // determine orientation of the half-edges
+
+    const std::pair<typename Surface::edge_descriptor,bool> ab = surface->edge( a, b );
+    if( ab.second )
+    {
+      assert( ! surface->edge( b, a ).second );
+
+      std::swap(a,b);
+    }
+
+    // insert face
+
+    surface->create_face( a, b, c );
   }
 
 }

@@ -136,9 +136,7 @@ void flat::ObjFileReader< Surface >::read( std::istream& stream, const std::shar
       const std::pair<typename Surface::edge_descriptor,bool> ca = surface->edge( c, a );
       if( ab.second || bc.second || ca.second )
       {
-        const std::pair<typename Surface::edge_descriptor,bool> ba = surface->edge( b, a );
-        assert(!ba.second);
-
+        assert(!surface->edge( b, a ).second);
         std::swap(a,b);
       }
 

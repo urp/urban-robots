@@ -108,11 +108,11 @@ namespace gtk
 
       Glib::RefPtr<Gtk::Builder> m_builder;
 
-      /*Gtk::VBox**/ void set_view( ::gtk::GLView* view )
+      void set_view( ::gtk::GLView* view )
       { assert( view );
-	assert( !m_view || m_view == view );
-	m_view = view;
-	m_vbox->pack_end( *m_view );
+        assert( !m_view || m_view == view );
+        m_view = view;
+        m_vbox->pack_end( *m_view );
       }
 
       bool step();

@@ -117,7 +117,6 @@ Geodesics::ac_t  Geodesics::access_channel(const Window& candidate, winlist_t& w
   if(itl != wlist.rend())
     std::clog << "mmp::access_channel\t\t|"
               << " pred left  " << *(*itl)->predeccessor() << std::endl<< "\t\t\t\t\t|";
-
   else
     std::clog << "mmp::access_channel\t\t|";
 
@@ -447,14 +446,13 @@ void    Geodesics::propagate_window( EventPoint& ev)
   const edge_handle e0 ( srcwin->edge, surf );
 
   // TODO: remove this
-  if( !srcwin->is_valid() )
+  if( ! srcwin->is_valid() )
   {
     # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
     std::clog << "mmp::Geodesics::propagate_window"
               << "\t|complete - window is invalid"
               << std::endl;
     # endif
-
 
     # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
     // pull coupled event point to current edge before ev gets destroyed
