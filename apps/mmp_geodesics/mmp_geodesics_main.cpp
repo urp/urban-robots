@@ -26,12 +26,8 @@
 
 # include <boost/program_options.hpp>
 
-# define USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
-
-# if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
 #   include "mmp/visualizer/gtk_geodesics_inspector.hpp"
 #   include "surface/tri_surface/gl_drawable.hpp"
-# endif
 
 int main (int argc, char *argv[])
 {
@@ -51,6 +47,7 @@ int main (int argc, char *argv[])
   // surface
   const char surface_file_param[]= "surface";
   const char generator_param[]   = "generator";
+  const char inspector_param[]= "inspector";
   const char export_dist_param[] = "export-distances";
 
   //const char session_out_param[]   = "session-out";
@@ -61,6 +58,7 @@ int main (int argc, char *argv[])
 
     (surface_file_param, po::value< std::string >(), "loads surface and texture from the specified file" )
     (generator_param, po::value< std::string >(), "defines a surface generator" )
+    (inspector_param, po::value< std::string >(), "show inspector" )
     (export_dist_param, po::value< std::string >(), "specifies a file to which the distance matrix will be exported" )
     ;
 
@@ -158,40 +156,39 @@ int main (int argc, char *argv[])
 
   distance_function distances;
 
-  # if defined USE_FLAT_MMP_VISUALIZE_GTK_OBSERVER
 
-  // initialize gtkmm
-  Gtk::Main kit(argc, argv);
-  // initialize gtkglextmm.
-  Gtk::GL::init(argc, argv);
 
-  std::auto_ptr< gtk::GeodesicsInspector > obs;
-
-  //typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
-  //distance_matrix_type distance_matrix( surface->num_vertices() );
-
-  // TODO: add geodesic inspector - via po!!!
-
-  for( TriSurface::vertex_descriptor source = 0; source < surface->num_vertices(); source++ )
+  if( vm.count( inspector_param ) )
   {
-    mmp::Geodesics gi( *surface, source );
+    // initialize gtkmm
+    Gtk::Main kit(argc, argv);
+    // initialize gtkglextmm.
+    Gtk::GL::init(argc, argv);
 
-    if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
-    else obs->initialize( &gi, surface );
-    obs->run_propagation();
+    std::auto_ptr< gtk::GeodesicsInspector > obs;
 
-    //for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
-    //  distance_matrix( source, query ) = gi.query_distance( query );
+    //typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
+    //distance_matrix_type distance_matrix( surface->num_vertices() );
 
+    for( TriSurface::vertex_descriptor source = 0; source < surface->num_vertices(); source++ )
+    {
+      mmp::Geodesics gi( *surface, source );
+
+      if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
+      else obs->initialize( &gi, surface );
+      obs->run_propagation();
+
+      //for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
+      //  distance_matrix( source, query ) = gi.query_distance( query );
+
+    }
+
+    // distances.set_distances( distance_matrix, distance_function::ALL );
   }
-
-  //distances.set_distances( distance_matrix, distance_function::ALL );
-
-  # else
-
-  distances.compute( surface, distance_function::ALL );
-
-  # endif
+  else
+  {
+    distances.compute( surface, distance_function::ALL );
+  }
 
 
   //----| export distance matrix
