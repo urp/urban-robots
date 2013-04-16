@@ -16,7 +16,6 @@
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
 # include "mmp/geodesics.hpp"
-# include "surface/distance_function/distance_function.hpp"
 # include "surface/tri_surface/tri_surface.hpp"
 # include "surface/quad_surface/quad_surface.hpp"
 # include "surface/generators.hpp"
@@ -29,9 +28,13 @@
 #   include "mmp/visualizer/gtk_geodesics_inspector.hpp"
 #   include "surface/tri_surface/gl_drawable.hpp"
 
+
+using namespace flat;
+
+typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
+
 int main (int argc, char *argv[])
 {
-  using namespace flat;
 
   namespace po = boost::program_options;
 
@@ -39,7 +42,7 @@ int main (int argc, char *argv[])
   std::clog << std::boolalpha;
   std::cerr << std::boolalpha;
 
-  std::cout << "cli-measure - Copyright (C) Peter Urban 2011" << std::endl;
+  std::cout << "mmp-geodesics - Copyright (C) Peter Urban 2011-2013" << std::endl;
 
   //----| parse commandline
   // Declare the supported options.
@@ -47,7 +50,8 @@ int main (int argc, char *argv[])
   // surface
   const char surface_file_param[]= "surface";
   const char generator_param[]   = "generator";
-  const char inspector_param[]= "inspector";
+  const char inspector_param[]   = "inspector";
+  const char source_param[] = "single-source";
   const char export_dist_param[] = "export-distances";
 
   //const char session_out_param[]   = "session-out";
@@ -55,10 +59,10 @@ int main (int argc, char *argv[])
   po::options_description desc("Program options");
   desc.add_options()
     ("help", "produce help message")
-
+    (inspector_param, "show inspector to visualize propagation" )
     (surface_file_param, po::value< std::string >(), "loads surface and texture from the specified file" )
     (generator_param, po::value< std::string >(), "defines a surface generator" )
-    (inspector_param, po::value< std::string >(), "show inspector" )
+    (source_param, po::value< TriSurface::vertex_descriptor >(), "compute shortest path only from vertex specified by an index" )
     (export_dist_param, po::value< std::string >(), "specifies a file to which the distance matrix will be exported" )
     ;
 
@@ -90,6 +94,8 @@ int main (int argc, char *argv[])
 
   if( vm.count( surface_file_param ) )
   {
+    //----| file readers
+
     std::string path( vm[ surface_file_param ].as< std::string >() );
 
     // TODO make filereaders polymorphic
@@ -120,6 +126,7 @@ int main (int argc, char *argv[])
   }else
   if( vm.count( generator_param ) )
   {
+    //----| surface generators
 
     size_pair field_size = { 10, 10 };
     surface = surface_t::create_with_size( field_size.first * field_size.second );
@@ -154,42 +161,56 @@ int main (int argc, char *argv[])
 
   //:::| compute distances
 
-  distance_function distances;
+  distance_matrix_type distance_matrix( vm.count( export_dist_param ) ? surface->num_vertices() : 0 );
+
+  //---| single-source ?
+
+  TriSurface::vertex_descriptor source,last_source;
+
+  if( vm.count( source_param ) )
+  {
+    source = last_source = vm[ source_param ].as< TriSurface::vertex_descriptor >();
+    assert( source < surface->num_vertices() );
+  }else
+  {
+    source = 0;
+    last_source = surface->num_vertices()-1;
+  }
 
 
+  //---| inspector ?
+
+  std::auto_ptr< gtk::GeodesicsInspector > obs;
+  std::auto_ptr< Gtk::Main > kit;
 
   if( vm.count( inspector_param ) )
   {
     // initialize gtkmm
-    Gtk::Main kit(argc, argv);
+    kit.reset( new Gtk::Main(argc, argv) );
     // initialize gtkglextmm.
     Gtk::GL::init(argc, argv);
+  }
 
-    std::auto_ptr< gtk::GeodesicsInspector > obs;
+  for( ; source <= last_source; source++ )
+  {
+    mmp::Geodesics gi( *surface, source );
 
-    //typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
-    //distance_matrix_type distance_matrix( surface->num_vertices() );
-
-    for( TriSurface::vertex_descriptor source = 0; source < surface->num_vertices(); source++ )
+    //----| propagate from source
+    if( vm.count( inspector_param ) )
     {
-      mmp::Geodesics gi( *surface, source );
-
+      // reuse inspector window
       if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
       else obs->initialize( &gi, surface );
       obs->run_propagation();
 
-      //for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
-      //  distance_matrix( source, query ) = gi.query_distance( query );
+    }else
+      gi.propagate_paths();
 
-    }
-
-    // distances.set_distances( distance_matrix, distance_function::ALL );
+    //----| copy vertex-vertex distances from source vertex to distance matrix
+    if( vm.count( export_dist_param ) )
+      for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
+        distance_matrix( source, query ) = gi.query_distance( query );
   }
-  else
-  {
-    distances.compute( surface, distance_function::ALL );
-  }
-
 
   //----| export distance matrix
   if( vm.count( export_dist_param ) )
@@ -197,7 +218,7 @@ int main (int argc, char *argv[])
     std::string     path( vm[export_dist_param].as<std::string>() );
     std::ofstream   distfile( path );
     std::clog << "exporting distance matrix to file \"" << path << '\"'<< std::endl;
-    distfile << distances;
+    distfile << distance_matrix;
     distfile.close();
   }
 

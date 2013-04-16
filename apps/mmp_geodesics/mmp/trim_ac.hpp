@@ -24,11 +24,11 @@
 
 # pragma once
 
-# define DBG_FLAT_MMP_TRIM_AC
-# define DBG_FLAT_MMP_WINDOW_BISECTOR
-# define DBG_FLAT_MMP_CHECK_BISECTOR
-# define DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
-# define DBG_FLAT_MMP_DOMINATE_CROSSING
+//# define DBG_FLAT_MMP_TRIM_AC
+//# define DBG_FLAT_MMP_WINDOW_BISECTOR
+//# define DBG_FLAT_MMP_CHECK_BISECTOR
+//# define DBG_FLAT_MMP_CHECK_BISECTOR__USE_CAIRO
+//# define DBG_FLAT_MMP_DOMINATE_CROSSING
 
 # include "mmp/common.hpp"
 # include "mmp/geodesics.hpp"

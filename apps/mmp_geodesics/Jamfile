@@ -31,7 +31,6 @@ exe mmp-geodesics
 
 #---| surface
 
-	surface/distance_function/distance_function.cpp
 	surface/point_cloud/point_cloud.cpp
 	surface/tri_surface/tri_surface.cpp
 	surface/tri_surface/gl_drawable.cpp

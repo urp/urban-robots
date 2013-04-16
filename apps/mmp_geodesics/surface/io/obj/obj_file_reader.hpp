@@ -34,9 +34,9 @@
 
 # include <sstream>
 
-# define DBG_FLAT_OBJ_FILE_READER
+//# define DBG_FLAT_OBJ_FILE_READER
 //# define DBG_FLAT_OBJ_FILE_READER_VERTEX_SAMPLE
-# define DBG_FLAT_OB_FILE_READER__READ_FACES
+//# define DBG_FLAT_OB_FILE_READER__READ_FACES
 
 namespace flat
 {
