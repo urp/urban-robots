@@ -135,6 +135,7 @@ void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::share
   if( !m_surface_drawable || m_surface_drawable->get_surface() != surface )
   {
     m_surface_drawable.reset( new gl::SurfaceDrawable( surface ) );
+    m_surface_drawable->set_edge_mode( gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
     m_view->add_drawable( m_surface_drawable.get() );
   }
 

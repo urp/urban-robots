@@ -1,5 +1,6 @@
-//io.hpp
-//Copyright (C) 2006-2012 Peter Urban (peter.urban@s2003.tu-chemnitz.de)
+
+// flatter - gl_tools.h
+// Copyright (C) 2006-2011  Peter Urban (peter.urban@s2003.tu-chemnitz.de)
 //
 //This program is free software; you can redistribute it and/or
 //modify it under the terms of the GNU General Public License
@@ -15,4 +16,24 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-# include "utk/io/io.hpp"
+#pragma once
+
+#include "gtk/gl_view/gl_canvas.hpp"
+
+namespace gtk
+{
+
+  //
+  // OpenGL frame buffer configuration utilities.
+  //
+
+  struct gl_query
+  {
+    static void print_gl_attrib(const Glib::RefPtr<const Gdk::GL::Config>& glconfig,
+                                const char* attrib_str,
+                                int attrib,
+                                bool is_boolean);
+
+    static void examine_gl_attrib(const Glib::RefPtr<const Gdk::GL::Config>& glconfig);
+  };
+}

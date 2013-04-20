@@ -24,8 +24,8 @@
 
 # pragma once
 
-//# define DBG_GTK_GL_RENDER_TARGETS
-//# define DBG_GTK_GL_CANVAS
+# define DBG_GTK_GL_RENDER_TARGETS
+# define DBG_GTK_GL_CANVAS
 
 # include <gtkmm.h>
 # include <gtkglmm.h>
@@ -51,9 +51,9 @@ namespace gtk
       typedef enum { WINDOW = 0, PIXMAP = 1 } types_t;
 
     protected:
-      types_t	m_type;
+      types_t   m_type;
 
-      GLCanvas&	m_canvas;
+      GLCanvas& m_canvas;
 
       Glib::RefPtr<Gdk::GL::Drawable> m_drawable;
 
@@ -61,33 +61,37 @@ namespace gtk
 
 
       GLRenderTarget( const types_t& type, GLCanvas& canvas )
-      : m_type( type ), m_canvas( canvas ), m_drawable(), m_context()	{	}
+      : m_type( type ), m_canvas( canvas ), m_drawable(), m_context()   {       }
 
     public:
 
       void gl_begin_context()
       {
-	assert( m_drawable );	assert( m_context );
+        assert( m_drawable );
+        assert( m_context );
 
-	if( ! m_drawable->gl_begin( m_context ) )
-	  std::cerr << "gtk::GLRenderTarget::gl_begin_context\t|" << "FAILED" << std::endl;
+        if( ! m_drawable->gl_begin( m_context ) )
+          std::cerr << "gtk::GLRenderTarget::gl_begin_context\t|" << "FAILED" << std::endl;
       }
 
       void gl_end_context()
       {
-	gl::PrintError();
-	m_drawable->gl_end();
+        m_drawable->gl_end();
       }
 
       void gl_flush()
       {
-	assert( m_drawable );
-	//glFinish();
-	if( m_drawable->is_double_buffered() ) m_drawable->swap_buffers();
-	else glFlush();
+        assert( m_drawable );
+
+        if( m_drawable->is_double_buffered() )
+          m_drawable->swap_buffers();
+        else
+          glFlush();
       }
 
       virtual bool configure( const size_t width, const size_t height) = 0;
+
+      bool is_double_buffered() const { return m_drawable->is_double_buffered(); }
 
       const types_t& get_type() const { return m_type; }
   };
@@ -126,24 +130,24 @@ namespace gtk
 
       static flat::distance_t    cam_dist_step;
 
-      typedef boost::signal<void()>	content_request_signal;
-      typedef boost::signal< void( const Glib::RefPtr<Gdk::Pixmap>& ) >	pixmap_update_signal;
+      typedef boost::signal<void()>     content_request_signal;
+      typedef boost::signal< void( const Glib::RefPtr<Gdk::Pixmap>& ) > pixmap_update_signal;
 
     private:
 
       // drawing options
-      bool	m_show_origin;
-      bool	m_show_pivot;
+      bool      m_show_origin;
+      bool      m_show_pivot;
 
       content_request_signal m_gl_content_request_signal;
 
-      pixmap_update_signal 	 m_pixmap_update_signal;
+      pixmap_update_signal       m_pixmap_update_signal;
 
       std::array< std::shared_ptr< GLRenderTarget >, 2 > m_targets;
 
-      std::shared_ptr< GLRenderTarget >	m_active_target;
+      std::shared_ptr< GLRenderTarget > m_active_target;
 
-      Glib::RefPtr< Gdk::Pixmap >	  m_pixmap;
+      Glib::RefPtr< Gdk::Pixmap >         m_pixmap;
 
       //used by render target
       void gl_initialize_context();
@@ -155,48 +159,48 @@ namespace gtk
       void gl_render_scene();
 
       // camera
-      coord_t			cam_dist;
-      location_t		cam_center;
-      utk::inertial<coord_t> 	cam_inertial;
-      location_t		old_cam_center;
-      utk::inertial<coord_t> 	old_cam_inertial;
-      location2d_t		old_mouse_pos;
+      coord_t                   cam_dist;
+      location_t                cam_center;
+      utk::inertial<coord_t>    cam_inertial;
+      location_t                old_cam_center;
+      utk::inertial<coord_t>    old_cam_inertial;
+      location2d_t              old_mouse_pos;
 
     protected:
 
       // callback functions
-      virtual bool	on_configure_event(GdkEventConfigure* event);
-      virtual bool	on_expose_event(GdkEventExpose* event);
+      virtual bool      on_configure_event(GdkEventConfigure* event);
+      virtual bool      on_expose_event(GdkEventExpose* event);
 
-      virtual bool 	on_button_press_event(GdkEventButton* event);
-      virtual bool 	on_motion_notify_event(GdkEventMotion* event);
-      virtual bool 	on_scroll_event(GdkEventScroll* event);
+      virtual bool      on_button_press_event(GdkEventButton* event);
+      virtual bool      on_motion_notify_event(GdkEventMotion* event);
+      virtual bool      on_scroll_event(GdkEventScroll* event);
 
     public:
 
       GLCanvas( BaseObjectType* cobject
-	      , const Glib::RefPtr<Gtk::Builder>& builder );
+              , const Glib::RefPtr<Gtk::Builder>& builder );
 
       virtual ~GLCanvas() { }
 
-      void 	set_render_target( const GLRenderTarget::types_t target_type )
+      void      set_render_target( const GLRenderTarget::types_t target_type )
       {
         # if defined DBG_GTK_GL_CANVAS
-	std::clog << "gtk::GLCanvas::set_render_targets\t|"
-		  << ( target_type == GLRenderTarget::WINDOW ? " window" : "" )
-		  << ( target_type == GLRenderTarget::PIXMAP ? " pixmap" : "" )
-		  << std::endl;
+        std::clog << "gtk::GLCanvas::set_render_targets\t|"
+                  << ( target_type == GLRenderTarget::WINDOW ? " window" : "" )
+                  << ( target_type == GLRenderTarget::PIXMAP ? " pixmap" : "" )
+                  << std::endl;
         # endif
 
-	if( m_active_target->get_type() == target_type ) return;
+        if( m_active_target->get_type() == target_type ) return;
 
-	m_active_target = ( target_type == GLRenderTarget::WINDOW
-					    ? std::get<GLRenderTarget::WINDOW>( m_targets )
-					    : std::get<GLRenderTarget::PIXMAP>( m_targets ) );
+        m_active_target = ( target_type == GLRenderTarget::WINDOW
+                                            ? std::get<GLRenderTarget::WINDOW>( m_targets )
+                                            : std::get<GLRenderTarget::PIXMAP>( m_targets ) );
 
-	m_active_target->configure( get_width(), get_height() );
+        m_active_target->configure( get_width(), get_height() );
 
-	request_redraw();
+        request_redraw();
       }
 
       bool render_to_window();
@@ -204,31 +208,31 @@ namespace gtk
 
       void request_redraw()
       {
-	Gtk::DrawingArea::queue_draw();
+        Gtk::DrawingArea::queue_draw();
       }
 
       void set_origin_visibility( const bool show )
       {
         if( show == get_origin_visibility() ) return;
-	  m_show_origin = show;
-	  request_redraw();
+          m_show_origin = show;
+          request_redraw();
       }
 
-      void	set_pivot_visibility( const bool show )
+      void      set_pivot_visibility( const bool show )
       {
         if( show == get_pivot_visibility() ) return;
-	  m_show_pivot = show;
-	  request_redraw();
+          m_show_pivot = show;
+          request_redraw();
       }
 
-      Glib::RefPtr< Gdk::Pixmap >& 	     get_pixmap() { return m_pixmap; };
+      Glib::RefPtr< Gdk::Pixmap >&           get_pixmap() { return m_pixmap; };
       const Glib::RefPtr< Gdk::Pixmap >& get_pixmap() const { return m_pixmap; };
 
-      const bool&	get_origin_visibility()	const	{ return m_show_origin; }
+      const bool&       get_origin_visibility() const   { return m_show_origin; }
 
-      const bool&	get_pivot_visibility()	const	{ return m_show_pivot; }
+      const bool&       get_pivot_visibility()  const   { return m_show_pivot; }
 
-      void		gl_draw_coords()	const;
+      void              gl_draw_coords()        const;
 
       boost::signals::connection connect_content_provider( content_request_signal::slot_type provider )
       { return m_gl_content_request_signal.connect( provider ); }

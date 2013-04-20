@@ -293,7 +293,7 @@ void flat::PlyFileReader< Surface >::read_faces( PlyFile* in_file, const std::sh
     std::cout << "flat::PlyFileReader::read_faces\t| got " << face.num_vertices << " vertex indices " << std::endl;
     # endif
 
-    assert( strip.num_vertices == 3 );
+    assert( face.num_vertices == 3 );
 
     std::clog <<  "a " << *(face.vertex_indices)
               << " b " << *(face.vertex_indices+1)

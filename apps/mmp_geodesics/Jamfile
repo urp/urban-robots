@@ -1,47 +1,48 @@
 project apps/mmp_geodesics
 : requirements <include>/$(TOP)/apps/mmp_geodesics/
-							 <define>NDEBUG
+#              <define>NDEBUG
 ;
 
 local linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
 local cflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --cflags gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
 
 exe mmp-geodesics
-:	mmp_geodesics_main.cpp
+: mmp_geodesics_main.cpp
 
 #---| open gl stuff
 
-	gl/tools.cpp
+  gl/tools.cpp
 
-	gtk/gl_view/gl_canvas.cpp
-	gtk/gl_view/gl_view.cpp
+  gtk/gl_view/gl_canvas.cpp
+  gtk/gl_view/gl_query.cpp
+  gtk/gl_view/gl_view.cpp
 
 #---| mmp geodesics
 
-	mmp/window.cpp
-	mmp/eventpoint.cpp
-	mmp/utilities.cpp
+  mmp/window.cpp
+  mmp/eventpoint.cpp
+  mmp/utilities.cpp
 
-	mmp/trim_ac.cpp
-	mmp/geodesics.cpp
+  mmp/trim_ac.cpp
+  mmp/geodesics.cpp
 
-	mmp/visualizer/gl_drawable.cpp
-	mmp/visualizer/gtk_geodesics_inspector.cpp
-	mmp/visualizer/cairo_visualizer.cpp
+  mmp/visualizer/gl_drawable.cpp
+  mmp/visualizer/gtk_geodesics_inspector.cpp
+  mmp/visualizer/cairo_visualizer.cpp
 
 #---| surface
 
-	surface/point_cloud/point_cloud.cpp
-	surface/tri_surface/tri_surface.cpp
-	surface/tri_surface/gl_drawable.cpp
-	surface/quad_surface/quad_surface.cpp
-	surface/quad_surface/gl_drawable.cpp
+  surface/point_cloud/point_cloud.cpp
+  surface/tri_surface/tri_surface.cpp
+  surface/tri_surface/gl_drawable.cpp
+  surface/quad_surface/quad_surface.cpp
+  surface/quad_surface/gl_drawable.cpp
 
-	surface/io/ply/ply.cpp
-	surface/generators.cpp
+  surface/io/ply/ply.cpp
+  surface/generators.cpp
 
-	/robots//boost-signals
-	/robots//boost-options
+  /robots//boost-signals
+  /robots//boost-options
 
 : <cflags>$(cflags)
   <linkflags>$(linkflags)

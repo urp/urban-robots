@@ -22,10 +22,11 @@
 # include "gl/tools.hpp"
 
 # include "gtk/gl_view/gl_canvas.hpp"
+# include "gtk/gl_view/gl_query.hpp"
 
 using namespace gtk;
 
-flat::coord_t	GLCanvas::cam_dist_step = 0.1;
+flat::coord_t GLCanvas::cam_dist_step = 0.1;
 
 GLWindowRenderTarget::GLWindowRenderTarget( GLCanvas& canvas )
 : GLRenderTarget( WINDOW, canvas )
@@ -38,12 +39,16 @@ GLWindowRenderTarget::GLWindowRenderTarget( GLCanvas& canvas )
     if( !window_config )
     {
       std::clog << "gtk::GLWindowRenderTarget::GLWindowRenderTarget\t|"
-	   	        << "WARNING - could not create double-buffered visual - trying single-buffered"
-	 		    << std::endl;
+              << "WARNING - could not create double-buffered visual - trying single-buffered"
+          << std::endl;
 
       window_config = Gdk::GL::Config::create( Gdk::GL::MODE_RGB | Gdk::GL::MODE_DEPTH );
     }
-
+    else
+    {
+      std::clog << "gtk::GLWindowRenderTarget::GLWindowRenderTarget\t| created double-buffered visual" << std::endl;
+      assert( window_config->is_double_buffered() );
+    }
     assert( window_config );
 
     Gtk::GL::widget_set_gl_capability( canvas, window_config );
@@ -57,17 +62,18 @@ bool GLWindowRenderTarget::configure( const size_t width, const size_t height )
 {
   # if defined DBG_GTK_GL_RENDER_TARGETS
   std::clog << "gtk::GLWindowRenderTarget::configure\t|"
- 	        << " width " << width << " height " << height << std::endl;
+          << " width " << width << " height " << height << std::endl;
   # endif
   if( !m_drawable )
-	m_drawable = Gtk::GL::widget_get_gl_drawable( m_canvas );
+  m_drawable = Gtk::GL::widget_get_gl_drawable( m_canvas );
 
   if( !m_context  )
   {
-	m_context  = Gtk::GL::widget_get_gl_context ( m_canvas );
+    m_context  = Gtk::GL::widget_get_gl_context ( m_canvas );
 
-	gl_begin_context();
-	m_canvas.gl_initialize_context();
+    gl_begin_context();
+
+    m_canvas.gl_initialize_context();
   }
   else gl_begin_context();
 
@@ -87,13 +93,16 @@ GLPixmapRenderTarget::GLPixmapRenderTarget( GLCanvas& canvas )
   assert( m_config );
 
   m_canvas.set_colormap( m_config->get_colormap() );
+
+  std::clog << "gtk::GLPixmapRenderTarget::GLPixmapRenderTarget\t| created single-buffered visual" << std::endl;
+
 }
 
 bool GLPixmapRenderTarget::configure( const size_t width, const size_t height )
 {
   # if defined DBG_GTK_GL_RENDER_TARGETS
   std::clog << "gtk::GLPixmapRenderTarget::configure\t|"
-   		    << " width " << width << " height " << height << std::endl << std::flush;
+          << " width " << width << " height " << height << std::endl << std::flush;
   # endif
 
   Glib::RefPtr< Gdk::Pixmap > pixmap = Gdk::Pixmap::create( m_canvas.get_window(), width, height, m_config->get_depth() );
@@ -137,14 +146,16 @@ GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& b
   signal_scroll_event().connect( sigc::mem_fun(*this, &GLCanvas::on_scroll_event));
 
   std::get< GLRenderTarget::WINDOW >( m_targets ).reset( new GLWindowRenderTarget( *this ) );
-  std::get< GLRenderTarget::PIXMAP >( m_targets ).reset( new GLPixmapRenderTarget( *this ) );
+  //std::get< GLRenderTarget::PIXMAP >( m_targets ).reset( new GLPixmapRenderTarget( *this ) );
 
+  // TODO: build in a gui swith
   m_active_target = std::get< GLRenderTarget::WINDOW >( m_targets );
 }
 
 
 void GLCanvas::gl_initialize_context()
 {
+
   glClearColor(.2, .2, .2, 1.);
   glClearDepth(1.0);
 
@@ -173,11 +184,11 @@ void GLCanvas::gl_initialize_context()
   glEnable( GL_LIGHT0 );
 
   // create light components
-  GLfloat ambientLight[]  =	{ 0.15f, 0.15f, 0.15f, 1.f };
-  GLfloat diffuseLight[]  =	{   .7f,   .7f,   .7f, 1.f };
+  GLfloat ambientLight[]  = { 0.15f, 0.15f, 0.15f, 1.f };
+  GLfloat diffuseLight[]  = {   .7f,   .7f,   .7f, 1.f };
   GLfloat specularLight[] = {   .2f,   .2f,   .2f, 1.f };
 
-  GLfloat position[] 	  = {   0.f,   0.f, -10.0f, 1.f };
+  GLfloat position[]    = {   0.f,   0.f, -10.0f, 1.f };
 
   // assign created components to GL_LIGHT0
   glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
@@ -185,7 +196,12 @@ void GLCanvas::gl_initialize_context()
   glLightfv( GL_LIGHT0, GL_SPECULAR, specularLight );
   glLightfv( GL_LIGHT0, GL_POSITION, position );
 
+  # if defined DBG_GTK_GL_CANVAS
+  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| error checkpoint" << std::endl;
   gl::PrintError();
+  # endif
+
+
 }
 
 void GLCanvas::gl_setup_view( const float width, const float height )
@@ -197,6 +213,12 @@ void GLCanvas::gl_setup_view( const float width, const float height )
   gluPerspective( 40.f, width/float(height), 0.001f, 100.f );
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
+
+  # if defined DBG_GTK_GL_CANVAS
+  std::cerr << "gtk::GLCanvas::gl_setup_view\t| error checkpoint" << std::endl;
+  gl::PrintError();
+  # endif
+
 }
 
 bool GLCanvas::on_configure_event( GdkEventConfigure* event )
@@ -209,9 +231,22 @@ bool GLCanvas::on_configure_event( GdkEventConfigure* event )
 
 void GLCanvas::gl_render_scene()
 {
+
+  const bool context_double_buffered = Gdk::GL::Context::get_current()->get_gl_config()->is_double_buffered();
+
   # if defined DBG_GTK_GL_CANVAS
-  std::clog << "gtk::GLCanvas::gl_render_scene\t\t|" << std::endl;
+  GLint draw_buffer;
+  glGetIntegerv(GL_DRAW_BUFFER, &draw_buffer );
+  GLboolean gl_double_buffered;
+  glGetBooleanv(GL_DOUBLEBUFFER, &gl_double_buffered );
+  std::clog << "gtk::GLCanvas::gl_render_scene\t\t| double buffered " << bool(gl_double_buffered) << "(gl)/" << context_double_buffered << "(gtk)"
+  << " draw buffer " << (draw_buffer == GL_FRONT ? "FRONT" : (draw_buffer == GL_BACK ? "BACK" : "unknown")) << std::endl;
+  std::cerr << "gtk::GLCanvas::gl_render_scene\t\t| query gl attributes"<< std::endl;
+  gl_query::examine_gl_attrib( Gtk::GL::widget_get_gl_config( *this ) );
+
   # endif
+
+  glDrawBuffer( context_double_buffered ? GL_BACK : GL_FRONT );
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
@@ -222,8 +257,8 @@ void GLCanvas::gl_render_scene()
   // draw viewing pivot
   if( get_pivot_visibility() )
   { glPushMatrix();
-	  gl::Translate( cam_center );
-	  gl::DrawCoords(.2f);
+    gl::Translate( cam_center );
+    gl::DrawCoords(.2f);
     glPopMatrix();
   }
 
@@ -233,9 +268,14 @@ void GLCanvas::gl_render_scene()
 
   glPopMatrix();
 
+  # if defined DBG_GTK_GL_CANVAS
+  std::cerr << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl;
+  gl::PrintError();
+  # endif
+
 }
 
-bool 	GLCanvas::render_to_window()
+bool  GLCanvas::render_to_window()
 {
   # if defined DBG_GTK_GL_CANVAS
   std::clog << "gtk::GLCanvas::render_to_window\t\t|" << std::endl;
@@ -264,7 +304,7 @@ bool 	GLCanvas::render_to_window()
   return true;
 }
 
-bool 	GLCanvas::render_to_pixmap()
+bool  GLCanvas::render_to_pixmap()
 {
   if( m_active_target->get_type() == GLRenderTarget::PIXMAP )
   {
@@ -275,8 +315,10 @@ bool 	GLCanvas::render_to_pixmap()
     return true;
   }
 
-  const std::shared_ptr< GLRenderTarget >&	pix_target = std::get< GLRenderTarget::PIXMAP >( m_targets );
+  const std::shared_ptr< GLRenderTarget >&  pix_target = std::get< GLRenderTarget::PIXMAP >( m_targets );
+
   pix_target->configure(get_width(),get_height());
+
   pix_target->gl_begin_context();
 
     gl_render_scene();
@@ -294,12 +336,12 @@ bool GLCanvas::on_expose_event( GdkEventExpose* event )
 {
   # if defined DBG_GTK_GL_CANVAS
   std::clog << "gtk::GLCanvas::on_expose_event\t\t|"
-	  		<<"count "<<event->count
-			<<" x "<<event->area.x
-			<<" y "<<event->area.y
-			<<" width "<<event->area.width
-			<<" height "<<event->area.height
-	 		<< std::flush<<std::endl;
+        <<"count "<<event->count
+      <<" x "<<event->area.x
+      <<" y "<<event->area.y
+      <<" width "<<event->area.width
+      <<" height "<<event->area.height
+      << std::flush<<std::endl;
   # endif
 
   return render_to_window();
@@ -310,7 +352,7 @@ bool GLCanvas::on_button_press_event( GdkEventButton* event )
 {
   # if defined DBG_GTK_GL_CANVAS
   std::clog << "gtk::GLCanvas::on_button_press_event"
-  			<< std::flush<<std::endl;
+        << std::flush<<std::endl;
   # endif
   old_cam_inertial = cam_inertial;
   old_cam_center   = cam_center;
@@ -325,31 +367,31 @@ bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
 {
   location2d_t  cur_mouse_pos(event->x,event->y);
   utk::size_t width = get_width(),
-			  height= get_height();
+        height= get_height();
 
   if(event->state & GDK_BUTTON3_MASK)
   {
-	cam_center  = old_cam_center;
-	cam_center.x() -= (old_mouse_pos.x()-cur_mouse_pos.x())/width;
-	cam_center.y() += (old_mouse_pos.y()-cur_mouse_pos.y())/height;
+    cam_center  = old_cam_center;
+    cam_center.x() -= (old_mouse_pos.x()-cur_mouse_pos.x())/width;
+    cam_center.y() += (old_mouse_pos.y()-cur_mouse_pos.y())/height;
   }
 
   if(event->state & GDK_BUTTON1_MASK)
   {
-	cam_center = old_cam_center;
-	cam_inertial.quat()=old_cam_inertial.quat();
+    cam_center = old_cam_center;
+    cam_inertial.quat()=old_cam_inertial.quat();
 
-	location2d_t 	     oldpos( 2*old_mouse_pos.x()/(width-1.)-1., 2*(1.-old_mouse_pos.y()/(height-1.))-1.);
-	location2d_t 	     newpos( 2*cur_mouse_pos.x()/(width-1.)-1., 2*(1.-cur_mouse_pos.y()/(height-1.))-1.);
-	utk::veca<coord_t,4> axan  (utk::get_axis_angle_from_trackball( oldpos, newpos ));
+    location2d_t       oldpos( 2*old_mouse_pos.x()/(width-1.)-1., 2*(1.-old_mouse_pos.y()/(height-1.))-1.);
+    location2d_t       newpos( 2*cur_mouse_pos.x()/(width-1.)-1., 2*(1.-cur_mouse_pos.y()/(height-1.))-1.);
+    utk::veca<coord_t,4> axan  (utk::get_axis_angle_from_trackball( oldpos, newpos ));
 
-	axan.xyz() = old_cam_inertial.rot_vec( axan.xyz() );
+    axan.xyz() = old_cam_inertial.rot_vec( axan.xyz() );
 
-	cam_inertial.rot(axan,-axan.a());
-	cam_inertial.quat().normalize();
+    cam_inertial.rot(axan,-axan.a());
+    cam_inertial.quat().normalize();
   }
 
-  location_t	loc( 0.,0.,cam_dist );
+  location_t  loc( 0.,0.,cam_dist );
   cam_inertial.position() = cam_inertial.rot_vec(loc) + cam_center;
 
   request_redraw();
@@ -358,12 +400,12 @@ bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
   return false;
 }
 
-bool	GLCanvas::on_scroll_event( GdkEventScroll* event )
+bool  GLCanvas::on_scroll_event( GdkEventScroll* event )
 {
   if( event->direction == GDK_SCROLL_UP )
-	utk::clamp_min( cam_dist -= cam_dist_step );
+    utk::clamp_min( cam_dist -= cam_dist_step );
   if( event->direction == GDK_SCROLL_DOWN )
-	cam_dist += cam_dist_step;
+    cam_dist += cam_dist_step;
 
   location_t pos( coord_t(0.), coord_t(0.), cam_dist );
   cam_inertial.position() = cam_inertial.rot_vec( pos ) + cam_center;
@@ -372,7 +414,7 @@ bool	GLCanvas::on_scroll_event( GdkEventScroll* event )
   return true;
 }
 
-void	GLCanvas::gl_draw_coords()	const
+void  GLCanvas::gl_draw_coords()  const
 {
   glLineWidth( 1. );
   glDisable( GL_LIGHTING );
