@@ -73,7 +73,7 @@ bool gtk::GeodesicsInspector::step()
       m_step_button->set_sensitive( false );
       m_iterate_button->set_sensitive( false );
 
-      if( m_view->is_renderer_blocked() )  m_view->force_redraw();
+      if( m_view->get_canvas()->is_renderer_blocked() )  m_view->force_redraw();
 
       // check result
       if( !end_result_sane && m_stop_on_errors )
@@ -136,12 +136,12 @@ void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::share
   {
     m_surface_drawable.reset( new gl::SurfaceDrawable( surface ) );
     m_surface_drawable->set_edge_mode( gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
-    m_view->add_drawable( m_surface_drawable.get() );
+    m_view->get_canvas()->add_drawable( m_surface_drawable.get() );
   }
 
   m_geodesics_drawable.reset( new gl::GeodesicsDrawable( m_geodesics ) );
 
-  m_view->add_drawable( m_geodesics_drawable.get() );
+  m_view->get_canvas()->add_drawable( m_geodesics_drawable.get() );
 
   set_title( "propagating from vertex " + boost::lexical_cast<std::string>( m_geodesics->source() ) );
 

@@ -24,48 +24,41 @@
 # include "gtkmm.h"
 # include "gtkglmm.h"
 
-# include "view.hpp"
-# include "gtk/gl_view/gl_drawable.hpp"
 # include "gtk/gl_view/gl_canvas.hpp"
 
 /* For testing propose use the local (not installed) glade file */
 //# define GTK_GLVIEW_BUILDER_FILE PACKAGE_DATA_DIR"/gtk_flatdoc/glade/gl-view.ui" */
 # define   GTK_GLVIEW_BUILDER_FILE "gtk/gl_view/gl_view.ui"
 
-// debugging
-# define DBG_FLAT_GLCANVAS_INVALIDATE
-# define DBG_FLAT_GLCANVAS_ADD_DRAWABLE
-# define DBG_FLAT_GLCANVAS_REMOVE_DRAWABLE
-
 namespace gtk
 {
 
-  class GLView : public Gtk::VBox, public flat::View< gl::Drawable >
+  class GLView : public Gtk::VBox
   {
     public:
 
       struct Filename
       {
-	std::string	directory;
-	std::string	filename_body;
-	size_t		counter;
-	std::string	extension;
+        std::string     directory;
+        std::string     filename_body;
+        size_t          counter;
+        std::string     extension;
 
-	Filename( const std::string& dir, const std::string& body, const size_t& count, const std::string& ext )
-	: directory( dir ), filename_body( body ), counter( count ), extension( ext )
-	{	}
+        Filename( const std::string& dir, const std::string& body, const size_t& count, const std::string& ext )
+        : directory( dir ), filename_body( body ), counter( count ), extension( ext )
+        {       }
 
-	Filename()
-	: directory(), filename_body("untitled"), counter(0), extension()
-	{	}
+        Filename()
+        : directory(), filename_body("untitled"), counter(0), extension()
+        {       }
 
-	std::string operator()	()
-	{ return  directory + "/"
-	+ filename_body
-	+ boost::lexical_cast< std::string > ( counter++ )
-	+ ( extension.length() ? "." : "" )
-	+ extension;
-	}
+        std::string operator()  ()
+        { return  directory + "/"
+        + filename_body
+        + boost::lexical_cast< std::string > ( counter++ )
+        + ( extension.length() ? "." : "" )
+        + extension;
+        }
       };
 
     private:
@@ -78,12 +71,10 @@ namespace gtk
       Gtk::CheckButton* m_origin_check;
       Gtk::CheckButton* m_pivot_check;
 
-      bool m_block_renderer;
-
       //TODO: replace with connection
-      Gtk::ToolButton*	 m_save_frame_as_button;
+      Gtk::ToolButton*   m_save_frame_as_button;
       Gtk::ToggleToolButton* m_record_frames_toggle;
-      Gtk::MenuToolButton*	 m_render_target_menu;
+      Gtk::MenuToolButton*       m_render_target_menu;
 
       boost::signals::connection m_record_frames_connection;
       Filename m_record_filename;
@@ -97,44 +88,28 @@ namespace gtk
 
       void on_record_frame( /*const Glib::RefPtr<Gdk::Pixmap>& pixmap*/ );
 
-      void gl_draw_content()
-      { std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_draw ) ); }
-
     public:
 
       GLView( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder );
 
-      ~GLView() {	}
+      ~GLView() {       }
 
       //void clear() { m_canvas->clear(); }
 
-      bool  is_renderer_blocked()   const 	{ return m_block_renderer; }
-
-      virtual void	invalidate( gl::Drawable* drawable = 0 )
-      {
-	# if defined DBG_FLAT_GLCANVAS_INVALIDATE
-	std::clog << "flat::GLCanvas::invalidate\t|"
-		  << ( drawable ? " drawable" : " view" )
-		  << " render " << ( m_block_renderer ? "disabled" : "active" )
-		  << std::endl;
-	# endif
-	if( !m_block_renderer ) m_canvas->request_redraw();
-      }
-
       void  force_redraw()
       {
-	m_canvas->request_redraw();
+        m_canvas->request_redraw();
       }
 
       GLCanvas* get_canvas() const { return m_canvas; }
 
       static GLView* create()
       {
-	// load the Glade file and instiate its widgets:
-	Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file( GTK_GLVIEW_BUILDER_FILE );
-	GLView* vp = 0;
-	builder->get_widget_derived("gl_view_main_vbox",vp);
-	return vp;
+        // load the Glade file and instiate its widgets:
+        Glib::RefPtr<Gtk::Builder> builder = Gtk::Builder::create_from_file( GTK_GLVIEW_BUILDER_FILE );
+        GLView* vp = 0;
+        builder->get_widget_derived("gl_view_main_vbox",vp);
+        return vp;
       }
 
   };// of GLView

@@ -22,142 +22,46 @@
 # include "gl/tools.hpp"
 
 # include "gtk/gl_view/gl_canvas.hpp"
-# include "gtk/gl_view/gl_query.hpp"
 
 using namespace gtk;
 
 flat::coord_t GLCanvas::cam_dist_step = 0.1;
 
-GLWindowRenderTarget::GLWindowRenderTarget( GLCanvas& canvas )
-: GLRenderTarget( WINDOW, canvas )
-{
-  if( !Gtk::GL::widget_is_gl_capable( canvas ) )
-  {
-    Glib::RefPtr<Gdk::GL::Config> window_config = Gdk::GL::Config::create( Gdk::GL::MODE_RGB
-                                                                         | Gdk::GL::MODE_DOUBLE
-                                                                         | Gdk::GL::MODE_DEPTH );
-    if( !window_config )
-    {
-      std::clog << "gtk::GLWindowRenderTarget::GLWindowRenderTarget\t|"
-              << "WARNING - could not create double-buffered visual - trying single-buffered"
-          << std::endl;
-
-      window_config = Gdk::GL::Config::create( Gdk::GL::MODE_RGB | Gdk::GL::MODE_DEPTH );
-    }
-    else
-    {
-      std::clog << "gtk::GLWindowRenderTarget::GLWindowRenderTarget\t| created double-buffered visual" << std::endl;
-      assert( window_config->is_double_buffered() );
-    }
-    assert( window_config );
-
-    Gtk::GL::widget_set_gl_capability( canvas, window_config );
-  }
-
-  assert( Gtk::GL::widget_is_gl_capable( canvas ) );
-
-}
-
-bool GLWindowRenderTarget::configure( const size_t width, const size_t height )
-{
-  # if defined DBG_GTK_GL_RENDER_TARGETS
-  std::clog << "gtk::GLWindowRenderTarget::configure\t|"
-          << " width " << width << " height " << height << std::endl;
-  # endif
-  if( !m_drawable )
-  m_drawable = Gtk::GL::widget_get_gl_drawable( m_canvas );
-
-  if( !m_context  )
-  {
-    m_context  = Gtk::GL::widget_get_gl_context ( m_canvas );
-
-    gl_begin_context();
-
-    m_canvas.gl_initialize_context();
-  }
-  else gl_begin_context();
-
-  m_canvas.gl_setup_view( width, height );
-
-  gl_end_context();
-
-  return true;
-}
-
-
-
-GLPixmapRenderTarget::GLPixmapRenderTarget( GLCanvas& canvas )
-: GLRenderTarget( PIXMAP, canvas )
-{
-  m_config = Gdk::GL::Config::create( Gdk::GL::MODE_RGB | Gdk::GL::MODE_DEPTH );
-  assert( m_config );
-
-  m_canvas.set_colormap( m_config->get_colormap() );
-
-  std::clog << "gtk::GLPixmapRenderTarget::GLPixmapRenderTarget\t| created single-buffered visual" << std::endl;
-
-}
-
-bool GLPixmapRenderTarget::configure( const size_t width, const size_t height )
-{
-  # if defined DBG_GTK_GL_RENDER_TARGETS
-  std::clog << "gtk::GLPixmapRenderTarget::configure\t|"
-          << " width " << width << " height " << height << std::endl << std::flush;
-  # endif
-
-  Glib::RefPtr< Gdk::Pixmap > pixmap = Gdk::Pixmap::create( m_canvas.get_window(), width, height, m_config->get_depth() );
-
-  if( m_canvas.get_pixmap() )
-    Gdk::GL::ext( m_canvas.get_pixmap() ).unset_gl_capability();
-
-  m_canvas.set_pixmap( pixmap );
-
-  m_drawable = Gdk::GL::ext( pixmap ).set_gl_capability( m_config );
-
-  assert( Gdk::GL::ext( pixmap ).is_gl_capable() );
-  # warning "BUG in gtk::GLPixmapRenderTarget::configure - context recreation causes texture loss"
-  m_context  = Gdk::GL::Context::create( m_drawable, false );
-
-  gl_begin_context();
-    m_canvas.gl_initialize_context();
-    m_canvas.gl_setup_view( width, height );
-  gl_end_context();
-
-  return true;
-}
-
-
-
-
 GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder )
 : Gtk::DrawingArea( cobject )
-, m_show_origin( false ), m_show_pivot( true )
-, cam_dist( 10. ), cam_center( 0. ), cam_inertial()
+, m_show_origin( false )
+, m_show_pivot( true )
+, m_block_renderer(false)
+, cam_dist( 3. )
+, cam_center( 0. )
+, cam_inertial()
 {
   # if defined DBG_GTK_GL_CANVAS
   std::clog << "gtk::GLCanvas::GLCanvas" <<std::endl;
   # endif
+
   // setting camera position
   cam_inertial.position().z() += cam_dist;
+
+  //set_app_paintable( true );
+  //set_double_buffered( false );
 
   // view transformation signals. Events have to be enabled in the glade file
   signal_button_press_event().connect(  sigc::mem_fun(*this, &GLCanvas::on_button_press_event) );
   signal_motion_notify_event().connect( sigc::mem_fun(*this, &GLCanvas::on_motion_notify_event));
   signal_scroll_event().connect( sigc::mem_fun(*this, &GLCanvas::on_scroll_event));
 
-  std::get< GLRenderTarget::WINDOW >( m_targets ).reset( new GLWindowRenderTarget( *this ) );
-  //std::get< GLRenderTarget::PIXMAP >( m_targets ).reset( new GLPixmapRenderTarget( *this ) );
+  // The context of the window
 
-  // TODO: build in a gui swith
-  m_active_target = std::get< GLRenderTarget::WINDOW >( m_targets );
+  m_target.reset( new GLWindowRenderTarget( *this )
+                  //       new GLPixmapRenderTarget( m_pixmap )
+                        );
 }
-
 
 void GLCanvas::gl_initialize_context()
 {
-
-  glClearColor(.2, .2, .2, 1.);
-  glClearDepth(1.0);
+  glClearColor( .2, .2, .2, 1. );
+  glClearDepth( 1. );
 
   glDepthFunc( GL_LEQUAL );
   glEnable(GL_DEPTH_TEST);
@@ -168,10 +72,10 @@ void GLCanvas::gl_initialize_context()
   glEnable( GL_LINE_SMOOTH );
 
   //glDisable( GL_CULL_FACE );
-  //glCullFace(GL_BACK);
+  //glCullFace( GL_BACK );
 
   glEnable(GL_POLYGON_OFFSET_FILL);
-  glPolygonOffset (1., 1.);
+  glPolygonOffset( 1., 1. );
 
   //glEnable( GL_LIGHTING );
 
@@ -197,12 +101,20 @@ void GLCanvas::gl_initialize_context()
   glLightfv( GL_LIGHT0, GL_POSITION, position );
 
   # if defined DBG_GTK_GL_CANVAS
-  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| error checkpoint" << std::endl;
+  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| canvas error checkpoint" << std::endl;
   gl::PrintError();
   # endif
 
+  //if( ! m_target->get_gdk_gl_context()->get_share_list() )
+  std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
+
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| drawable error checkpoint" << std::endl;
+  gl::PrintError();
+  # endif
 
 }
+
 
 void GLCanvas::gl_setup_view( const float width, const float height )
 {
@@ -214,45 +126,99 @@ void GLCanvas::gl_setup_view( const float width, const float height )
   glMatrixMode( GL_MODELVIEW );
   glLoadIdentity();
 
-  # if defined DBG_GTK_GL_CANVAS
-  std::cerr << "gtk::GLCanvas::gl_setup_view\t| error checkpoint" << std::endl;
-  gl::PrintError();
+  # if defined DBG_GTK_GLCANVAS_GL_SETUP_VIEW
+  gl::PrintError( std::clog << "gtk::GLCanvas::gl_setup_view\t| error checkpoint" << std::endl );
   # endif
 
 }
 
-bool GLCanvas::on_configure_event( GdkEventConfigure* event )
+void GLCanvas::set_render_target( const GLRenderTarget::types_t target_type )
 {
-  if( !m_active_target ) return false;
+  # if defined DBG_GTK_GLCANVAS_SET_RENDER_TARGET
+  std::clog << "gtk::GLCanvas::set_render_targets\t|"
+            << ( target_type == GLRenderTarget::WINDOW ? " window" : "" )
+            << ( target_type == GLRenderTarget::PIXMAP ? " pixmap" : "" )
+            << std::endl;
+  # endif
 
-  return m_active_target->configure( event->width, event->height );
+
+  if( m_target->get_type() == target_type ) return;
+
+  Glib::RefPtr< const Gdk::GL::Context>  old_context = m_target->get_gdk_gl_context();
+
+  std::shared_ptr< GLRenderTarget > new_target;
+
+  switch(target_type)
+  {
+    case GLRenderTarget::WINDOW : new_target.reset( new GLWindowRenderTarget( *this, old_context ) ); break;
+    case GLRenderTarget::PIXMAP : new_target.reset( new GLPixmapRenderTarget( m_pixmap, get_width(), get_height(), old_context ) ); break;
+    default : assert(false);
+  }
+
+  assert( new_target );
+
+  set_colormap( new_target->get_gdk_gl_config()->get_colormap() );
+
+  m_target = new_target;
+
+  configure_target( get_width(), get_height() );
+
+  request_redraw();
 }
 
+bool GLCanvas::configure_target( const size_t width, const size_t height )
+{
+  if( !m_target ) return false;
+
+  const bool old_context_was_not_shared = ! m_target->get_gdk_gl_context() || ! m_target->get_gdk_gl_context()->get_share_list();
+
+  const bool configured = m_target->configure( width, height );
+
+  # if defined DBG_GTK_GLCANVAS_CONFIGURE
+  std::clog << "gtk::GLCanvas::on_configure_event\t| preparing context" << std::endl;
+  # endif
+
+  m_target->gl_begin_context();
+
+    if( ! m_target->get_gdk_gl_context()->get_share_list() || old_context_was_not_shared )
+    {
+      # if defined DBG_GTK_GLCANVAS_CONFIGURE
+      std::clog << "gtk::GLCanvas::on_configure_event\t| reinitializing context" << std::endl;
+      # endif
+
+      gl_initialize_context();
+    }
+
+    gl_setup_view(get_width(),get_height());
+
+  m_target->gl_end_context();
+
+  return configured;
+}
+
+bool GLCanvas::on_configure_event( GdkEventConfigure* event )
+{
+  configure_target( event->width, event->height);
+}
 
 void GLCanvas::gl_render_scene()
 {
-
+  # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
   const bool context_double_buffered = Gdk::GL::Context::get_current()->get_gl_config()->is_double_buffered();
 
-  # if defined DBG_GTK_GL_CANVAS
   GLint draw_buffer;
   glGetIntegerv(GL_DRAW_BUFFER, &draw_buffer );
   GLboolean gl_double_buffered;
   glGetBooleanv(GL_DOUBLEBUFFER, &gl_double_buffered );
   std::clog << "gtk::GLCanvas::gl_render_scene\t\t| double buffered " << bool(gl_double_buffered) << "(gl)/" << context_double_buffered << "(gtk)"
   << " draw buffer " << (draw_buffer == GL_FRONT ? "FRONT" : (draw_buffer == GL_BACK ? "BACK" : "unknown")) << std::endl;
-  std::cerr << "gtk::GLCanvas::gl_render_scene\t\t| query gl attributes"<< std::endl;
-  gl_query::examine_gl_attrib( Gtk::GL::widget_get_gl_config( *this ) );
-
   # endif
-
-  glDrawBuffer( context_double_buffered ? GL_BACK : GL_FRONT );
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPushMatrix();
 
-  gl::InvTrafo( cam_inertial ); // -> gl_setup_view
+  gl::InvTrafo( cam_inertial );
 
   // draw viewing pivot
   if( get_pivot_visibility() )
@@ -264,34 +230,33 @@ void GLCanvas::gl_render_scene()
 
   if( get_origin_visibility() ) gl::DrawCoords( 1. );
 
-  m_gl_content_request_signal();
+  std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_draw ) );
 
   glPopMatrix();
 
-  # if defined DBG_GTK_GL_CANVAS
-  std::cerr << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl;
-  gl::PrintError();
+  # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
+  gl::PrintError( std::clog << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl );
   # endif
 
 }
 
-bool  GLCanvas::render_to_window()
+bool GLCanvas::render_to_window()
 {
   # if defined DBG_GTK_GL_CANVAS
   std::clog << "gtk::GLCanvas::render_to_window\t\t|" << std::endl;
   # endif
 
-  m_active_target->gl_begin_context();
+  m_target->gl_begin_context();
 
     gl_render_scene();
 
-    m_active_target->gl_flush();
+    m_target->gl_flush();
 
-  m_active_target->gl_end_context();
+  m_target->gl_end_context();
 
-  // integrate into GLPixmapRenderTarget
-  if( m_active_target->get_type() == GLRenderTarget::PIXMAP )
+  if( m_target->get_type() == GLRenderTarget::PIXMAP )
   {
+
     get_window()->draw_drawable( get_style()->get_fg_gc(get_state()),
                                  m_pixmap,
                                  0, 0, 0, 0,
@@ -299,42 +264,29 @@ bool  GLCanvas::render_to_window()
 
     m_pixmap_update_signal( m_pixmap );
 
-  } else assert( m_active_target->get_type() == GLRenderTarget::WINDOW );
+  } else assert( m_target->get_type() == GLRenderTarget::WINDOW );
 
   return true;
 }
 
 bool  GLCanvas::render_to_pixmap()
 {
-  if( m_active_target->get_type() == GLRenderTarget::PIXMAP )
-  {
-    render_to_window();
 
-    m_pixmap_update_signal( m_pixmap );
+  const auto target_type = m_target->get_type();
 
-    return true;
-  }
+  // TODO: try to create pixmap context in parallel
+  set_render_target( GLRenderTarget::PIXMAP );
 
-  const std::shared_ptr< GLRenderTarget >&  pix_target = std::get< GLRenderTarget::PIXMAP >( m_targets );
+  render_to_window();
 
-  pix_target->configure(get_width(),get_height());
-
-  pix_target->gl_begin_context();
-
-    gl_render_scene();
-
-    pix_target->gl_flush();
-
-  pix_target->gl_end_context();
-
-  m_pixmap_update_signal( m_pixmap );
+  set_render_target( target_type );
 
   return true;
 }
 
 bool GLCanvas::on_expose_event( GdkEventExpose* event )
 {
-  # if defined DBG_GTK_GL_CANVAS
+  # if defined DBG_GTK_GLCANVAS_ON_EXPOSE_EVENT
   std::clog << "gtk::GLCanvas::on_expose_event\t\t|"
         <<"count "<<event->count
       <<" x "<<event->area.x
@@ -350,7 +302,7 @@ bool GLCanvas::on_expose_event( GdkEventExpose* event )
 
 bool GLCanvas::on_button_press_event( GdkEventButton* event )
 {
-  # if defined DBG_GTK_GL_CANVAS
+  # if defined DBG_GTK_GLCANVAS_ON_BUTTON_PRESS_EVENT
   std::clog << "gtk::GLCanvas::on_button_press_event"
         << std::flush<<std::endl;
   # endif
@@ -365,9 +317,9 @@ bool GLCanvas::on_button_press_event( GdkEventButton* event )
 
 bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
 {
-  location2d_t  cur_mouse_pos(event->x,event->y);
-  utk::size_t width = get_width(),
-        height= get_height();
+  const location2d_t  cur_mouse_pos(event->x,event->y);
+  const utk::size_t width = get_width();
+  const utk::size_t height= get_height();
 
   if(event->state & GDK_BUTTON3_MASK)
   {
@@ -412,25 +364,4 @@ bool  GLCanvas::on_scroll_event( GdkEventScroll* event )
 
   request_redraw();
   return true;
-}
-
-void  GLCanvas::gl_draw_coords()  const
-{
-  glLineWidth( 1. );
-  glDisable( GL_LIGHTING );
-  glBegin(GL_LINES);
-  {
-    glColor3f (1.f,0.f,0.f);
-    glVertex3f(0.f,0.f,0.f);
-    glVertex3f(1.f,0.f,0.f);
-
-    glColor3f (0.f,1.f,0.f);
-    glVertex3f(0.f,0.f,0.f);
-    glVertex3f(0.f,1.f,0.f);
-
-    glColor3f (0.f,0.f,1.f);
-    glVertex3f(0.f,0.f,0.f);
-    glVertex3f(0.f,0.f,1.f);
-  }
-  glEnd();
 }

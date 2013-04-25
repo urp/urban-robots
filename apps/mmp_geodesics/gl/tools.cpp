@@ -15,9 +15,9 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include	"gl/tools.hpp"
+#include  "gl/tools.hpp"
 
-void	gl::InvTrafo(const utk::inertial<float>& i)
+void  gl::InvTrafo(const utk::inertial<float>& i)
 { DB_FLAT_GL_TOOLS_MSG("uv::gl::InvTrafo\t|"<<i)
   utk::mata<float,4> m = i.get_inverse_mat3();
   m(0,3)=0.; m(1,3)=0.; m(2,3)=0.; m(3,0)=0.; m(3,1)=0.; m(3,2)=0.; m(3,3)=1.;
@@ -25,7 +25,7 @@ void	gl::InvTrafo(const utk::inertial<float>& i)
   glTranslatef( -i.position().x(), -i.position().y(), -i.position().z() );
 }
 
-void	gl::InvTrafo(const utk::inertial<double>& i)
+void  gl::InvTrafo(const utk::inertial<double>& i)
 { DB_FLAT_GL_TOOLS_MSG("uv::gl::InvTrafo\t|"<<i)
   utk::mata<double,4> m = i.get_inverse_mat3();
   m(0,3)=0.; m(1,3)=0.; m(2,3)=0.; m(3,0)=0.; m(3,1)=0.; m(3,2)=0.; m(3,3)=1.;
@@ -34,15 +34,17 @@ void	gl::InvTrafo(const utk::inertial<double>& i)
   Translate( -i.position().x(), -i.position().y(),   -i.position().z() );
 }
 
-void	gl::PrintError()
-{ GLenum code = glGetError();
+void  gl::PrintError( std::ostream& os )
+{
+  GLenum code = glGetError();
   if(code != GL_NO_ERROR)
-    std::cerr << "flat::gl::PrintError\t|"
-			  << "WARNING: an OpenGL error has occured. "
-			  << "message: " << gluErrorString(code) << std::endl;
+    os << "flat::gl::PrintError\t| "
+       << " WARNING: an OpenGL error has occured."
+       << " message: " << gluErrorString(code) << std::endl;
+
 }
 
-void	gl::DrawCoords( GLfloat size )
+void  gl::DrawCoords( GLfloat size )
 {
   //std::cerr<<"uv::gl::glDrawCoords\t|axis length "<<s<<std::endl;
   glBegin(GL_LINES);
@@ -62,7 +64,7 @@ void	gl::DrawCoords( GLfloat size )
   glEnd();
 }
 
-void	gl::DrawBoxPaths(const utk::uint8_t front,const utk::vecn<GLfloat,24>& vert,const GLint* e1,const GLint* e2,const GLint* seq)
+void  gl::DrawBoxPaths(const utk::uint8_t front,const utk::vecn<GLfloat,24>& vert,const GLint* e1,const GLint* e2,const GLint* seq)
 {
   const utk::uint8_t  start=front*8;
   utk::veca<GLfloat,3>  col(1.f);
@@ -82,8 +84,8 @@ void	gl::DrawBoxPaths(const utk::uint8_t front,const utk::vecn<GLfloat,24>& vert
 
       glBegin(GL_LINES);
       {
-	    Vertex(vert[vid1*3],vert[vid1*3+1],vert[vid1*3+2]);
-	    Vertex(vert[vid2*3],vert[vid2*3+1],vert[vid2*3+2]);
+      Vertex(vert[vid1*3],vert[vid1*3+1],vert[vid1*3+2]);
+      Vertex(vert[vid2*3],vert[vid2*3+1],vert[vid2*3+2]);
       }
       glEnd();
     }
@@ -96,7 +98,7 @@ void	gl::DrawBoxPaths(const utk::uint8_t front,const utk::vecn<GLfloat,24>& vert
   glEnd();
 }
 
-void	gl::DrawBoxVertices(const utk::vecn<GLfloat,24>& vert)
+void  gl::DrawBoxVertices(const utk::vecn<GLfloat,24>& vert)
 { //std::cerr<<"uv::gl::glDrawBoxVertices\t|..."<<std::endl;
   glPointSize(5.);
   for(utk::uint8_t i=0;i<8;++i)

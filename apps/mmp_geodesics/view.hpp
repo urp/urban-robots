@@ -46,43 +46,43 @@ namespace flat
 
     public:
 
-      typename drawable_list_t::iterator 		begin()	{ return m_drawables.begin(); }
-      typename drawable_list_t::const_iterator 	begin()	const { return m_drawables.begin(); }
+      typename drawable_list_t::iterator        begin() { return m_drawables.begin(); }
+      typename drawable_list_t::const_iterator  begin() const { return m_drawables.begin(); }
 
-      typename drawable_list_t::iterator 		end()	{ return m_drawables.end(); }
-      typename drawable_list_t::const_iterator 	end()	const { return m_drawables.end(); }
+      typename drawable_list_t::iterator        end()   { return m_drawables.end(); }
+      typename drawable_list_t::const_iterator  end()   const { return m_drawables.end(); }
 
       void add_drawable( DrawableT* drawable )
       {
-	assert( drawable );
-	# if defined DBG_FLAT_GLCANVAS_ADD_DRAWABLE
-	    std::clog << "flat::View::add_drawable\t|" << typeid(DrawableT).name() << std::endl;
-	# endif
+        assert( drawable );
+        # if defined DBG_FLAT_GLCANVAS_ADD_DRAWABLE
+            std::clog << "flat::View::add_drawable\t|" << typeid(DrawableT).name() << std::endl;
+        # endif
 
-	drawable->connect_invalidator( boost::bind( &View< DrawableT >::invalidate, this, drawable ) );
-	drawable->connect_remover    ( boost::bind( &View< DrawableT >::remove_drawable, this, drawable ) );
+        drawable->connect_invalidator( boost::bind( &View< DrawableT >::invalidate, this, drawable ) );
+        drawable->connect_remover    ( boost::bind( &View< DrawableT >::remove_drawable, this, drawable ) );
 
-	m_drawables.push_back( drawable );
+        m_drawables.push_back( drawable );
       }
 
       /*void clear()
       {
-	    std::clog << "flat::GLCanvas::clear" << std::endl;
-	    m_drawables.clear(); // TODO disconnect
+            std::clog << "flat::GLCanvas::clear" << std::endl;
+            m_drawables.clear(); // TODO disconnect
       }*/
 
       void remove_drawable( DrawableT* drawable )
       {
-	auto it = std::find( m_drawables.begin(), m_drawables.end(), drawable );
+        auto it = std::find( m_drawables.begin(), m_drawables.end(), drawable );
 
-	if( it != m_drawables.end() )
-	{ m_drawables.erase( it );
-	  # if defined DBG_FLAT_GLCANVAS_REMOVE_DRAWABLE
-	  std::clog << "flat::View::remove_drawable\t|drawable removed" << std::endl;
-	  # endif
-	}
-	else // TODO: error handling
-	  std::cerr << "flat::View::remove_drawable\t| FAILED - " << drawable << " not found !" << std::endl;
+        if( it != m_drawables.end() )
+        { m_drawables.erase( it );
+          # if defined DBG_FLAT_GLCANVAS_REMOVE_DRAWABLE
+          std::clog << "flat::View::remove_drawable\t|drawable removed" << std::endl;
+          # endif
+        }
+        else // TODO: error handling
+          std::cerr << "flat::View::remove_drawable\t| FAILED - " << drawable << " not found !" << std::endl;
       }
 
       virtual void invalidate( DrawableT* ) = 0;

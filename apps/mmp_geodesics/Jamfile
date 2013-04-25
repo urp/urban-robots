@@ -1,5 +1,6 @@
 project apps/mmp_geodesics
 : requirements <include>/$(TOP)/apps/mmp_geodesics/
+#              <define>GTK_DISABLE_DEPRECATED
 #              <define>NDEBUG
 ;
 
@@ -13,6 +14,7 @@ exe mmp-geodesics
 
   gl/tools.cpp
 
+  gtk/gl_view/gl_render_targets.cpp
   gtk/gl_view/gl_canvas.cpp
   gtk/gl_view/gl_query.cpp
   gtk/gl_view/gl_view.cpp

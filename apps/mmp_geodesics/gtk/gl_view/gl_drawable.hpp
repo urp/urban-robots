@@ -39,35 +39,37 @@ namespace gl
   {
     public:
 
-      typedef boost::signal<void()>	invalidate_signal;
-      typedef boost::signal<void()>	remove_signal;
+      typedef boost::signal<void()>     invalidate_signal;
+      typedef boost::signal<void()>     remove_signal;
 
     private:
 
       remove_signal remove_drawable;
-      invalidate_signal	invalidate_drawable;
+      invalidate_signal invalidate_drawable;
 
     public:
 
-      Drawable()  {	}
+      Drawable()  {     }
 
-      virtual	~Drawable()
+      virtual   ~Drawable()
       { std::clog << "gl::Drawable::~Drawable\t|disconnecting drawable"
-		  << std::endl << std::flush;
-	remove_drawable();
+                  << std::endl << std::flush;
+        remove_drawable();
       }
 
       boost::signals::connection  connect_invalidator( invalidate_signal::slot_type invalidator )
       { return invalidate_drawable.connect( invalidator ); }
 
-	  boost::signals::connection connect_remover( remove_signal::slot_type remover )
+          boost::signals::connection connect_remover( remove_signal::slot_type remover )
       { return remove_drawable.connect( remover ); }
 
       void invalidate()
       {
         std::clog << "gl::Drawable::invalidate\t|invalidating drawable" << std::endl;
-	invalidate_drawable();
+        invalidate_drawable();
       }
+
+      virtual void gl_initialize_context() = 0;
 
       virtual void gl_draw() = 0;
   };

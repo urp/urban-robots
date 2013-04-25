@@ -23,10 +23,9 @@
 #include "gtk/gl_view/gl_view.hpp"
 
 gtk::GLView::GLView( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder )
-: Gtk::VBox(cobject), m_builder( builder ), m_block_renderer( false )
+: Gtk::VBox(cobject), m_builder( builder )
 {
   m_builder->get_widget_derived( "gl_canvas" , m_canvas );
-  get_canvas()->connect_content_provider( std::bind( std::mem_fun( &GLView::gl_draw_content ), this ) );
   m_record_frames_connection = get_canvas()->connect_pixmap_observer ( std::bind( std::mem_fun( &GLView::on_record_frame), this ) );
   m_record_frames_connection.block();
   // get control widgets
@@ -49,7 +48,7 @@ gtk::GLView::GLView( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& 
   m_pivot_check->signal_toggled().connect( sigc::mem_fun( *this, &GLView::on_pivot_toggled) );
 }
 
-void   save_pixmap( const Glib::RefPtr<Gdk::Pixmap>& pixmap, const std::string& filename = "frame", const std::string& format = "png" )	//const
+void   save_pixmap( const Glib::RefPtr<Gdk::Pixmap>& pixmap, const std::string& filename = "frame", const std::string& format = "png" ) //const
 {
   int width, height;
   pixmap->get_size( width, height );
@@ -70,9 +69,9 @@ void gtk::GLView::on_save_frame_as_clicked()
   fcd.add_button( Gtk::Stock::SAVE, Gtk::RESPONSE_OK );
   if( fcd.run() == Gtk::RESPONSE_OK )
   {
-	m_canvas->render_to_pixmap();
+    m_canvas->render_to_pixmap();
 
-	save_pixmap( m_canvas->get_pixmap(), fcd.get_filename(), "png" );
+    save_pixmap( m_canvas->get_pixmap(), fcd.get_filename(), "png" );
   }
 }
 
@@ -83,27 +82,30 @@ void gtk::GLView::on_record_frames_toggled()
     Gtk::FileChooserDialog fcd( "Choose a folder were the save the frames", Gtk::FILE_CHOOSER_ACTION_SELECT_FOLDER );
     fcd.add_button( Gtk::Stock::OPEN, Gtk::RESPONSE_OK );
 
-	if( fcd.run() == Gtk::RESPONSE_OK )
-	{
-	  m_canvas->set_render_target( GLRenderTarget::PIXMAP );
-      m_record_filename = Filename( fcd.get_filename(), "frame", 0, "png" );
-	  m_record_frames_connection.unblock();
-	}
-	else m_record_frames_toggle->set_active( false );
+    if( fcd.run() == Gtk::RESPONSE_OK )
+    {
+      m_canvas->set_render_target( GLRenderTarget::PIXMAP );
+        m_record_filename = Filename( fcd.get_filename(), "frame", 0, "png" );
+      m_record_frames_connection.unblock();
+    }
+    else m_record_frames_toggle->set_active( false );
   }
   else
   {
-	m_record_frames_connection.block();
-	m_canvas->set_render_target( GLRenderTarget::WINDOW );
+    m_record_frames_connection.block();
+    m_canvas->set_render_target( GLRenderTarget::WINDOW );
   }
 }
 
 void gtk::GLView::on_block_renderer_clicked()
 {
-  m_block_renderer = !m_block_renderer;
-  m_render_target_menu->set_stock_id( m_block_renderer
-                                      ? Gtk::Stock::DISCONNECT
-                                      : Gtk::Stock::CONNECT );
+  m_canvas->block_renderer( ! m_canvas->is_renderer_blocked() );
+
+  //m_canvas->set_visible( !block );
+
+  m_render_target_menu->set_stock_id( m_canvas->is_renderer_blocked()
+                                    ? Gtk::Stock::DISCONNECT
+                                    : Gtk::Stock::CONNECT );
 }
 
 void gtk::GLView::on_origin_toggled()

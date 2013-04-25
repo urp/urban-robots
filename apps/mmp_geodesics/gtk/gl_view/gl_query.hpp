@@ -29,11 +29,13 @@ namespace gtk
 
   struct gl_query
   {
-    static void print_gl_attrib(const Glib::RefPtr<const Gdk::GL::Config>& glconfig,
-                                const char* attrib_str,
-                                int attrib,
-                                bool is_boolean);
+    static void print_gl_attrib( std::ostream& os
+                               , const Glib::RefPtr<const Gdk::GL::Config>& glconfig
+                               , const char* attrib_str
+                               , int attrib
+                               , bool is_boolean
+                               );
 
-    static void examine_gl_attrib(const Glib::RefPtr<const Gdk::GL::Config>& glconfig);
+    static void examine_gl_attrib( std::ostream& os, const Glib::RefPtr<const Gdk::GL::Config>& glconfig);
   };
 }

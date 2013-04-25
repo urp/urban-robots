@@ -33,7 +33,7 @@ using namespace flat;
 
 typedef boost::numeric::ublas::symmetric_matrix< distance_t, boost::numeric::ublas::upper > distance_matrix_type;
 
-int main (int argc, char *argv[])
+int main ( int argc, char **argv )
 {
 
   namespace po = boost::program_options;
@@ -67,7 +67,7 @@ int main (int argc, char *argv[])
     ;
 
   po::variables_map vm;
-  po::store( po::parse_command_line( argc, argv, desc ), vm );
+  po::store( po::basic_command_line_parser< char >( argc, argv ).options( desc ).allow_unregistered().run(), vm );
   po::notify( vm );
 
   //help
@@ -88,7 +88,7 @@ int main (int argc, char *argv[])
 
   //----| model - surface
 
-  typedef flat::TriSurface	surface_t;
+  typedef flat::TriSurface  surface_t;
 
   std::shared_ptr<surface_t> surface;
 
