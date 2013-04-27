@@ -77,12 +77,19 @@ namespace gtk
       // make temporary in gl::View
       Glib::RefPtr< Gdk::Pixmap >       m_pixmap;
 
-
       // setup render target
+
+      std::vector< gl::Drawable* > m_gl_init_list;
+      //std::vector< gl::Drawable* > m_gl_remove_texture_list;
 
       bool configure_target( const size_t width, const size_t height );
 
       void gl_initialize_context();
+
+      void gl_initialize_drawables( const bool init_all = false );
+
+      void gl_remove_all_drawables( const bool remove_all );
+
       void gl_setup_view( const float width, const float height );
 
       // issue opengl drawing commands
@@ -113,6 +120,45 @@ namespace gtk
               , const Glib::RefPtr<Gtk::Builder>& builder );
 
       virtual ~GLCanvas() { }
+
+      // adding and removing drawables
+
+      virtual void add_drawable( gl::Drawable* drawable )
+      {
+
+        std::clog << "gtk::GLCanvas::add_drawable" << std::endl;
+
+        flat::View< gl::Drawable >::add_drawable( drawable );
+
+        if( m_target->is_valid() )
+        {
+          m_target->gl_begin_context();
+
+            drawable->gl_initialize_context();
+
+          m_target->gl_end_context();
+        }
+        else
+          m_gl_init_list.push_back(drawable);
+      }
+
+      virtual void remove_drawable( gl::Drawable* drawable )
+      {
+        assert( m_target );
+
+        std::clog << "gtk::GLCanvas::remove_drawable| valid context " << m_target->is_valid() << std::endl;
+
+        if( m_target->is_valid() )
+        {
+          m_target->gl_begin_context();
+
+            drawable->gl_remove_from_context();
+
+          m_target->gl_end_context();
+        }
+
+        flat::View< gl::Drawable >::remove_drawable( drawable );
+      }
 
       // TODO: add gui switch
 

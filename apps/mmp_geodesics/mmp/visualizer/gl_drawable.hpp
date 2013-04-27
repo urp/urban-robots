@@ -23,7 +23,6 @@
 
 # include "gtk/gl_view/gl_view.hpp"
 # include "gtk/gl_view/gl_drawable.hpp"
-//# include "surface/tri_surface/drawable.h"
 
 # include <utk/geometry.h>
 
@@ -125,9 +124,13 @@ namespace gl
       GeodesicsDrawable( Geodesics* g );
 
       virtual ~GeodesicsDrawable()
-      { std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl; }
+      { std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl;
+        send_remove_signal();
+      }
 
       virtual void gl_initialize_context();
+
+      virtual void gl_remove_from_context();
 
       virtual void gl_draw();
 

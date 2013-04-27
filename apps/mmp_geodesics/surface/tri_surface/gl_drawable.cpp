@@ -71,6 +71,10 @@ void gl::SurfaceDrawable::gl_initialize_context()
 */
 }
 
+void gl::SurfaceDrawable::gl_remove_from_context()
+{
+}
+
 void gl::SurfaceDrawable::gl_draw_gaussian_curvature_vertices() const
 {
   using namespace boost::accumulators;

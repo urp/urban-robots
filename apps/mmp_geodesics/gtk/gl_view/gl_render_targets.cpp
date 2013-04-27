@@ -29,13 +29,17 @@ using namespace gtk;
 
 //:::| GLRenderTarget |:::
 
-void GLRenderTarget::gl_begin_context()
+bool GLRenderTarget::gl_begin_context()
 {
-  assert( get_gdk_gl_context() );
-  assert( get_gdk_gl_drawable() );
+  assert( is_valid() );
 
   if( ! get_gdk_gl_drawable()->gl_begin( get_gdk_gl_context() ) )
+  {
     std::cerr << "gtk::GLRenderTarget::gl_begin_context\t|" << "FAILED" << std::endl;
+    return false;
+  }
+
+  return true;
 }
 
 void GLRenderTarget::gl_end_context()
@@ -47,7 +51,7 @@ void GLRenderTarget::gl_flush()
 {
   Glib::RefPtr< Gdk::GL::Drawable > gldrawable = get_gdk_gl_drawable();
 
-  assert( gldrawable );
+  assert( is_valid() );
 
   if( gldrawable->is_double_buffered() )
     gldrawable->swap_buffers();
@@ -89,11 +93,6 @@ GLWindowRenderTarget::GLWindowRenderTarget( Gtk::Widget& widget, const Glib::Ref
   # endif
 }
 
-GLWindowRenderTarget::~GLWindowRenderTarget()
-{
-  //Gtk::GL::widget_unset_gl_capability( m_widget );
-}
-
 bool GLWindowRenderTarget::configure( const size_t width, const size_t height )
 {
   # if defined DBG_GTK_GL_RENDER_TARGETS
@@ -106,7 +105,7 @@ bool GLWindowRenderTarget::configure( const size_t width, const size_t height )
     m_context  = Gtk::GL::widget_get_gl_context ( m_widget );
   }
 
-  //assert( get_gdk_gl_context()->get_gl_drawable() == get_gdk_gl_drawable() );
+  assert( is_valid() );
 
   return m_context;
 }

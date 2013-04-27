@@ -92,7 +92,7 @@ Geodesics::ac_t  Geodesics::access_channel(const Window& candidate, winlist_t& w
   // QUIRK to decide in case of equal frontier points
   if( itr != wlist.end() )
   {
-	// siblingss are inserted after another - side lobes are inserted first
+  // siblingss are inserted after another - side lobes are inserted first
     const bool putright = left_edge_candidate;
 
     const bool sameparent = &wpre == (*itr)->predeccessor();
@@ -123,16 +123,16 @@ Geodesics::ac_t  Geodesics::access_channel(const Window& candidate, winlist_t& w
   std::clog << " pred cand   "<< wpre << " (on " << (left_edge_candidate ? "left" : "right") << " edge)" << std::endl;
 
   if(itr != wlist.end())
-	std::clog << "\t\t\t\t\t|" << " pred right " << *(*itr)->predeccessor() << std::endl;
+  std::clog << "\t\t\t\t\t|" << " pred right " << *(*itr)->predeccessor() << std::endl;
 
 
   if(itl != wlist.rend())
-	std::clog << "\t\t\t\t\t| left  " << **itl << std::endl;
+  std::clog << "\t\t\t\t\t| left  " << **itl << std::endl;
 
   std::clog << "\t\t\t\t\t| cand  " << candidate << std::endl;
 
   if(itr != wlist.end())
-	std::clog << "\t\t\t\t\t| right " << **itr << std::endl;
+  std::clog << "\t\t\t\t\t| right " << **itr << std::endl;
 
   # endif
 
@@ -194,7 +194,7 @@ Geodesics::insert_result Geodesics::insert_window( Window* candidate, const utk:
   const ps_t psc( candidate->pseudosource() );
 
   # if defined DBG_FLAT_MMP_INSERT_WINDOW
-  std::clog	<< "mmp::Geodesics::insert_window\t|^"
+  std::clog << "mmp::Geodesics::insert_window\t|^"
             << *candidate
             << " -> " << ehc << " with " << wlist.size() << " windows"
             << std::endl << std::flush;
@@ -241,8 +241,8 @@ Geodesics::insert_result Geodesics::insert_window( Window* candidate, const utk:
   }else{ delete candidate; candidate = 0; } // delete dominated window
 
   # if defined DBG_FLAT_MMP_INSERT_WINDOW
-  std::clog	<< "mmp::Geodesics::insert_window\t|" << "complete - "
-  			<< wlist.size() << " edge windows"
+  std::clog << "mmp::Geodesics::insert_window\t|" << "complete - "
+        << wlist.size() << " edge windows"
             << " - adjacent events ("
             << (get< LEFT>(result.ac_ev) ? get< LEFT>(result.ac_ev)->window()->id : 0 ) << "<>"
             << (get<RIGHT>(result.ac_ev) ? get<RIGHT>(result.ac_ev)->window()->id : 0 ) << ")"
@@ -253,7 +253,7 @@ Geodesics::insert_result Geodesics::insert_window( Window* candidate, const utk:
 }
 
 // add windows on the 1-ring edges around the source vertex
-void	Geodesics::initialize()
+void  Geodesics::initialize()
 {
   # if defined DBG_FLAT_MMP_INITIALIZE
   std::clog << "mmp::Geodesics::initialize\t|"
@@ -267,7 +267,7 @@ void	Geodesics::initialize()
 
   for(auto outits = get_surface().vertex( source() ).out_edges(); outits.first != outits.second; outits.first++ )
   {
-	const edge_handle out( *outits.first, surf );
+  const edge_handle out( *outits.first, surf );
 
     Window* wout = Window::create_initial( source(), out , coord_t(0), out.length(), distance_t(0), out.length() );
     # if defined DBG_FLAT_MMP_INITIALIZE
@@ -309,7 +309,7 @@ void	Geodesics::initialize()
   # endif
 }
 
-void	Geodesics::handle_event( EventPoint* ev )
+void  Geodesics::handle_event( EventPoint* ev )
 {
   edge_handle eh( ev->window()->edge, surf );
 
@@ -364,10 +364,10 @@ std::pair< Geodesics::winlist_t::iterator, ev_pair_t >  Geodesics::delete_window
 
   ev_pair_t ac_ev( 0,0 );
   if( evgrab.frontier != event_queue.end() )
-	ac_ev = delete_event( evgrab.frontier );
+  ac_ev = delete_event( evgrab.frontier );
   # endif
 
-  event_queue.remove_if( [&loc](const EventPoint* ev)->bool { if( *loc == ev->window() ) {	delete ev; return true;} return false; } );
+  event_queue.remove_if( [&loc](const EventPoint* ev)->bool { if( *loc == ev->window() ) {  delete ev; return true;} return false; } );
 
   //:::|delete the window
 
@@ -380,7 +380,7 @@ std::pair< Geodesics::winlist_t::iterator, ev_pair_t >  Geodesics::delete_window
 
 //---| delete_event
 //
-ev_pair_t	Geodesics::delete_event( event_queue_t::iterator ev_it )
+ev_pair_t Geodesics::delete_event( event_queue_t::iterator ev_it )
 {
   //TODO: will ac_ev be coupled again after deletion? otherwise we have pointers to deleted memory
   //assert( (*ev_it)->adjacent<LEFT>() == 0 && (*ev_it)->adjacent<RIGHT>() == 0 );
@@ -394,7 +394,7 @@ ev_pair_t	Geodesics::delete_event( event_queue_t::iterator ev_it )
 }
 
 
-ev_pair_t	Geodesics::delete_event( EventPoint* ev )
+ev_pair_t Geodesics::delete_event( EventPoint* ev )
 {
   event_queue_t::iterator it = std::find(event_queue.begin(), event_queue.end(), ev);
   assert( it != event_queue.end() );
@@ -403,7 +403,7 @@ ev_pair_t	Geodesics::delete_event( EventPoint* ev )
 
 
 // propagate windows over the mesh
-void	Geodesics::propagate_paths()
+void  Geodesics::propagate_paths()
 {
   using utk::sqr;
 
@@ -500,9 +500,9 @@ void    Geodesics::propagate_window( EventPoint& ev)
   //        / e0 \              __
   //(0,0) = A---->B = (|e0|,0)  AB : baseline
   //        <-----^
-  // 		     \   /
+  //         \   /
   //       e1 \ / e2
-  //     		   v C = (xc,yc) - reconstructed using |e1| and |e2|
+  //           v C = (xc,yc) - reconstructed using |e1| and |e2|
 
   // coordinates of the baseline
   const coord2_t A( coord_t(0), coord_t(0) );
@@ -518,7 +518,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
   utk::ray<coord_t,2> e2ray( C, B );
 
   assert( utk::close_ulps( e1ray.length(), e1l) );
-  assert( utk::close_ulps( e2ray.length(), e2l) );
+  //assert( utk::close_ulps( e2ray.length(), e2l) );
 
   // normalize such that parameter refelects position on edge
   e1ray.direction().normalize();
@@ -528,14 +528,14 @@ void    Geodesics::propagate_window( EventPoint& ev)
 
   //                  <-LEFT RIGHT->
 
-  // ps						          //  			       ps
-  //   \ b0					        //  		    	 b0/ \b1
-  // A--\--->B				      //  	  	   A--/---\->B
-  //  \  \  /				        //           _\/ e0  \/_
-  //   \  \/_,C+e2b0*(B-C)	//  A+e1b0*e1 /\     /\ `C+e2b1*e2
-  //    \ /\ 				        //        C-A=e1\   /e2=B-C
-  //     C  \				        //           	   \ /
-                            //	              C
+  // ps                     //               ps
+  //   \ b0                 //             b0/ \b1
+  // A--\--->B              //           A--/---\->B
+  //  \  \  /               //           _\/ e0  \/_
+  //   \  \/_,C+e2b0*(B-C)  //  A+e1b0*e1 /\     /\ `C+e2b1*e2
+  //    \ /\                //        C-A=e1\   /e2=B-C
+  //     C  \               //               \ /
+                            //                C
 
   // intersection of rays from pseudosource (through left/right window bounds) with the opposite edges
   // and with the line parallel to e0 touching C
@@ -547,9 +547,9 @@ void    Geodesics::propagate_window( EventPoint& ev)
   // potentially created windows
 
   Window* w11 = 0; // projected on e1    A------B
-  Window* w12 = 0; // side lobe on e1	w12 \    / w22
-  Window* w21 = 0; // projected on e2	     \  /
-  Window* w22 = 0; // side lobe on e2	   w11\/w21
+  Window* w12 = 0; // side lobe on e1 w12 \    / w22
+  Window* w21 = 0; // projected on e2      \  /
+  Window* w22 = 0; // side lobe on e2    w11\/w21
 
   insert_result  e11, e12, e21, e22;
 
@@ -602,7 +602,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
 
     source_ps = srcwin->pseudosource();
 
-    coord_t 		bound0, bound1;
+    coord_t     bound0, bound1;
     edge_descriptor edge0,  edge1;
 
     std::tie( bound0, edge0 ) = project_bound<LEFT >( ev, e1, e2, e1ray, e2ray, e0l, e1l, e2l, source_ps );
@@ -680,7 +680,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
       # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
       std::clog << "\t\t\t\t\t| window on e1" << std::endl;
       # endif
-  	  assert( edge0 == e1.descriptor() || edge1 == e1.descriptor() );
+      assert( edge0 == e1.descriptor() || edge1 == e1.descriptor() );
       const distance_t distance0 = utk::distance( source_ps, e1ray.at(bound0) );
       const distance_t distance1 = utk::distance( source_ps, e1ray.at(bound1) );
 
@@ -706,7 +706,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
       # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
       std::clog << "\t\t\t\t\t| left side lobe"
                 << ", angle at b0 = " << (e0.source().total_angle()/(2.*M_PI)) << "pi"
-	  	  	    << ", e1 is boundary " << e1boundary << std::endl;
+              << ", e1 is boundary " << e1boundary << std::endl;
       # endif
 
       // outer sidelobe
@@ -725,8 +725,8 @@ void    Geodesics::propagate_window( EventPoint& ev)
     {
       # if defined DBG_FLAT_MMP_PROPAGATE_WINDOW
       std::clog << "\t\t\t\t\t| right side lobe"
-	            << ", angle at b1 = " << (e0.target().total_angle()/(2.*M_PI)) << "pi"
-	  	  	    << ", e2 is boundary " << e2boundary << std::endl;
+              << ", angle at b1 = " << (e0.target().total_angle()/(2.*M_PI)) << "pi"
+              << ", e2 is boundary " << e2boundary << std::endl;
       # endif
 
       // outer sidelobe
@@ -766,7 +766,7 @@ void    Geodesics::propagate_window( EventPoint& ev)
 }
 
 
-coord_t Geodesics::backtrace( const Window& window, const coord_t& window_point )	const
+coord_t Geodesics::backtrace( const Window& window, const coord_t& window_point ) const
 {
   assert( contained( window_point, window ) );
 
@@ -774,12 +774,12 @@ coord_t Geodesics::backtrace( const Window& window, const coord_t& window_point 
 
   // return predeccessors bounds if window is a ps window
   if( window.has_ps_vertex<LEFT>() )
-  {	assert( pre->bound<LEFT>() == 0 );
-	return 0;
+  { assert( pre->bound<LEFT>() == 0 );
+  return 0;
   }
 
   if( window.has_ps_vertex<RIGHT>() )
-  	return pre->bound<RIGHT>();
+    return pre->bound<RIGHT>();
 
   // base edge (contains the windows predeccessor)
   const edge_handle e0 ( pre->edge, get_surface() ); assert( e0.opposite().second );
@@ -788,7 +788,7 @@ coord_t Geodesics::backtrace( const Window& window, const coord_t& window_point 
   // is the window a OUTSIDE-sidelobe ?
   const edge_handle we ( window.edge, get_surface() );
   if( window.ps == we.next().target() )
-	return we.next() == e0.opposite().first ? coord_t(0) : e0l;
+  return we.next() == e0.opposite().first ? coord_t(0) : e0l;
 
   // the opposite edges
   const edge_handle e1 ( e0.opposite().first.next() );
@@ -799,10 +799,10 @@ coord_t Geodesics::backtrace( const Window& window, const coord_t& window_point 
 
   //:::|2d triangle reconstruction
 
-  //    		 / e0 \
+  //         / e0 \
   // (0,0) = A---->B = (|e0|,0)
   //         <-----^
-  //  		    \   /
+  //          \   /
   //        e1 \ / e2
   //            v C = (xc, -yc) - reconstructed using |e1| and |e2|
 
@@ -855,14 +855,14 @@ std::list< coord_t >&    Geodesics::backtrace( const Window& window, std::list< 
 }
 
 // retrieve distance from source to destination vertex
-distance_t	Geodesics::query_distance( const vertex_descriptor& target ) const
+distance_t  Geodesics::query_distance( const vertex_descriptor& target ) const
 {
   const distance_t dist = vertex_labels[ target ];
 
   # if defined DBG_FLAT_MMP_QUERY_DISTANCE
   std::clog << "mmp::Geodesics::query_distance\t|"
             << " minimal distance " << dist
-            << " from " << source()	<< " to " << target
+            << " from " << source() << " to " << target
             << std::endl << std::flush;
   # endif
 
@@ -871,7 +871,7 @@ distance_t	Geodesics::query_distance( const vertex_descriptor& target ) const
 
 
 /* retrieve distance from source to point on edge
-distance_t	Geodesics::query_minimal_distance(const edge_descriptor& targetedge) const
+distance_t  Geodesics::query_minimal_distance(const edge_descriptor& targetedge) const
 {
   distance_t dmin = std::numeric_limits<distance_t>::infinity();
 
@@ -883,7 +883,7 @@ distance_t	Geodesics::query_minimal_distance(const edge_descriptor& targetedge) 
     { dmin=td;
       std::clog <<"mmp::Geodesics::query_distance"
                 <<"\t| distance candidate (out) - "<<wfront
-	            <<std::endl;
+              <<std::endl;
     }
 
     const Window& wback = *windows[edge_handle(*outits.first,surf).previous()].back();
@@ -892,13 +892,13 @@ distance_t	Geodesics::query_minimal_distance(const edge_descriptor& targetedge) 
     { dmin=td;
       std::clog <<"mmp::Geodesics::query_distance"
                 <<"\t| distance candidate (in)  - "<<wback
-	            <<std::endl;
+              <<std::endl;
     }
   }
   std::clog <<"mmp::Geodesics::query_distance"
             <<"\t| to "<<target
             <<"\t| minimal distance "<<dmin
-	        <<std::endl<<std::flush;
+          <<std::endl<<std::flush;
   assert(std::isfinite(dmin));
   return dmin;
 }*/
@@ -1179,7 +1179,7 @@ bool  Geodesics::sanity_check()  const
   }
 
   if( ok )
-  {	std::cout << "mmp::Geodesics::sanity_check"
+  { std::cout << "mmp::Geodesics::sanity_check"
               << "\t| completed successfully"
               << std::endl;
     std::clog << "mmp::Geodesics::sanity_check"

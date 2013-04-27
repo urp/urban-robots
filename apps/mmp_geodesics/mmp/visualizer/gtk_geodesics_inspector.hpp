@@ -49,12 +49,12 @@ namespace gtk
 
     private: // data members
 
-      std::shared_ptr< gl::GeodesicsDrawable >	m_geodesics_drawable;
-      std::shared_ptr< ::gl::SurfaceDrawable >	m_surface_drawable;
+      std::shared_ptr< gl::GeodesicsDrawable >  m_geodesics_drawable;
+      std::shared_ptr< ::gl::SurfaceDrawable >  m_surface_drawable;
 
       mmp::Geodesics* m_geodesics;
 
-      gtk::GLView*	m_view;
+      gtk::GLView*  m_view;
 
 
       sigc::connection m_iterate_connection;
@@ -68,8 +68,8 @@ namespace gtk
       Gtk::Label*  m_top_distance_label;
       Gtk::Label*  m_queue_size_label;
 
-      Gtk::ToolButton* 		m_step_button;
-      Gtk::ToggleToolButton* 	m_iterate_button;
+      Gtk::ToolButton*    m_step_button;
+      Gtk::ToggleToolButton*  m_iterate_button;
 
       Gtk::CheckButton*       m_check_result_check;
       Gtk::CheckButton*       m_stop_on_errors_check;
@@ -77,7 +77,7 @@ namespace gtk
       bool m_check_result;
       bool m_stop_on_errors;
 
-      std::ofstream	m_debug_log_file;
+      std::ofstream m_debug_log_file;
       std::streambuf* m_clog_buffer;
 
       void    redirect_clog_to_file( const std::string& path )
@@ -117,7 +117,7 @@ namespace gtk
 
       bool step();
 
-      void single_step()	{ step(); };
+      void single_step()  { step(); };
 
       void toggle_iteration();
 

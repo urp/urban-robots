@@ -140,7 +140,8 @@ namespace gl
 
       const std::shared_ptr< const flat::TriSurface >& get_surface() const { return m_surface; }
 
-      virtual void  gl_initialize_context();
+      virtual void gl_initialize_context();
+      virtual void gl_remove_from_context();
 
       virtual void gl_draw()
       {

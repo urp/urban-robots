@@ -55,11 +55,13 @@ namespace gtk
 
     public:
 
-      void gl_begin_context();
+      bool gl_begin_context();
 
       void gl_end_context();
 
       void gl_flush();
+
+      virtual bool is_valid() = 0;
 
       virtual bool configure( const size_t width, const size_t height) = 0;
 
@@ -68,6 +70,7 @@ namespace gtk
       virtual Glib::RefPtr< Gdk::GL::Config > get_gdk_gl_config() = 0;
 
       const types_t& get_type() const { return m_type; }
+
 
   };
 
@@ -82,7 +85,12 @@ namespace gtk
 
       GLWindowRenderTarget( Gtk::Widget& widget, const Glib::RefPtr< const Gdk::GL::Context >& shared_context = Glib::RefPtr< const Gdk::GL::Context >() );
 
-      virtual ~GLWindowRenderTarget();
+      virtual ~GLWindowRenderTarget() {};
+
+      bool is_valid()
+      {
+        return Gtk::GL::widget_is_gl_capable( m_widget ) && m_widget.is_realized() && get_gdk_gl_context() && get_gdk_gl_drawable();
+      }
 
       bool configure( const size_t width, const size_t height );
 
@@ -91,6 +99,7 @@ namespace gtk
       Glib::RefPtr< Gdk::GL::Drawable > get_gdk_gl_drawable();
 
       Glib::RefPtr< Gdk::GL::Config > get_gdk_gl_config();
+
 
   };
 
@@ -129,6 +138,13 @@ namespace gtk
       Glib::RefPtr< Gdk::GL::Config > get_gdk_gl_config()
       {
         return m_config;
+      }
+
+      bool is_valid()
+      {
+        return m_pixmap
+               && Gdk::GL::ext( m_pixmap ).is_gl_capable()
+               && m_context;
       }
 
   };

@@ -147,8 +147,6 @@ void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::share
 
   m_step_button->set_sensitive( true );
   m_iterate_button->set_sensitive( true );
-  // m_view-invalidate() TODO: check if view has_context -> GLView
-
 }
 
 void gtk::GeodesicsInspector::run_propagation( )

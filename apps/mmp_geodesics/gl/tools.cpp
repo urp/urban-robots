@@ -38,7 +38,7 @@ void  gl::PrintError( std::ostream& os )
 {
   GLenum code = glGetError();
   if(code != GL_NO_ERROR)
-    os << "flat::gl::PrintError\t| "
+    os << "gl::PrintError\t| "
        << " WARNING: an OpenGL error has occured."
        << " message: " << gluErrorString(code) << std::endl;
 

@@ -43,8 +43,8 @@ GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& b
   // setting camera position
   cam_inertial.position().z() += cam_dist;
 
-  //set_app_paintable( true );
-  //set_double_buffered( false );
+  set_app_paintable( true );
+  set_double_buffered( false );
 
   // view transformation signals. Events have to be enabled in the glade file
   signal_button_press_event().connect(  sigc::mem_fun(*this, &GLCanvas::on_button_press_event) );
@@ -54,19 +54,24 @@ GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& b
   // The context of the window
 
   m_target.reset( new GLWindowRenderTarget( *this )
-                  //       new GLPixmapRenderTarget( m_pixmap )
-                        );
+                  //new GLPixmapRenderTarget( m_pixmap )
+                );
 }
 
 void GLCanvas::gl_initialize_context()
 {
+
+  # if defined DBG_GTK_GLCANVAS_CONFIGURE
+  std::clog << "gtk::GLCanvas::configure_target\t| (re-)initializing context" << std::endl;
+  # endif
+
   glClearColor( .2, .2, .2, 1. );
   glClearDepth( 1. );
 
   glDepthFunc( GL_LEQUAL );
   glEnable(GL_DEPTH_TEST);
 
-  glEnable( GL_BLEND );
+  //glEnable( GL_BLEND );
   glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
   glEnable( GL_LINE_SMOOTH );
@@ -85,36 +90,66 @@ void GLCanvas::gl_initialize_context()
 
   glLightModeli( GL_LIGHT_MODEL_COLOR_CONTROL, GL_SEPARATE_SPECULAR_COLOR );
 
+  // light 0
+
   glEnable( GL_LIGHT0 );
 
   // create light components
-  GLfloat ambientLight[]  = { 0.15f, 0.15f, 0.15f, 1.f };
-  GLfloat diffuseLight[]  = {   .7f,   .7f,   .7f, 1.f };
-  GLfloat specularLight[] = {   .2f,   .2f,   .2f, 1.f };
+  GLfloat ambient0[]  = { 0.15f, 0.15f, 0.15f, 1.f };
+  GLfloat diffuse0[]  = {   .7f,   .7f,   .7f, 1.f };
+  GLfloat specular0[] = {   .2f,   .2f,   .2f, 1.f };
 
-  GLfloat position[]    = {   0.f,   0.f, -10.0f, 1.f };
+  GLfloat position0[]    = {   0.f,   0.f, -10.0f, 1.f };
 
   // assign created components to GL_LIGHT0
-  glLightfv( GL_LIGHT0, GL_AMBIENT, ambientLight );
-  glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuseLight );
-  glLightfv( GL_LIGHT0, GL_SPECULAR, specularLight );
-  glLightfv( GL_LIGHT0, GL_POSITION, position );
+  glLightfv( GL_LIGHT0, GL_AMBIENT, ambient0 );
+  glLightfv( GL_LIGHT0, GL_DIFFUSE, diffuse0 );
+  glLightfv( GL_LIGHT0, GL_SPECULAR, specular0 );
+  glLightfv( GL_LIGHT0, GL_POSITION, position0 );
+
+  // light 1
+
+  glEnable( GL_LIGHT1 );
+
+  // create light components
+  GLfloat ambient1[]  = { 0.15f, 0.15f, 0.15f, 1.f };
+  GLfloat diffuse1[]  = {   .7f,   .7f,   .7f, 1.f };
+  GLfloat specular1[] = {   .2f,   .2f,   .2f, 1.f };
+
+  GLfloat position1[]    = { 0.f, 0.f, 10.0f, 1.f };
+
+  // assign created components to GL_LIGHT1
+  glLightfv( GL_LIGHT1, GL_AMBIENT, ambient1 );
+  glLightfv( GL_LIGHT1, GL_DIFFUSE, diffuse1 );
+  glLightfv( GL_LIGHT1, GL_SPECULAR, specular1 );
+  glLightfv( GL_LIGHT1, GL_POSITION, position1 );
 
   # if defined DBG_GTK_GL_CANVAS
-  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| canvas error checkpoint" << std::endl;
-  gl::PrintError();
+  gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_context\t| canvas error checkpoint" << std::endl );
   # endif
-
-  //if( ! m_target->get_gdk_gl_context()->get_share_list() )
-  std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
-
-  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
-  std::cerr << "gtk::GLCanvas::gl_initialize_context\t| drawable error checkpoint" << std::endl;
-  gl::PrintError();
-  # endif
-
 }
 
+void GLCanvas::gl_initialize_drawables( const bool init_all )
+{
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  std::clog << "gtk::GLCanvas::gl_initialize_drawables\t| "
+            << "initialize " << (init_all ? "all" : ( m_gl_init_list.empty() ? "no new" : "new" ) ) << "drawables"
+            << std::endl;
+  # endif
+
+  assert( m_target->is_valid() );
+
+  if( init_all)
+    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
+  else
+    std::for_each( m_gl_init_list.begin(), m_gl_init_list.end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
+
+  m_gl_init_list.clear();
+
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_drawables\t| drawable error checkpoint" << std::endl );
+  # endif
+}
 
 void GLCanvas::gl_setup_view( const float width, const float height )
 {
@@ -175,18 +210,19 @@ bool GLCanvas::configure_target( const size_t width, const size_t height )
   const bool configured = m_target->configure( width, height );
 
   # if defined DBG_GTK_GLCANVAS_CONFIGURE
-  std::clog << "gtk::GLCanvas::on_configure_event\t| preparing context" << std::endl;
+  std::clog << "gtk::GLCanvas::configure_target\t| preparing context" << std::endl;
   # endif
 
   m_target->gl_begin_context();
 
     if( ! m_target->get_gdk_gl_context()->get_share_list() || old_context_was_not_shared )
     {
-      # if defined DBG_GTK_GLCANVAS_CONFIGURE
-      std::clog << "gtk::GLCanvas::on_configure_event\t| reinitializing context" << std::endl;
-      # endif
-
       gl_initialize_context();
+      gl_initialize_drawables( true );
+
+    }else
+    {
+      gl_initialize_drawables();
     }
 
     gl_setup_view(get_width(),get_height());
@@ -216,23 +252,28 @@ void GLCanvas::gl_render_scene()
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
+  glPushAttrib( GL_ALL_ATTRIB_BITS );
   glPushMatrix();
+  {
+    gl::InvTrafo( cam_inertial );
 
-  gl::InvTrafo( cam_inertial );
+    // draw viewing pivot
+    if( get_pivot_visibility() )
+    {
+      glPushMatrix();
+        gl::Translate( cam_center );
+        gl::DrawCoords(.2f);
+      glPopMatrix();
+    }
 
-  // draw viewing pivot
-  if( get_pivot_visibility() )
-  { glPushMatrix();
-    gl::Translate( cam_center );
-    gl::DrawCoords(.2f);
-    glPopMatrix();
+    if( get_origin_visibility() )
+      gl::DrawCoords( 1. );
+
+    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_draw ) );
+
   }
-
-  if( get_origin_visibility() ) gl::DrawCoords( 1. );
-
-  std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_draw ) );
-
   glPopMatrix();
+  glPopAttrib();
 
   # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
   gl::PrintError( std::clog << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl );

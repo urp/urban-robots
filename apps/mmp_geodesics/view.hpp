@@ -52,7 +52,7 @@ namespace flat
       typename drawable_list_t::iterator        end()   { return m_drawables.end(); }
       typename drawable_list_t::const_iterator  end()   const { return m_drawables.end(); }
 
-      void add_drawable( DrawableT* drawable )
+      virtual void add_drawable( DrawableT* drawable )
       {
         assert( drawable );
         # if defined DBG_FLAT_GLCANVAS_ADD_DRAWABLE
@@ -71,7 +71,7 @@ namespace flat
             m_drawables.clear(); // TODO disconnect
       }*/
 
-      void remove_drawable( DrawableT* drawable )
+      virtual void remove_drawable( DrawableT* drawable )
       {
         auto it = std::find( m_drawables.begin(), m_drawables.end(), drawable );
 

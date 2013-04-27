@@ -58,13 +58,6 @@ void gl::GeodesicsDrawable::gl_initialize_context()
   // select our current texture
   glBindTexture( GL_TEXTURE_1D, m_equidist_texture );
 
-  glMatrixMode( GL_TEXTURE );
-
-    glLoadIdentity();
-    glScalef( 10., 10., 10. );
-
-  glMatrixMode( GL_MODELVIEW );
-
   // select modulate to mix texture with color for shading
   glTexEnvf( GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE );
 
@@ -78,6 +71,11 @@ void gl::GeodesicsDrawable::gl_initialize_context()
                    , GL_RGBA, GL_FLOAT, data );
 }
 
+
+void gl::GeodesicsDrawable::gl_remove_from_context()
+{
+  glDeleteTextures(1,&m_equidist_texture);
+}
 
 void gl::GeodesicsDrawable::gl_draw_event_point( EventPoint* ev, const bool is_top_event )
 {
@@ -345,12 +343,20 @@ void gl::GeodesicsDrawable::gl_draw_interval( const Window&             window
   if( shading == TEXTURE_DISTANCE_SHADING )
   {
     glEnable( GL_TEXTURE_1D );
+    // select our current texture
     glBindTexture( GL_TEXTURE_1D, m_equidist_texture );
+
+    glMatrixMode( GL_TEXTURE );
+
+      glLoadIdentity();
+      glScalef( 10., 10., 10. );
+
+    glMatrixMode( GL_MODELVIEW );
   }
 
   glEnable( GL_LIGHTING );
 
-  glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
+  //glLightModeli(GL_LIGHT_MODEL_TWO_SIDE, GL_TRUE);
 
   const distance_t top_distance = m_geodesics->event_queue.empty() ? 0. : m_geodesics->event_queue.top()->distance();
 
@@ -598,5 +604,4 @@ void gl::GeodesicsDrawable::gl_draw()
   if( ! m_geodesics->event_queue.empty() )
     gl_draw_wavefront( FLAT_SHADING );
 
-  //glDeleteTextures( 1, &m_equidist_texture );
 }
