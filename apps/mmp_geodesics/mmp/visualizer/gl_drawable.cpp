@@ -25,7 +25,7 @@
 
 # include <boost/lexical_cast.hpp>
 
-gl::GeodesicsDrawable::GeodesicsDrawable( Geodesics* g )
+gl::GeodesicsDrawable::GeodesicsDrawable( const std::shared_ptr< Geodesics >& g )
 : m_geodesics( g ), m_covering_visible( true )
 { }
 

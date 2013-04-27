@@ -52,7 +52,7 @@ namespace gtk
       std::shared_ptr< gl::GeodesicsDrawable >  m_geodesics_drawable;
       std::shared_ptr< ::gl::SurfaceDrawable >  m_surface_drawable;
 
-      mmp::Geodesics* m_geodesics;
+      std::shared_ptr< mmp::Geodesics > m_geodesics;
 
       gtk::GLView*  m_view;
 
@@ -145,9 +145,9 @@ namespace gtk
 
       void run_propagation();
 
-      void initialize( mmp::Geodesics* geodesics, const std::shared_ptr< const TriSurface > surface );
+      void initialize( const std::shared_ptr< mmp::Geodesics >& geodesics, const std::shared_ptr< const TriSurface >& surface );
 
-      static GeodesicsInspector* create_propagation_observer( mmp::Geodesics* geodesics, const std::shared_ptr< const TriSurface > surface )
+      static GeodesicsInspector* create_propagation_observer( const std::shared_ptr< mmp::Geodesics >& geodesics, const std::shared_ptr< const TriSurface > surface )
       {
         std::cout << "mmp::visualizer::gtk::GeodesicsInspector::create_propagation_observer" << std::endl;
 
@@ -162,7 +162,7 @@ namespace gtk
         return obs;
       }
 
-      static GeodesicsInspector* create_inspector( mmp::Geodesics* geodesics, const std::shared_ptr< const TriSurface > surface )
+      static GeodesicsInspector* create_inspector( const std::shared_ptr< mmp::Geodesics >& geodesics, const std::shared_ptr< const TriSurface > surface )
       {
         Glib::RefPtr< Gtk::Builder > builder = Gtk::Builder::create_from_file( GTK_MMP_OBSERVER_BUILDER_FILE );
         gtk::GeodesicsInspector* obs = 0;

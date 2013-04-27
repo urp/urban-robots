@@ -44,29 +44,23 @@ namespace gl
 
     private:
 
+      // inform all views that drawable needs redraw
       invalidate_signal invalidate_drawable;
-      remove_signal remove_drawable;
 
-      bool removed = false;
+      // order all views to remove the drawable
+      remove_signal remove_drawable;
 
     protected:
 
-      void send_remove_signal()
-      {
-        if( removed ) return;
+      Drawable()  {     }
 
-        remove_drawable();
-        removed = true;
-      }
+      Drawable( const Drawable& ) = delete;
 
     public:
-
-      Drawable()  {     }
 
       virtual   ~Drawable()
       {
         std::clog << "gl::Drawable::~Drawable\t|disconnecting drawable" << std::endl << std::flush;
-        send_remove_signal();
       }
 
       boost::signals::connection connect_invalidator( invalidate_signal::slot_type invalidator )
@@ -74,6 +68,8 @@ namespace gl
 
       boost::signals::connection connect_remover( remove_signal::slot_type remover )
       { return remove_drawable.connect( remover ); }
+
+      void remove_from_all_views() { remove_drawable(); }
 
       void invalidate()
       {

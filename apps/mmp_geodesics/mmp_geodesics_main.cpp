@@ -163,20 +163,6 @@ int main ( int argc, char **argv )
 
   distance_matrix_type distance_matrix( vm.count( export_dist_param ) ? surface->num_vertices() : 0 );
 
-  //---| single-source ?
-
-  TriSurface::vertex_descriptor source,last_source;
-
-  if( vm.count( source_param ) )
-  {
-    source = last_source = vm[ source_param ].as< TriSurface::vertex_descriptor >();
-    assert( source < surface->num_vertices() );
-  }else
-  {
-    source = 0;
-    last_source = surface->num_vertices()-1;
-  }
-
 
   //---| inspector ?
 
@@ -191,25 +177,43 @@ int main ( int argc, char **argv )
     Gtk::GL::init(argc, argv);
   }
 
+  //---| single-source ?
+
+  TriSurface::vertex_descriptor source,last_source;
+
+  if( vm.count( source_param ) )
+  {
+    source = last_source = vm[ source_param ].as< TriSurface::vertex_descriptor >();
+    assert( source < surface->num_vertices() );
+  }else
+  {
+    source = 0;
+    last_source = surface->num_vertices()-1;
+  }
+
+  //---| compute distances from source to last_source
+
   for( ; source <= last_source; source++ )
   {
-    mmp::Geodesics gi( *surface, source );
+    std::shared_ptr< mmp::Geodesics > geodesics( new mmp::Geodesics( *surface, source ) );
 
-    //----| propagate from source
     if( vm.count( inspector_param ) )
     {
       // reuse inspector window
-      if( !obs.get() ) obs.reset( gtk::GeodesicsInspector::create_propagation_observer( &gi, surface ) );
-      else obs->initialize( &gi, surface );
+      if( !obs.get() )
+        obs.reset( gtk::GeodesicsInspector::create_propagation_observer( geodesics, surface ) );
+      else
+        obs->initialize( geodesics, surface );
+
       obs->run_propagation();
 
     }else
-      gi.propagate_paths();
+      geodesics->propagate_paths();
 
-    //----| copy vertex-vertex distances from source vertex to distance matrix
+    //----| copy vertex-vertex distances (from source vertex) to distance matrix
     if( vm.count( export_dist_param ) )
       for( TriSurface::vertex_descriptor query = source + 1; query < surface->num_vertices(); query++)
-        distance_matrix( source, query ) = gi.query_distance( query );
+        distance_matrix( source, query ) = geodesics->query_distance( query );
   }
 
   //----| export distance matrix

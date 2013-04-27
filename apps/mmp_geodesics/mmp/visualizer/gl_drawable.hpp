@@ -45,7 +45,7 @@ namespace gl
 
     private: // data members
 
-      Geodesics* m_geodesics;
+      std::shared_ptr< Geodesics > m_geodesics;
 
       bool m_covering_visible;
 
@@ -119,13 +119,19 @@ namespace gl
 
       void gl_draw_covering( const shading_t );
 
+    protected:
+
+       GeodesicsDrawable( const std::shared_ptr< Geodesics >& g );
+
     public: // functions
 
-      GeodesicsDrawable( Geodesics* g );
+
+      static std::shared_ptr< GeodesicsDrawable > create( const std::shared_ptr< Geodesics >& g )
+      { return std::shared_ptr< GeodesicsDrawable >( new GeodesicsDrawable( g ) ); }
 
       virtual ~GeodesicsDrawable()
-      { std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl;
-        send_remove_signal();
+      {
+        std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl;
       }
 
       virtual void gl_initialize_context();
@@ -140,6 +146,6 @@ namespace gl
       void set_covering_visibility( const bool& visibility )
       { m_covering_visible = visibility; }
 
-      Geodesics* get_geodesics() const   { return m_geodesics; }
+      const std::shared_ptr< Geodesics >& get_geodesics() const  { return m_geodesics; }
   };
 }

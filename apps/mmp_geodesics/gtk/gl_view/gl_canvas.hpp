@@ -79,8 +79,8 @@ namespace gtk
 
       // setup render target
 
-      std::vector< gl::Drawable* > m_gl_init_list;
-      //std::vector< gl::Drawable* > m_gl_remove_texture_list;
+      std::vector< View< gl::Drawable >::drawable_pointer > m_gl_init_list;
+      std::vector< View< gl::Drawable >::drawable_pointer > m_gl_remove_list;
 
       bool configure_target( const size_t width, const size_t height );
 
@@ -88,7 +88,7 @@ namespace gtk
 
       void gl_initialize_drawables( const bool init_all = false );
 
-      void gl_remove_all_drawables( const bool remove_all );
+      void gl_remove_drawables( const bool remove_all = false );
 
       void gl_setup_view( const float width, const float height );
 
@@ -123,7 +123,7 @@ namespace gtk
 
       // adding and removing drawables
 
-      virtual void add_drawable( gl::Drawable* drawable )
+      virtual void add_drawable( const View< gl::Drawable >::drawable_pointer& drawable )
       {
 
         std::clog << "gtk::GLCanvas::add_drawable" << std::endl;
@@ -139,10 +139,10 @@ namespace gtk
           m_target->gl_end_context();
         }
         else
-          m_gl_init_list.push_back(drawable);
+          m_gl_init_list.push_back( drawable );
       }
 
-      virtual void remove_drawable( gl::Drawable* drawable )
+      virtual void remove_drawable( const View< gl::Drawable >::drawable_pointer& drawable )
       {
         assert( m_target );
 
@@ -156,6 +156,8 @@ namespace gtk
 
           m_target->gl_end_context();
         }
+        else
+          m_gl_remove_list.push_back( drawable );
 
         flat::View< gl::Drawable >::remove_drawable( drawable );
       }
@@ -198,7 +200,7 @@ namespace gtk
         return m_block_renderer;
       }
 
-      virtual void invalidate( gl::Drawable* drawable = 0 )
+      virtual void invalidate( const drawable_pointer& drawable = drawable_pointer() )
       {
         # if defined DBG_GTK_GLCANVAS_INVALIDATE
         std::clog << "flat::GLCanvas::invalidate\t|"

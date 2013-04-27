@@ -139,10 +139,12 @@ void GLCanvas::gl_initialize_drawables( const bool init_all )
 
   assert( m_target->is_valid() );
 
+  auto call_gl_initialize_context = []( const flat::View< gl::Drawable >::drawable_pointer& drawable ) { drawable->gl_initialize_context(); };
+
   if( init_all)
-    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
+    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_initialize_context );
   else
-    std::for_each( m_gl_init_list.begin(), m_gl_init_list.end(), std::mem_fun( &gl::Drawable::gl_initialize_context ) );
+    std::for_each( m_gl_init_list.begin(), m_gl_init_list.end(), call_gl_initialize_context );
 
   m_gl_init_list.clear();
 
@@ -150,6 +152,31 @@ void GLCanvas::gl_initialize_drawables( const bool init_all )
   gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_drawables\t| drawable error checkpoint" << std::endl );
   # endif
 }
+
+void GLCanvas::gl_remove_drawables( const bool remove_all )
+{
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  std::clog << "gtk::GLCanvas::gl_remove_drawables\t| "
+            << "remove " << (remove_all ? "all" : ( m_gl_remove_list.empty() ? "no new" : "new" ) ) << "drawables"
+            << std::endl;
+  # endif
+
+  assert( m_target->is_valid() );
+
+  auto call_gl_remove_from_context = []( const flat::View< gl::Drawable >::drawable_pointer& drawable ) { drawable->gl_remove_from_context(); };
+
+  if( remove_all)
+    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_remove_from_context );
+  else
+    std::for_each( m_gl_remove_list.begin(), m_gl_remove_list.end(), call_gl_remove_from_context );
+
+  m_gl_remove_list.clear();
+
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  gl::PrintError( std::clog << "gtk::GLCanvas::gl_remove_drawables\t| drawable error checkpoint" << std::endl );
+  # endif
+}
+
 
 void GLCanvas::gl_setup_view( const float width, const float height )
 {
@@ -222,10 +249,11 @@ bool GLCanvas::configure_target( const size_t width, const size_t height )
 
     }else
     {
+      gl_remove_drawables();
       gl_initialize_drawables();
     }
 
-    gl_setup_view(get_width(),get_height());
+    gl_setup_view( get_width(), get_height() );
 
   m_target->gl_end_context();
 
@@ -234,7 +262,7 @@ bool GLCanvas::configure_target( const size_t width, const size_t height )
 
 bool GLCanvas::on_configure_event( GdkEventConfigure* event )
 {
-  configure_target( event->width, event->height);
+  return configure_target( event->width, event->height );
 }
 
 void GLCanvas::gl_render_scene()
@@ -252,7 +280,6 @@ void GLCanvas::gl_render_scene()
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-  glPushAttrib( GL_ALL_ATTRIB_BITS );
   glPushMatrix();
   {
     gl::InvTrafo( cam_inertial );
@@ -266,14 +293,25 @@ void GLCanvas::gl_render_scene()
       glPopMatrix();
     }
 
+    // draw origin
+
     if( get_origin_visibility() )
       gl::DrawCoords( 1. );
 
-    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), std::mem_fun( &gl::Drawable::gl_draw ) );
+    // draw drawables
+
+    auto call_gl_draw = []( const flat::View< gl::Drawable >::drawable_pointer& drawable )
+                        {
+                          glPushAttrib( GL_ALL_ATTRIB_BITS );
+                          drawable->gl_draw();
+                          glPopAttrib();
+                        };
+
+    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_draw );
 
   }
+
   glPopMatrix();
-  glPopAttrib();
 
   # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
   gl::PrintError( std::clog << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl );

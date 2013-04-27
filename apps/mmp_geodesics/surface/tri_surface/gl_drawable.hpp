@@ -35,8 +35,8 @@ namespace gl
   {
     public:
 
-      typedef std::string       mode_t;
-      typedef std::list<mode_t> mode_list_t;
+      typedef std::string         mode_t;
+      typedef std::list< mode_t > mode_list_t;
 
       // vertex modes
       static const mode_t GAUSSIAN_CURVATURE_VERTEX_MODE;
@@ -114,7 +114,7 @@ namespace gl
       void  gl_draw_gaussian_curvature_vertices() const;
       void  gl_draw_textured_faces()    const;
 
-    public:
+    protected:
 
       SurfaceDrawable( const std::shared_ptr< const flat::TriSurface >& surface )
       : m_vertex_mode ( SOLID_VERTEX_MODE )
@@ -126,6 +126,11 @@ namespace gl
       , m_surface( surface )
       , m_global_scale( 1. ), m_vertex_size( 2. )
       { std::clog << "gl::SurfaceDrawable::SurfaceDrawable" << std::endl; }
+
+    public:
+
+      static std::shared_ptr< SurfaceDrawable > create( const std::shared_ptr< const flat::TriSurface >& surface )
+      { return std::shared_ptr< SurfaceDrawable >( new SurfaceDrawable( surface ) ); }
 
       virtual ~SurfaceDrawable() { std::clog << "gl::SurfaceDrawable::~SurfaceDrawable" << std::endl; }
 
@@ -234,76 +239,6 @@ namespace gl
 
       template< typename ColorIt >
       void gl_draw_scaled_vertices( ColorIt col_it )    const;
-
-  };
-
-  class SharedSurfaceDrawable  : public SurfaceDrawable, public flat::View< SurfaceDrawable >
-  {
-    public:
-
-      SharedSurfaceDrawable( const std::shared_ptr< flat::TriSurface >& surface )
-      : SurfaceDrawable( surface )      { std::clog << "gl::SharedSurfaceDrawable::SharedSurfaceDrawable" << std::endl; }
-
-      virtual ~SharedSurfaceDrawable()   { std::clog << "gl::SharedSurfaceDrawable::~SharedSurfaceDrawable" << std::endl; }
-
-      //----| Drawable interface
-
-      void    gl_draw()
-      {
-        # if defined DBG_GL_SHAREDSURFACEDRAWABLE
-        std::clog << "gl::SharedSurfaceDrawable::gl_draw\t|"
-                  << " vertex mode = \"" << get_vertex_mode() << "\""
-                  << " edge mode = \"" << get_edge_mode() << "\""
-                  << " surface mode = \"" << get_face_mode() << "\"" << std::endl;
-        # endif
-        bool vdone = gl_draw_vertices( get_vertex_mode() );
-        bool edone = gl_draw_edges( get_edge_mode() );
-        bool fdone = gl_draw_faces( get_face_mode() );
-
-        for( auto it = flat::View< SurfaceDrawable >::begin(); it != flat::View< SurfaceDrawable >::end(); it++ )
-        {
-          if( ! vdone ) vdone = (*it)->gl_draw_vertices( get_vertex_mode() );
-          if( ! edone ) edone = (*it)->gl_draw_edges( get_edge_mode() );
-          if( ! fdone ) fdone = (*it)->gl_draw_faces( get_face_mode() );
-
-          (*it)->gl_draw_others();
-        }
-      }
-
-      //----| View interface
-
-      void    add_drawable( SurfaceDrawable* d )
-      {
-        std::clog << "flat::SharedSurfaceDrawable::add_drawable" << std::endl << std::flush;
-
-        flat::View< SurfaceDrawable >::add_drawable( d );
-
-        append_vertex_modes( d->get_vertex_mode_list() );
-        append_edge_modes  ( d->get_edge_mode_list() );
-        append_face_modes  ( d->get_face_mode_list() );
-      }
-
-      void      invalidate( SurfaceDrawable* d )
-      {
-        std::clog << "gl::SharedSurfaceDrawable::invalidate\t| invalidating " << ( d ? "drawable" : "view" ) << std::endl;
-        SurfaceDrawable::invalidate();
-      }
-
-      void    set_vertex_size( const float& s )
-      {
-        for( auto it = flat::View< SurfaceDrawable >::begin(); it != flat::View< SurfaceDrawable >::end(); it++ )
-              (*it)->set_vertex_size(s);
-        SurfaceDrawable::set_vertex_size( s );
-        invalidate_view();
-      }
-
-      void    set_global_scale( const flat::location_ref_t& s )
-      {
-        for( auto it = flat::View< SurfaceDrawable >::begin(); it != flat::View< SurfaceDrawable >::end(); it++ )
-              (*it)->set_global_scale( s );
-        SurfaceDrawable::set_global_scale( s );
-        invalidate_view();
-      }
 
   };
 

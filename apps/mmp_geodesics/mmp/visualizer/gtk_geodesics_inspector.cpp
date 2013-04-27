@@ -56,6 +56,62 @@ gtk::GeodesicsInspector::GeodesicsInspector( BaseObjectType* cobject, const Glib
   set_view( gtk::GLView::create() );
 }
 
+
+void gtk::GeodesicsInspector::initialize( const std::shared_ptr< Geodesics >& geodesics, const std::shared_ptr< const TriSurface >& surface )
+{
+  assert( geodesics );
+
+  const std::shared_ptr< const TriSurface >& new_surface =  surface;// TODO: geodesics->get_surface(); - NEED: std::shared_ptr NOTE: would allow to remove surface arg
+
+  bool same_surface = m_geodesics && ( &m_geodesics->get_surface() == new_surface.get() );
+
+  m_geodesics = geodesics;
+
+  if( ! same_surface )
+  {
+    if( m_surface_drawable )
+      m_surface_drawable->remove_from_all_views();
+
+    m_surface_drawable = gl::SurfaceDrawable::create( new_surface );
+
+    m_surface_drawable->set_edge_mode( gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
+    m_view->get_canvas()->add_drawable( m_surface_drawable );
+  }
+
+  if( m_geodesics_drawable )
+    m_geodesics_drawable->remove_from_all_views();
+
+  m_geodesics_drawable = gl::GeodesicsDrawable::create( m_geodesics );
+
+  m_view->get_canvas()->add_drawable( m_geodesics_drawable );
+
+  set_title( "propagating from vertex " + boost::lexical_cast<std::string>( m_geodesics->source() ) );
+
+  m_step_button->set_sensitive( true );
+  m_iterate_button->set_sensitive( true );
+}
+
+void gtk::GeodesicsInspector::run_propagation( )
+{
+  // set up file for debug
+  std::ostringstream path;
+
+  path << "logs/" << m_geodesics->source() << "_propagation";
+
+  redirect_clog_to_file( path.str() );
+
+  assert( m_geodesics );
+
+  m_geodesics->initialize();
+
+  Gtk::Main::run(*this);
+
+  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::run_debugging_propagation\t|"
+            << "completed source " << m_geodesics->source()
+            << " with " << mmp::Window::next_id << " windows created in total"
+            << std::endl;
+}
+
 bool gtk::GeodesicsInspector::step()
 {
   std::clog << "mmp::visualizer::gtk::GeodesicsInspector::step" << std::endl;
@@ -106,7 +162,7 @@ bool gtk::GeodesicsInspector::step()
 void gtk::GeodesicsInspector::toggle_iteration()
 {
 
-  std::cout << "mmp::visualizer::gtk::GeodesicsInspector::toggle_iteration" << std::endl;
+  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::toggle_iteration" << std::endl;
 
   if( !m_iterate_connection.connected() )
   { m_iterate_connection = Glib::signal_idle().connect( sigc::mem_fun( *this, &GeodesicsInspector::step ) );
@@ -124,46 +180,4 @@ void gtk::GeodesicsInspector::toggle_iteration()
     m_iterate_button->set_label( Gtk::StockID( Gtk::Stock::MEDIA_PLAY ).get_string() );
   }
 
-}
-
-void gtk::GeodesicsInspector::initialize( Geodesics* geodesics, const std::shared_ptr< const TriSurface > surface )
-{
-  assert( &geodesics->get_surface() == surface.get() );
-
-  m_geodesics = geodesics;
-
-  if( !m_surface_drawable || m_surface_drawable->get_surface() != surface )
-  {
-    m_surface_drawable.reset( new gl::SurfaceDrawable( surface ) );
-    m_surface_drawable->set_edge_mode( gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
-    m_view->get_canvas()->add_drawable( m_surface_drawable.get() );
-  }
-
-  m_geodesics_drawable.reset( new gl::GeodesicsDrawable( m_geodesics ) );
-
-  m_view->get_canvas()->add_drawable( m_geodesics_drawable.get() );
-
-  set_title( "propagating from vertex " + boost::lexical_cast<std::string>( m_geodesics->source() ) );
-
-  m_step_button->set_sensitive( true );
-  m_iterate_button->set_sensitive( true );
-}
-
-void gtk::GeodesicsInspector::run_propagation( )
-{
-  // set up file for debug
-  std::ostringstream path;
-
-  path << "logs/" << m_geodesics->source() << "_propagation";
-
-  redirect_clog_to_file( path.str() );
-
-  m_geodesics->initialize();
-
-  Gtk::Main::run(*this);
-
-  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::run_debugging_propagation\t|"
-            << "completed source " << m_geodesics->source()
-            << " with " << mmp::Window::next_id << " windows created in total"
-            << std::endl;
 }

@@ -36,8 +36,8 @@ namespace flat
   {
     public: // types
 
-      typedef DrawableT* value_type;
-      typedef std::vector< value_type > drawable_list_t;
+      typedef std::shared_ptr< DrawableT > drawable_pointer;
+      typedef std::vector< drawable_pointer > drawable_list_t;
 
     private:
 
@@ -52,7 +52,7 @@ namespace flat
       typename drawable_list_t::iterator        end()   { return m_drawables.end(); }
       typename drawable_list_t::const_iterator  end()   const { return m_drawables.end(); }
 
-      virtual void add_drawable( DrawableT* drawable )
+      virtual void add_drawable( const drawable_pointer& drawable )
       {
         assert( drawable );
         # if defined DBG_FLAT_GLCANVAS_ADD_DRAWABLE
@@ -60,7 +60,7 @@ namespace flat
         # endif
 
         drawable->connect_invalidator( boost::bind( &View< DrawableT >::invalidate, this, drawable ) );
-        drawable->connect_remover    ( boost::bind( &View< DrawableT >::remove_drawable, this, drawable ) );
+        drawable->connect_remover( boost::bind( &View< DrawableT >::remove_drawable, this, drawable ) );
 
         m_drawables.push_back( drawable );
       }
@@ -71,7 +71,7 @@ namespace flat
             m_drawables.clear(); // TODO disconnect
       }*/
 
-      virtual void remove_drawable( DrawableT* drawable )
+      virtual void remove_drawable( const drawable_pointer& drawable )
       {
         auto it = std::find( m_drawables.begin(), m_drawables.end(), drawable );
 
@@ -81,13 +81,14 @@ namespace flat
           std::clog << "flat::View::remove_drawable\t|drawable removed" << std::endl;
           # endif
         }
-        else // TODO: error handling
+        else
+        { // TODO: error handling
           std::cerr << "flat::View::remove_drawable\t| FAILED - " << drawable << " not found !" << std::endl;
+          std::terminate();
+        }
       }
 
-      virtual void invalidate( DrawableT* ) = 0;
-
-      void invalidate_view() { invalidate( 0 ); }
-
+      // invalidate drawable (all drawables if none provided)
+      virtual void invalidate( const drawable_pointer& drawable = drawable_pointer() ) = 0;
   };
 }
