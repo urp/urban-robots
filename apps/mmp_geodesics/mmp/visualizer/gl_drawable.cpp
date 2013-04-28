@@ -86,12 +86,14 @@ void gl::GeodesicsDrawable::gl_draw_event_point( EventPoint* ev, const bool is_t
 
   const location_t evloc =  edge.ray().at_arc_length( ev->point() );
 
-  glDisable( GL_LIGHTING );
+  glPushAttrib( GL_POINT_BIT | GL_LIGHTING_BIT );
 
  // draw event point
   if( is_top_event )
-  { // draw top-event marker
+  {
+    // draw top-event marker
     glPointSize( 5. );
+
     Color( rgba_color_t( 1, .2, .2, 1 ) );
 
   }else
@@ -106,6 +108,8 @@ void gl::GeodesicsDrawable::gl_draw_event_point( EventPoint* ev, const bool is_t
     Vertex( evloc );
   glEnd();
 
+  glPopAttrib();
+
 }
 
 void gl::GeodesicsDrawable::gl_draw_window_edges( const Window& window, const Window::types& window_type
@@ -116,7 +120,7 @@ void gl::GeodesicsDrawable::gl_draw_window_edges( const Window& window, const Wi
   using ::gl::Vertex;
   using ::gl::Color;
 
-  glDisable( GL_LIGHTING );
+  glPushAttrib( GL_LINE_BIT | GL_LIGHTING_BIT );
 
   if( window_type == Window::INNER_SIDELOBE )
   {
@@ -152,6 +156,8 @@ void gl::GeodesicsDrawable::gl_draw_window_edges( const Window& window, const Wi
 
     glEnd();
   }
+
+  glPopAttrib();
 }
 
 
@@ -276,8 +282,6 @@ void gl::GeodesicsDrawable::gl_do_draw_subdivision( const Window&           wind
                           );
     // uncomment to drw subdivision
     //
-    glPointSize( 1 );
-
     glBegin( GL_LINES );
 
       gl::Color( .5, .2, 1. , 1.);
@@ -327,6 +331,7 @@ void gl::GeodesicsDrawable::gl_draw_interval( const Window&             window
   rgba_color_t win_left_color = fill_color, win_right_color = fill_color,
                pre_left_color = fill_color, pre_right_color = fill_color;
 
+  glPushAttrib( GL_LINE_BIT | GL_LIGHTING_BIT | GL_TEXTURE_BIT );
 
   if( shading == ABSOLUTE_DISTANCE_SHADING )
   {
@@ -384,7 +389,7 @@ void gl::GeodesicsDrawable::gl_draw_interval( const Window&             window
   if( shading == TEXTURE_DISTANCE_SHADING )
   { glDisable( GL_TEXTURE_1D ); }
 
-  glDisable( GL_LIGHTING );
+  glPopAttrib();
 }
 
 bool gl::GeodesicsDrawable::gl_draw_window( const Window& window
@@ -415,7 +420,7 @@ bool gl::GeodesicsDrawable::gl_draw_window( const Window& window
     const location_t pre_right = pre_ray.at_arc_length( get< RIGHT >( pre_bounds ) );
 
     ps_t pre_ps = pre->pseudosource();
-    glPolygonOffset( 0.4,0.4 );
+
     gl_draw_interval( window
                     , type
                     , edge_color, fill_color, source_color, shading
@@ -426,7 +431,7 @@ bool gl::GeodesicsDrawable::gl_draw_window( const Window& window
                     , std::make_pair( win_left, win_right )
                     , std::make_pair( pre_left, pre_right )
                     );
-    glPolygonOffset( 1.,1. );
+
     return ! ( type & Window::OUTER_SIDELOBE );
   }
   return false;
@@ -442,9 +447,13 @@ void gl::GeodesicsDrawable::gl_draw_window_sequence( const Window& window
   bool no_root = gl_draw_window( window, edge_color, fill_color, source_color, shading );
   if( window.predeccessor() && no_root )
   {
-    glPolygonOffset( 0.,0. );
+    glPushAttrib( GL_POLYGON_BIT );
+
+      glPolygonOffset( 0.,0. );
+
       gl_draw_window_sequence( *window.predeccessor(), edge_color, fill_color, source_color, shading );
-    glPolygonOffset( 1.,1. );
+
+    glPopAttrib();
   }
   //else std::cout<< "mmp::visualizer::gl::GeodesicsDrawable::gl_draw_window_sequence\t| last " << window << std::endl;
 }
@@ -473,7 +482,10 @@ void gl::GeodesicsDrawable::gl_draw_covering( const shading_t shading )
 void gl::GeodesicsDrawable::gl_draw_wavefront_indicators( EventPoint*   ev
                                                         , const rgba_color_ref_t crossing_color
                                                         , const rgba_color_ref_t colinear_color )
-{ using mmp::LEFT;
+{
+  # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
+
+  using mmp::LEFT;
   using mmp::RIGHT;
 
   using ::gl::Vertex;
@@ -485,7 +497,8 @@ void gl::GeodesicsDrawable::gl_draw_wavefront_indicators( EventPoint*   ev
   const coord_t rel_length = .333;
 
   auto draw_indicators = [&] ( EventPoint* left_ev, EventPoint* right_ev )
-                         { const Window& left_win =  *left_ev->window();
+                         {
+                           const Window& left_win =  *left_ev->window();
                            const Window& right_win = *right_ev->window();
 
                            Geodesics::edge_handle  left_edge(  left_win.edge, m_geodesics->get_surface() );
@@ -498,25 +511,27 @@ void gl::GeodesicsDrawable::gl_draw_wavefront_indicators( EventPoint*   ev
                            Vertex( right_edge.ray().at_arc_length( right_win.bound<LEFT>() + rel_length * right_win.length() ) );
                          };
 
-  # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
+  glPushAttrib( GL_LINE_BIT );
 
+    if( ev->colinear<LEFT>() )
+    {
+      Color( colinear_color );
+    }else
+    {
+      glLineWidth( 2. );
+      Color( crossing_color );
+    }
 
-  if( ev->colinear<LEFT>() )
-  {
-    glLineWidth( 3. );
-    Color( colinear_color );
-  }else
-  {
     glLineWidth( 2. );
-    Color( crossing_color );
-  }
 
-  glBegin( GL_LINE_STRIP );
+    glBegin( GL_LINE_STRIP );
 
-  if( ev->adjacent< LEFT >() )
-  draw_indicators( ev->adjacent< LEFT >(), ev );
+    if( ev->adjacent< LEFT >() )
+      draw_indicators( ev->adjacent< LEFT >(), ev );
 
-  glEnd();
+    glEnd();
+
+  glPopAttrib();
 
   # endif
 }
@@ -582,17 +597,13 @@ void gl::GeodesicsDrawable::gl_draw_wavefront( const shading_t shading )
                      else if( ev == top_ev->adjacent<LEFT>() || ev == top_ev->adjacent<RIGHT>() )
                        draw_cross_win( *ev->window() );
                      # endif
-                    // else
-                    //   draw_win( *ev->window() );
 
                      gl_draw_event_point( ev, is_top_ev );
                    }
 
                  }
                );
-  //glEnable( GL_DEPTH_TEST );
 }
-
 
 void gl::GeodesicsDrawable::gl_draw()
 {

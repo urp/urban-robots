@@ -68,13 +68,18 @@ void GLCanvas::gl_initialize_context()
   glClearColor( .2, .2, .2, 1. );
   glClearDepth( 1. );
 
+  //---| point and lines
+
+  glEnable( GL_LINE_SMOOTH );
+  glEnable( GL_POINT_SMOOTH );
+
+  //---| fragments
+
   glDepthFunc( GL_LEQUAL );
   glEnable(GL_DEPTH_TEST);
 
   //glEnable( GL_BLEND );
-  glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-  glEnable( GL_LINE_SMOOTH );
+  //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
 
   //glDisable( GL_CULL_FACE );
   //glCullFace( GL_BACK );
@@ -82,7 +87,9 @@ void GLCanvas::gl_initialize_context()
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset( 1., 1. );
 
-  //glEnable( GL_LIGHTING );
+  //---| lighting
+
+  glDisable( GL_LIGHTING );
 
   glShadeModel( GL_SMOOTH );
 
@@ -232,6 +239,7 @@ bool GLCanvas::configure_target( const size_t width, const size_t height )
 {
   if( !m_target ) return false;
 
+  // TODO: why need ???
   const bool old_context_was_not_shared = ! m_target->get_gdk_gl_context() || ! m_target->get_gdk_gl_context()->get_share_list();
 
   const bool configured = m_target->configure( width, height );

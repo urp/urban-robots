@@ -104,6 +104,8 @@ bool GLWindowRenderTarget::configure( const size_t width, const size_t height )
   {
     m_context  = Gtk::GL::widget_get_gl_context ( m_widget );
   }
+  else
+    assert( m_context == Gtk::GL::widget_get_gl_context ( m_widget ) );
 
   assert( is_valid() );
 
