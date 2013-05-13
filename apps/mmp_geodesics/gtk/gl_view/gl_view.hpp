@@ -21,10 +21,13 @@
 # include <cassert>
 # include <boost/lexical_cast.hpp>
 
-# include "gtkmm.h"
-# include "gtkglmm.h"
+# include "gl/headers.hpp"
+
+# include <gtkmm.h>
+# include <gtkglmm.h>
 
 # include "gtk/gl_view/gl_canvas.hpp"
+
 
 /* For testing propose use the local (not installed) glade file */
 //# define GTK_GLVIEW_BUILDER_FILE PACKAGE_DATA_DIR"/gtk_flatdoc/glade/gl-view.ui" */
@@ -39,25 +42,22 @@ namespace gtk
 
       struct Filename
       {
-        std::string     directory;
-        std::string     filename_body;
-        size_t          counter;
-        std::string     extension;
+        boost::filesystem::path directory;
+        boost::filesystem::path filename;
+        size_t counter;
+        boost::filesystem::path extension;
 
-        Filename( const std::string& dir, const std::string& body, const size_t& count, const std::string& ext )
-        : directory( dir ), filename_body( body ), counter( count ), extension( ext )
+        Filename( const boost::filesystem::path& dir, const boost::filesystem::path& filename, const size_t& count, const boost::filesystem::path& ext )
+        : directory( dir ), filename( filename ), counter( count ), extension( ext )
         {       }
 
         Filename()
-        : directory(), filename_body("untitled"), counter(0), extension()
+        : directory(), filename("untitled"), counter(0), extension()
         {       }
 
-        std::string operator()  ()
-        { return  directory + "/"
-        + filename_body
-        + boost::lexical_cast< std::string > ( counter++ )
-        + ( extension.length() ? "." : "" )
-        + extension;
+        boost::filesystem::path operator()  ()
+        {
+          return ( directory / filename / boost::lexical_cast< std::string > ( counter++ ) ).replace_extension( extension );
         }
       };
 
@@ -66,7 +66,7 @@ namespace gtk
       Glib::RefPtr<Gtk::Builder> m_builder;
 
       // widgets
-      GLCanvas* m_canvas;
+      std::shared_ptr< GLCanvas > m_canvas;
 
       Gtk::CheckButton* m_origin_check;
       Gtk::CheckButton* m_pivot_check;
@@ -82,8 +82,8 @@ namespace gtk
       void on_origin_toggled();
       void on_pivot_toggled();
 
-      void on_record_frames_toggled();
-      void on_save_frame_as_clicked();
+      /*void on_record_frames_toggled();
+      void on_save_frame_as_clicked();*/
       void on_block_renderer_clicked();
 
       void on_record_frame( /*const Glib::RefPtr<Gdk::Pixmap>& pixmap*/ );
@@ -101,7 +101,7 @@ namespace gtk
         m_canvas->request_redraw();
       }
 
-      GLCanvas* get_canvas() const { return m_canvas; }
+      std::shared_ptr< GLCanvas > get_canvas() const { return m_canvas; }
 
       static GLView* create()
       {

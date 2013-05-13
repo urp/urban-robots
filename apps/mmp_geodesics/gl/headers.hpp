@@ -1,4 +1,4 @@
-// tools.cpp
+// headers.hpp
 // Copyright (C) 2006-2013  Peter Urban (peter.urban@s2003.tu-chemnitz.de)
 //
 //This program is free software; you can redistribute it and/or
@@ -15,41 +15,21 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "gl/tools.hpp"
+#pragma once
 
-#include "gl/wrap/vertex.hpp"
+#  ifdef  __APPLE__
+#    include  "OpenGL/gl.h"
+#    include  "OpenGL/glu.h"
+#  else
+//#    include  "GL/gl.h"
+//#    include  "GL/glu.h"
+#    include  "GL/glew.h"
+#  endif
 
-#include "gl/wrap/color.hpp"
-
-using namespace uv::gl;
-
-void uv::gl::PrintError( std::ostream& os )
+namespace uv
 {
-  GLenum code = glGetError();
-
-  if(code != GL_NO_ERROR)
-    os << "gl::PrintError\t| "
-       << " WARNING: an OpenGL error has occured."
-       << " message: " << gluErrorString(code) << std::endl;
-
-}
-
-void uv::gl::DrawCoords( GLfloat size )
-{
-  //std::cerr<<"uv::gl::glDrawCoords\t|axis length "<<s<<std::endl;
-  glBegin(GL_LINES);
+  namespace gl
   {
-    Color ( 1.f , 0.f, 0.f );
-    Vertex( 0.f , 0.f, 0.f );
-    Vertex( size, 0.f, 0.f );
 
-    Color ( 0.f, 1.f , 0.f );
-    Vertex( 0.f, 0.f , 0.f );
-    Vertex( 0.f, size, 0.f );
-
-    Color ( 0.f, 0.f, 1.f );
-    Vertex( 0.f, 0.f, 0.f );
-    Vertex( 0.f, 0.f, size );
-  }
-  glEnd();
-}
+  }// of gl::
+} // of ::uv::

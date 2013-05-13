@@ -19,12 +19,13 @@
 
 #include "surface/quad_surface/gl_drawable.hpp"
 
-using namespace gl;
+using namespace uv::gl;
 
-const QuadSurfaceDrawable::mode_t gl::QuadSurfaceDrawable::VORONOI_GAUSSIAN_CURVATURE_VERTEX_MODE = "gaussian curvature (voronoi)";
+const QuadSurfaceDrawable::mode_t QuadSurfaceDrawable::VORONOI_GAUSSIAN_CURVATURE_VERTEX_MODE = "gaussian curvature (voronoi)";
 
 bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
-{ using namespace flat;
+{
+  using namespace flat;
 
   if( mode != VORONOI_GAUSSIAN_CURVATURE_VERTEX_MODE ) return SurfaceDrawable::gl_draw_vertices( mode );
 
@@ -32,8 +33,8 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
   float minc =   std::numeric_limits<float>::infinity();
   float maxc = - std::numeric_limits<float>::infinity();
 
-  std::vector< rgb_color_t >	colors( get_surface()->num_vertices() );
-  std::vector< rgb_color_t >::iterator 	col_it = colors.begin();
+  std::vector< rgb_color_t >  colors( get_surface()->num_vertices() );
+  std::vector< rgb_color_t >::iterator  col_it = colors.begin();
 
   for( auto vertex_it = get_surface()->vertex_handles(); vertex_it.first != vertex_it.second; col_it++, vertex_it.first++ )
   {
@@ -45,7 +46,8 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
     std::vector< QuadSurface::vertex_descriptor > nbs ( std::move( get_surface()->get_neighbors< NB8_ALL >( vertex_it.first->descriptor() ) ) );
 
     if( nbs.size() < 8 )
-    { *col_it = rgb_color_t(.1f,.4f,.1f);
+    {
+      *col_it = rgb_color_t(.1f,.4f,.1f);
       continue;
     }
 
@@ -53,14 +55,14 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
     {
       const location_ref_t bpos = get_surface()->vertex( nbs[ tri % nbs.size() ] ).location();
       const location_ref_t cpos = get_surface()->vertex( nbs[ ( tri + 1 ) % nbs.size() ] ).location();
-      const auto	ab   = bpos - apos;
-      const auto	bc   = cpos - bpos;
-      const auto	ca   = apos - cpos;
-      const auto 	absq 	= utk::sqr( ab ).sum();
-      const auto 	bcsq 	= utk::sqr( bc ).sum();
-      const auto 	casq 	= utk::sqr( ca ).sum();
-      const auto 	ablen	= std::sqrt( absq );
-      const auto 	calen	= std::sqrt( casq );
+      const auto  ab   = bpos - apos;
+      const auto  bc   = cpos - bpos;
+      const auto  ca   = apos - cpos;
+      const auto  absq  = utk::sqr( ab ).sum();
+      const auto  bcsq  = utk::sqr( bc ).sum();
+      const auto  casq  = utk::sqr( ca ).sum();
+      const auto  ablen = std::sqrt( absq );
+      const auto  calen = std::sqrt( casq );
       const bool  alpha_obtuse = bcsq > casq + absq;
       const bool  obtuse = absq > bcsq + casq || alpha_obtuse || casq > absq + bcsq;
 
@@ -69,7 +71,7 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
                 + std::atan( - dot( ab, bc ) / ( ablen * std::sqrt( bcsq ) ) ) * casq );
       else
         area += cross( ab, bc ).length() / ( alpha_obtuse ? 4. :8. );
-	    anglesum += std::acos( utk::dot( ca, ab ) / ( calen * ablen ) );
+      anglesum += std::acos( utk::dot( ca, ab ) / ( calen * ablen ) );
     } // of for
 
     const curvature_t curvature = ( 2 * M_PI - anglesum ) / area;
@@ -84,10 +86,10 @@ bool  QuadSurfaceDrawable::gl_draw_vertices( const mode_t& mode)   const
     //rgb_color_t(1.f - exp(-fabs(curvature)));
   }
   std::clog << "flat::gl::QuadSurfaceDrawable::gl_draw_vertices"
-	    << "\t|GAUSSIAN_CURVATURE_GRID_MODE"
-	    << "\t|min " << minc
-	    << "\t|max " << maxc
-	    << std::endl << std::flush;
+      << "\t|GAUSSIAN_CURVATURE_GRID_MODE"
+      << "\t|min " << minc
+      << "\t|max " << maxc
+      << std::endl << std::flush;
 
   //do the drawing
   glPointSize( get_vertex_size() );

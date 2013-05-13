@@ -42,7 +42,7 @@ namespace utk
 
         typedef boost::mpl::vector_c< T, Content... > mpl_vector_c;
 
-        vector() = default;
+        vector() {}//= default;
       };
 
     } // of integral::

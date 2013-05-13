@@ -1,10 +1,8 @@
-
 /***************************************************************************
- *            quad-surface-interface.h
+ *            gl_render_targets.hpp
  *
- *  Sat Nov 14 20:42:23 2009
- *  Copyright  2009  Peter Urban
- *  <s9peurba@stud.uni-saarland.de>
+  *  Copyright  2011-2013 Peter Urban
+ *  <urp@pks.mpg.de>
  ****************************************************************************/
 
 /*
@@ -23,37 +21,38 @@
  * Foundation, Inc., 51 Franklin Street, Fifth Floor Boston, MA 02110-1301,  USA
  */
 
-
 # pragma once
 
-#include "common.hpp"
+# define DBG_UV_GL_RENDER_TARGET
 
-#include "surface/quad_surface/quad_surface.hpp"
-#include "surface/tri_surface/gl_drawable.hpp"
+# include "gl/headers.hpp"
 
 namespace uv
 {
   namespace gl
   {
-    class QuadSurfaceDrawable : public SurfaceDrawable
+    class RenderTarget
     {
-        std::shared_ptr< flat::QuadSurface > m_surface;
+
+      protected:
+
+        RenderTarget() { }
 
       public:
 
-        static const mode_t VORONOI_GAUSSIAN_CURVATURE_VERTEX_MODE;
+        virtual bool gl_begin_context() = 0;
 
-      public:
+        virtual void gl_end_context() = 0;
 
-        QuadSurfaceDrawable( const std::shared_ptr< flat::QuadSurface >& surface )
-        : SurfaceDrawable( surface ), m_surface( surface )
-        { append_vertex_modes( { VORONOI_GAUSSIAN_CURVATURE_VERTEX_MODE } ); }
+        virtual void gl_flush() = 0;
 
-        virtual bool gl_draw_vertices( const mode_t& ) const;
+        virtual bool is_gl_context_valid() = 0;
 
-        const std::shared_ptr< flat::QuadSurface >& get_surface() const
-        { return m_surface; };
+        virtual bool configure( const size_t width, const size_t height) = 0;
+
+        //virtual uv::gl::Context >& gl_context() = 0;
+
+        //virtual const uv::gl::Context >& gl_context() const = 0;
     };
-
   } // of gl::
 } // of ::uv::

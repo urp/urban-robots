@@ -4,8 +4,8 @@ project apps/mmp_geodesics
 #              <define>NDEBUG
 ;
 
-local linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
-local cflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --cflags gl glu gtkmm-2.4 gtkglextmm-1.2" ] ] ;
+local linkflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --libs gl glew gtkmm-2.4 gtkglextmm-1.2" ] ] ;
+local cflags = [ MATCH "(.*)[\n]" : [ SHELL "pkg-config --cflags gl glew gtkmm-2.4 gtkglextmm-1.2" ] ] ;
 
 exe mmp-geodesics
 : mmp_geodesics_main.cpp
@@ -13,6 +13,11 @@ exe mmp-geodesics
 #---| open gl stuff
 
   gl/tools.cpp
+  gl/shader.cpp
+  gl/shader_program.cpp
+  gl/context.cpp
+
+#---| gtk stuff
 
   gtk/gl_view/gl_render_targets.cpp
   gtk/gl_view/gl_canvas.cpp
@@ -43,6 +48,8 @@ exe mmp-geodesics
   surface/io/ply/ply.cpp
   surface/generators.cpp
 
+  /robots//boost-filesystem
+  /robots//boost-system
   /robots//boost-signals
   /robots//boost-options
 

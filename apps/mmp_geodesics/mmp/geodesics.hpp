@@ -54,7 +54,7 @@
 //# define DBG_FLAT_MMP_QUERY_DISTANCE
 
 //----|friend forward
-namespace gl  { class GeodesicsDrawable; }
+namespace uv{ namespace gl  { class GeodesicsDrawable; } }
 namespace gtk { class GeodesicsInspector; }
 
 
@@ -85,9 +85,9 @@ namespace mmp
       struct edge_info
       {
         const edge_descriptor& descriptor; // the target edge
-        const coord_t&	 length;     // the length of the target edge
-        const coord_t&	 srcbound;   // the left or right interval bouindary of the source window
-        const coord_t&	 edgebound;  // the corresponding boundary ( 0 or length ) on the target edge
+        const coord_t&   length;     // the length of the target edge
+        const coord_t&   srcbound;   // the left or right interval bouindary of the source window
+        const coord_t&   edgebound;  // the corresponding boundary ( 0 or length ) on the target edge
 
         const utk::ray<coord_t,2>& ray;    // TODO: what?
       };
@@ -109,11 +109,11 @@ namespace mmp
     private:
 
       typedef PriorityQueue< EventPoint*, std::vector<EventPoint*>, EventPoint::smaller_min_distance > event_queue_t;
-      typedef std::list<Window*>	winlist_t;
+      typedef std::list<Window*>  winlist_t;
 
       // stores a window list for every edge
       typedef boost::vector_property_map< winlist_t, boost::property_map< surface_type::graph_t, boost::edge_index_t >::type >
-							edge_winlist_pmap_t;
+              edge_winlist_pmap_t;
       // stores a distance label for every vertex
       typedef boost::vector_property_map< distance_t >  vertex_label_pmap_t;
 
@@ -123,7 +123,7 @@ namespace mmp
       typedef std::pair< winlist_t::reverse_iterator, winlist_t::iterator > ac_t;
 
 
-      friend class gl::GeodesicsDrawable;
+      friend class uv::gl::GeodesicsDrawable;
       friend class gtk::GeodesicsInspector;
 
       template< side_t >
@@ -137,15 +137,15 @@ namespace mmp
     private:
       //----|data members
 
-      const surface_type&			surf;
+      const surface_type&     surf;
 
       const vertex_descriptor m_source;
 
       vertex_label_pmap_t     vertex_labels;
 
-      edge_winlist_pmap_t	    windows;
+      edge_winlist_pmap_t     windows;
 
-      event_queue_t		        event_queue;
+      event_queue_t           event_queue;
 
       mutable distance_t      m_max_distance;
 
@@ -227,9 +227,9 @@ namespace mmp
 
       //----|backtrace
 
-      coord_t backtrace(const Window&, const coord_t& )	const;
+      coord_t backtrace(const Window&, const coord_t& ) const;
 
-      std::pair< coord_t, coord_t > 	backtrace( const Window& window, const std::pair< coord_t, coord_t >& bounds )	const
+      std::pair< coord_t, coord_t >   backtrace( const Window& window, const std::pair< coord_t, coord_t >& bounds )  const
       {
         coord_t  left = backtrace( window, get<  LEFT >( bounds ) );
         coord_t right = backtrace( window, get< RIGHT >( bounds ) );
@@ -239,7 +239,7 @@ namespace mmp
         return std::make_pair( left, right );
       }
 
-      std::pair< coord_t, coord_t > 	backtrace( const Window& window )	const
+      std::pair< coord_t, coord_t >   backtrace( const Window& window ) const
       { return backtrace( window, window ); }
 
       std::list< coord_t >&   backtrace( const Window &, std::list< coord_t >& ) const;
@@ -413,9 +413,9 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
     // reinsert endpoint event if colinear frontier point (of adjacent event) is endpoint
     // so that vertices can be labeled correctly
     if( adjacent->flags() & EventPoint::LEFT_END )
-	  event_queue.push( new EventPoint( EventPoint::LEFT_END, adjacent->window(), adjacent->distance() ) );
+    event_queue.push( new EventPoint( EventPoint::LEFT_END, adjacent->window(), adjacent->distance() ) );
     if( adjacent->flags() & EventPoint::RIGHT_END )
-	  event_queue.push( new EventPoint( EventPoint::RIGHT_END, adjacent->window(), adjacent->distance() ) );
+    event_queue.push( new EventPoint( EventPoint::RIGHT_END, adjacent->window(), adjacent->distance() ) );
 
     # else
 
@@ -433,18 +433,18 @@ void mmp::Geodesics::pull_event( EventPoint& ev )
 
 template< mmp::side_t Side >
 std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
-  mmp::Geodesics::project_bound( EventPoint& 	ev
-			       , const edge_descriptor&         e1
-			       , const edge_descriptor&         e2
-			       , const utk::ray<coord_t,2>&     e1ray
-			       , const utk::ray<coord_t,2>&     e2ray
-			       , const coord_t		              e0l
-			       , const coord_t		              e1l
-			       , const coord_t		              e2l
-			       , const ps_t&		                ps
-			       )
+  mmp::Geodesics::project_bound( EventPoint&  ev
+             , const edge_descriptor&         e1
+             , const edge_descriptor&         e2
+             , const utk::ray<coord_t,2>&     e1ray
+             , const utk::ray<coord_t,2>&     e2ray
+             , const coord_t                  e0l
+             , const coord_t                  e1l
+             , const coord_t                  e2l
+             , const ps_t&                    ps
+             )
 {
-  const Window*	srcwin = ev.window();
+  const Window* srcwin = ev.window();
 
   # if defined FLAT_MMP_MAINTAIN_WAVEFRONT
 
@@ -464,7 +464,7 @@ std::pair< mmp::coord_t, mmp::Geodesics::edge_descriptor >
 
   Window* adjacent_win =  adjacent ? adjacent->window() : 0;
 
-  coord_t 			  new_bound;
+  coord_t         new_bound;
   edge_descriptor new_edge;
 
   if( colinear && srcwin->edge == adjacent_win->predeccessor()->edge )

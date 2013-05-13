@@ -29,14 +29,14 @@
 # define DBG_FLAT_GLCANVAS_ADD_DRAWABLE
 # define DBG_FLAT_GLCANVAS_REMOVE_DRAWABLE
 
-namespace flat
+namespace uv
 {
   template< typename DrawableT >
   class View : public boost::signals::trackable
   {
     public: // types
 
-      typedef std::shared_ptr< DrawableT > drawable_pointer;
+      typedef std::shared_ptr< DrawableT >    drawable_pointer;
       typedef std::vector< drawable_pointer > drawable_list_t;
 
     private:
@@ -56,7 +56,7 @@ namespace flat
       {
         assert( drawable );
         # if defined DBG_FLAT_GLCANVAS_ADD_DRAWABLE
-            std::clog << "flat::View::add_drawable\t|" << typeid(DrawableT).name() << std::endl;
+            std::clog << "uv::View::add_drawable\t|" << typeid(DrawableT).name() << std::endl;
         # endif
 
         drawable->connect_invalidator( boost::bind( &View< DrawableT >::invalidate, this, drawable ) );
@@ -78,12 +78,12 @@ namespace flat
         if( it != m_drawables.end() )
         { m_drawables.erase( it );
           # if defined DBG_FLAT_GLCANVAS_REMOVE_DRAWABLE
-          std::clog << "flat::View::remove_drawable\t|drawable removed" << std::endl;
+          std::clog << "uv::View::remove_drawable\t|drawable removed" << std::endl;
           # endif
         }
         else
         { // TODO: error handling
-          std::cerr << "flat::View::remove_drawable\t| FAILED - " << drawable << " not found !" << std::endl;
+          std::cerr << "uv::View::remove_drawable\t| FAILED - " << drawable << " not found !" << std::endl;
           std::terminate();
         }
       }

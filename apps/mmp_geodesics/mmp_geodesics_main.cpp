@@ -15,19 +15,23 @@
 // You should have received a copy of the GNU General Public License
 // along with this program. If not, see <http://www.gnu.org/licenses/>.
 
+# include <boost/program_options.hpp>
+
+# include <GL/glew.h>
+
 # include "mmp/geodesics.hpp"
+# include "mmp/visualizer/gtk_geodesics_inspector.hpp"
+
 # include "surface/tri_surface/tri_surface.hpp"
+# include "surface/tri_surface/gl_drawable.hpp"
+
 # include "surface/quad_surface/quad_surface.hpp"
+
 # include "surface/generators.hpp"
+
 # include "surface/io/pdm/pdm_file_reader.hpp"
 # include "surface/io/ply/ply_file_reader.hpp"
 # include "surface/io/obj/obj_file_reader.hpp"
-
-# include <boost/program_options.hpp>
-
-#   include "mmp/visualizer/gtk_geodesics_inspector.hpp"
-#   include "surface/tri_surface/gl_drawable.hpp"
-
 
 using namespace flat;
 
@@ -123,8 +127,8 @@ int main ( int argc, char **argv )
 
     transform( surface );
 
-  }else
-  if( vm.count( generator_param ) )
+  }
+  else if( vm.count( generator_param ) )
   {
     //----| surface generators
 
@@ -142,27 +146,27 @@ int main ( int argc, char **argv )
     {
       flat::DisturbTransform noise_trafo{ 0.1 };
       noise_trafo( surface );
-
     }
     else if( vm[ generator_param ].as< std::string >() == "wave" )
     {
       flat::WaveTransform wave_trafo;
       wave_trafo( surface );
-
-    }else
-    { std::cerr << "ERROR - unknown surface generator \"" << vm[ generator_param ].as<std::string>() << "\" specified." << std::endl;
+    }
+    else
+    {
+      std::cerr << "ERROR - unknown surface generator \"" << vm[ generator_param ].as<std::string>() << "\" specified." << std::endl;
       return 0;
     }
-  } else
-  { std::cerr << "ERROR - no surface specified - use one of the following arguments \"" << surface_file_param << "\", \"" << generator_param << "\" specified." << std::endl;
+  }
+  else
+  {
+    std::cerr << "ERROR - no surface specified - use one of the following arguments \"" << surface_file_param << "\", \"" << generator_param << "\" specified." << std::endl;
     return 0;
   }
-
 
   //:::| compute distances
 
   distance_matrix_type distance_matrix( vm.count( export_dist_param ) ? surface->num_vertices() : 0 );
-
 
   //---| inspector ?
 
@@ -172,9 +176,9 @@ int main ( int argc, char **argv )
   if( vm.count( inspector_param ) )
   {
     // initialize gtkmm
-    kit.reset( new Gtk::Main(argc, argv) );
+    kit.reset( new Gtk::Main( argc, argv ) );
     // initialize gtkglextmm.
-    Gtk::GL::init(argc, argv);
+    Gtk::GL::init( argc, argv );
   }
 
   //---| single-source ?

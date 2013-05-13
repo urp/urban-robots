@@ -25,7 +25,8 @@
 # pragma once
 
 // debugging
-# define DBG_GTK_GLCANVAS_SET_RENDER_TARGET
+# define DBG_GTK_GLCANVAS_ON_REALIZE
+# define DBG_GTK_GLCANVAS_UPDATE_CONTEXT
 # define DBG_GTK_GLCANVAS_CONFIGURE
 # define DBG_GTK_GLCANVAS_ON_EXPOSE_EVENT
 # define DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
@@ -34,10 +35,13 @@
 # define DBG_GTK_GLCANVAS_INVALIDATE
 # define DBG_GTK_GLCANVAS_ON_BUTTON_PRESS_EVENT
 
+# include "gl/headers.hpp"
+
 # include <gtkmm.h>
 # include <gtkglmm.h>
 
-# include "gtk/gl_view/gl_drawable.hpp"
+# include "gl/drawable.hpp"
+
 # include "gtk/gl_view/gl_render_targets.hpp"
 
 # include "view.hpp"
@@ -51,123 +55,94 @@
 namespace gtk
 {
 
-  class GLCanvas : public Gtk::DrawingArea, public flat::View< gl::Drawable >
+  template
+  class GLCanvas : public GLDrawingArea, public uv::View< uv::gl::Drawable >
   {
     public: //types
 
-      friend class GLWindowRenderTarget;
-      friend class GLPixmapRenderTarget;
+      static flat::distance_t cam_dist_step;
 
-      static flat::distance_t    cam_dist_step;
-
-      typedef boost::signal< void( const Glib::RefPtr<Gdk::Pixmap>& ) > pixmap_update_signal;
+      typedef boost::signal< void( const Glib::RefPtr< Gdk::Pixmap >& ) > pixmap_update_signal;
 
     private:
 
       // drawing options
-      bool      m_show_origin;
-      bool      m_show_pivot;
+      // TODO: make mini-drawables
+      bool m_show_origin;
+      bool m_show_pivot;
 
-      bool      m_block_renderer;
+      bool m_block_renderer;
+
+      //std::shared_ptr< GLPixmap > m_gl_pixmap;
 
       pixmap_update_signal   m_pixmap_update_signal;
 
-      std::shared_ptr< GLRenderTarget > m_target;
-
-      // make temporary in gl::View
-      Glib::RefPtr< Gdk::Pixmap >       m_pixmap;
-
       // setup render target
 
-      std::vector< View< gl::Drawable >::drawable_pointer > m_gl_init_list;
-      std::vector< View< gl::Drawable >::drawable_pointer > m_gl_remove_list;
+      std::vector< View< uv::gl::Drawable >::drawable_pointer > m_gl_init_list;
+      std::vector< View< uv::gl::Drawable >::drawable_pointer > m_gl_remove_list;
 
-      bool configure_target( const size_t width, const size_t height );
+      // issue opengl commands
 
       void gl_initialize_context();
 
-      void gl_initialize_drawables( const bool init_all = false );
+      void gl_initialize_queued_drawables();
 
-      void gl_remove_drawables( const bool remove_all = false );
+      void gl_initialize_all_drawables();
+
+      void gl_remove_queued_drawables();
+
+      void gl_remove_all_drawables();
 
       void gl_setup_view( const float width, const float height );
 
-      // issue opengl drawing commands
-
-      void gl_render_scene();
+      void gl_draw_scene();
 
       // camera
-      coord_t                   cam_dist;
-      location_t                cam_center;
-      utk::inertial<coord_t>    cam_inertial;
-      location_t                old_cam_center;
-      utk::inertial<coord_t>    old_cam_inertial;
-      location2d_t              old_mouse_pos;
+      flat::coord_t                  cam_dist;
+      flat::location_t               cam_center;
+      utk::inertial< flat::coord_t > cam_inertial;
+      flat::location_t               old_cam_center;
+      utk::inertial< flat::coord_t > old_cam_inertial;
+      flat::location2d_t             old_mouse_pos;
 
     protected:
 
       // callback functions
-      virtual bool      on_configure_event(GdkEventConfigure* event);
-      virtual bool      on_expose_event(GdkEventExpose* event);
+      virtual void on_realize() override;
+      virtual bool on_configure_event( GdkEventConfigure* event) override;
+      virtual bool on_expose_event( GdkEventExpose* event) override;
 
-      virtual bool      on_button_press_event(GdkEventButton* event);
-      virtual bool      on_motion_notify_event(GdkEventMotion* event);
-      virtual bool      on_scroll_event(GdkEventScroll* event);
+      virtual bool on_button_press_event( GdkEventButton* event) override;
+      virtual bool on_motion_notify_event( GdkEventMotion* event) override;
+      virtual bool on_scroll_event( GdkEventScroll* event ) override;
 
     public:
 
-      GLCanvas( BaseObjectType* cobject
-              , const Glib::RefPtr<Gtk::Builder>& builder );
+      GLCanvas();
 
       virtual ~GLCanvas() { }
 
       // adding and removing drawables
 
-      virtual void add_drawable( const View< gl::Drawable >::drawable_pointer& drawable )
+      virtual void add_drawable( const uv::View< uv::gl::Drawable >::drawable_pointer& drawable )
       {
 
         std::clog << "gtk::GLCanvas::add_drawable" << std::endl;
 
-        flat::View< gl::Drawable >::add_drawable( drawable );
+        uv::View< uv::gl::Drawable >::add_drawable( drawable );
 
-        if( m_target->is_valid() )
-        {
-          m_target->gl_begin_context();
-
-            drawable->gl_initialize_context();
-
-          m_target->gl_end_context();
-        }
-        else
-          m_gl_init_list.push_back( drawable );
+        m_gl_init_list.push_back( drawable );
       }
 
-      virtual void remove_drawable( const View< gl::Drawable >::drawable_pointer& drawable )
+      virtual void remove_drawable( const uv::View< uv::gl::Drawable >::drawable_pointer& drawable )
       {
-        assert( m_target );
+        std::clog << "gtk::GLCanvas::remove_drawable| valid context " << is_gl_context_valid() << std::endl;
 
-        std::clog << "gtk::GLCanvas::remove_drawable| valid context " << m_target->is_valid() << std::endl;
+        uv::View< uv::gl::Drawable >::remove_drawable( drawable );
 
-        if( m_target->is_valid() )
-        {
-          m_target->gl_begin_context();
-
-            drawable->gl_remove_from_context();
-
-          m_target->gl_end_context();
-        }
-        else
-          m_gl_remove_list.push_back( drawable );
-
-        flat::View< gl::Drawable >::remove_drawable( drawable );
+        m_gl_remove_list.push_back( drawable );
       }
-
-      // TODO: add gui switch
-
-      void set_render_target( const GLRenderTarget::types_t target_type );
-
-      bool render_to_window();
-      bool render_to_pixmap();
 
       void request_redraw()
       {
@@ -209,21 +184,32 @@ namespace gtk
                   << std::endl;
         # endif
 
-        if( !is_renderer_blocked() )
+        if( not is_renderer_blocked() )
           request_redraw();
       }
 
+/*
+      Glib::RefPtr< Gdk::Pixmap > get_pixmap()
+      {
+        if( not m_gl_pixmap ) return Glib::RefPtr< Gdk::Pixmap >();
 
-      Glib::RefPtr< Gdk::Pixmap >&       get_pixmap() { return m_pixmap; };
-      const Glib::RefPtr< Gdk::Pixmap >& get_pixmap() const { return m_pixmap; };
+        return m_gl_pixmap->pixmap();
+      }
 
+      const Glib::RefPtr< Gdk::Pixmap > get_pixmap() const
+      {
+        if( not m_gl_pixmap ) return Glib::RefPtr< Gdk::Pixmap >();
+
+        return m_gl_pixmap->pixmap();
+      }
+*/
       const bool&       get_origin_visibility() const   { return m_show_origin; }
 
       const bool&       get_pivot_visibility()  const   { return m_show_pivot; }
-
+/*
       boost::signals::connection connect_pixmap_observer( pixmap_update_signal::slot_type observer )
       { return m_pixmap_update_signal.connect( observer ); }
-
+*/
   };
 
 } // of namespace flat

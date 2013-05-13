@@ -25,6 +25,8 @@
 
 #include <boost/lexical_cast.hpp>
 
+using namespace mmp;
+
 gtk::GeodesicsInspector::GeodesicsInspector( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder )
 : Gtk::Window( cobject ), m_geodesics(0), m_view( 0 ), m_clog_buffer( 0 ), m_builder( builder )
 {
@@ -67,21 +69,21 @@ void gtk::GeodesicsInspector::initialize( const std::shared_ptr< Geodesics >& ge
 
   m_geodesics = geodesics;
 
-  if( ! same_surface )
+  if( not same_surface )
   {
     if( m_surface_drawable )
       m_surface_drawable->remove_from_all_views();
 
-    m_surface_drawable = gl::SurfaceDrawable::create( new_surface );
+    m_surface_drawable = uv::gl::SurfaceDrawable::create( new_surface );
 
-    m_surface_drawable->set_edge_mode( gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
+    m_surface_drawable->set_edge_mode( uv::gl::SurfaceDrawable::INVISIBLE_EDGE_MODE );
     m_view->get_canvas()->add_drawable( m_surface_drawable );
   }
 
   if( m_geodesics_drawable )
     m_geodesics_drawable->remove_from_all_views();
 
-  m_geodesics_drawable = gl::GeodesicsDrawable::create( m_geodesics );
+  m_geodesics_drawable = uv::gl::GeodesicsDrawable::create( m_geodesics );
 
   m_view->get_canvas()->add_drawable( m_geodesics_drawable );
 
@@ -106,7 +108,7 @@ void gtk::GeodesicsInspector::run_propagation( )
 
   Gtk::Main::run(*this);
 
-  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::run_debugging_propagation\t|"
+  std::clog << "gtk::GeodesicsInspector::run_propagation\t|"
             << "completed source " << m_geodesics->source()
             << " with " << mmp::Window::next_id << " windows created in total"
             << std::endl;
@@ -114,12 +116,12 @@ void gtk::GeodesicsInspector::run_propagation( )
 
 bool gtk::GeodesicsInspector::step()
 {
-  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::step" << std::endl;
+  std::clog << "gtk::GeodesicsInspector::step" << std::endl;
 
   // skip non-frontier event points
   do
   {
-    if( ! m_geodesics->step() )
+    if( not m_geodesics->step() )
     {
       //:::|propagation finished
 
@@ -129,23 +131,28 @@ bool gtk::GeodesicsInspector::step()
       m_step_button->set_sensitive( false );
       m_iterate_button->set_sensitive( false );
 
-      if( m_view->get_canvas()->is_renderer_blocked() )  m_view->force_redraw();
+      if( m_view->get_canvas()->is_renderer_blocked() )
+        m_view->force_redraw();
 
       // check result
-      if( !end_result_sane && m_stop_on_errors )
+      if( not end_result_sane and m_stop_on_errors )
       { Gtk::MessageDialog( "sanity check failed for source "
                           + boost::lexical_cast< std::string >( m_geodesics->source() )
                           ).run();
         m_iterate_button->set_active( false );
         return false; // block idle signal -> keep window open for eximination
       }
+
       hide();// stops inner main-loop
     }
-  }while( !m_geodesics->event_queue.empty() && ! ( m_geodesics->event_queue.top()->flags() & EventPoint::FRONTIER ) );
+
+  }while( not m_geodesics->event_queue.empty()
+          and not ( m_geodesics->event_queue.top()->flags() & EventPoint::FRONTIER )
+        );
 
   //:::|show text information about the next event
 
-  if( !m_geodesics->event_queue.empty() )
+  if( not m_geodesics->event_queue.empty() )
   {
     const EventPoint* top_event = m_geodesics->event_queue.top();
 
@@ -156,16 +163,18 @@ bool gtk::GeodesicsInspector::step()
 
     m_geodesics_drawable->invalidate();
   }
+
   return true;
 }
 
 void gtk::GeodesicsInspector::toggle_iteration()
 {
 
-  std::clog << "mmp::visualizer::gtk::GeodesicsInspector::toggle_iteration" << std::endl;
+  std::clog << "gtk::GeodesicsInspector::toggle_iteration" << std::endl;
 
-  if( !m_iterate_connection.connected() )
-  { m_iterate_connection = Glib::signal_idle().connect( sigc::mem_fun( *this, &GeodesicsInspector::step ) );
+  if( not m_iterate_connection.connected() )
+  {
+    m_iterate_connection = Glib::signal_idle().connect( sigc::mem_fun( *this, &GeodesicsInspector::step ) );
     m_iterate_connection.block();
   }
 

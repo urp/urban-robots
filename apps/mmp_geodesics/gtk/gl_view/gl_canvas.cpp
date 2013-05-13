@@ -27,8 +27,8 @@ using namespace gtk;
 
 flat::coord_t GLCanvas::cam_dist_step = 0.1;
 
-GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder )
-: Gtk::DrawingArea( cobject )
+GLCanvas::GLCanvas()
+: GLDrawingArea()
 , m_show_origin( false )
 , m_show_pivot( true )
 , m_block_renderer(false)
@@ -37,28 +37,30 @@ GLCanvas::GLCanvas( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& b
 , cam_inertial()
 {
   # if defined DBG_GTK_GL_CANVAS
-  std::clog << "gtk::GLCanvas::GLCanvas" <<std::endl;
+  std::clog << "gtk::GLCanvas::GLCanvas" << std::endl;
   # endif
 
   // setting camera position
   cam_inertial.position().z() += cam_dist;
 
-  set_app_paintable( true );
-  set_double_buffered( false );
+  // add event signals
+
+  add_events( Gdk::BUTTON_PRESS_MASK
+            | Gdk::BUTTON_MOTION_MASK
+            | Gdk::BUTTON_RELEASE_MASK
+            | Gdk::SCROLL_MASK
+            //| Gdk::STRUCTURE_MASK
+            );
+
 
   // view transformation signals. Events have to be enabled in the glade file
   signal_button_press_event().connect(  sigc::mem_fun(*this, &GLCanvas::on_button_press_event) );
   signal_motion_notify_event().connect( sigc::mem_fun(*this, &GLCanvas::on_motion_notify_event));
   signal_scroll_event().connect( sigc::mem_fun(*this, &GLCanvas::on_scroll_event));
 
-  // The context of the window
-
-  m_target.reset( new GLWindowRenderTarget( *this )
-                  //new GLPixmapRenderTarget( m_pixmap )
-                );
 }
 
-void GLCanvas::gl_initialize_context()
+void GLCanvas::gl_initialize_context( )
 {
 
   # if defined DBG_GTK_GLCANVAS_CONFIGURE
@@ -70,28 +72,31 @@ void GLCanvas::gl_initialize_context()
 
   //---| point and lines
 
-  glEnable( GL_LINE_SMOOTH );
   glEnable( GL_POINT_SMOOTH );
+  glHint( GL_POINT_SMOOTH_HINT, GL_NICEST );
+
+  glEnable( GL_LINE_SMOOTH );
+  glHint( GL_LINE_SMOOTH_HINT, GL_NICEST );
+
+  glEnable( GL_POLYGON_SMOOTH );
+  glHint( GL_POLYGON_SMOOTH_HINT, GL_NICEST );
 
   //---| fragments
 
-  glDepthFunc( GL_LEQUAL );
   glEnable(GL_DEPTH_TEST);
+  glDepthFunc( GL_LEQUAL );
 
   //glEnable( GL_BLEND );
   //glBlendFunc( GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA );
-
-  //glDisable( GL_CULL_FACE );
-  //glCullFace( GL_BACK );
 
   glEnable(GL_POLYGON_OFFSET_FILL);
   glPolygonOffset( 1., 1. );
 
   //---| lighting
 
-  glDisable( GL_LIGHTING );
+  //glDisable( GL_LIGHTING );
 
-  glShadeModel( GL_SMOOTH );
+  //glShadeModel( GL_SMOOTH );
 
   glEnable( GL_COLOR_MATERIAL );
 
@@ -136,51 +141,80 @@ void GLCanvas::gl_initialize_context()
   # endif
 }
 
-void GLCanvas::gl_initialize_drawables( const bool init_all )
+
+void GLCanvas::gl_initialize_queued_drawables()
 {
   # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
-  std::clog << "gtk::GLCanvas::gl_initialize_drawables\t| "
-            << "initialize " << (init_all ? "all" : ( m_gl_init_list.empty() ? "no new" : "new" ) ) << "drawables"
+  std::clog << "gtk::GLCanvas::gl_initialize_queued_drawables\t| "
+            << "initialize " << ( m_gl_init_list.empty() ? "no " : "" ) << "queued drawables"
             << std::endl;
   # endif
 
-  assert( m_target->is_valid() );
-
-  auto call_gl_initialize_context = []( const flat::View< gl::Drawable >::drawable_pointer& drawable ) { drawable->gl_initialize_context(); };
-
-  if( init_all)
-    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_initialize_context );
-  else
-    std::for_each( m_gl_init_list.begin(), m_gl_init_list.end(), call_gl_initialize_context );
+  for( auto drawable : m_gl_init_list )
+  { drawable->gl_initialize_context( gl_context() ); }
 
   m_gl_init_list.clear();
 
   # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
-  gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_drawables\t| drawable error checkpoint" << std::endl );
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_queued_drawables\t| error checkpoint" << std::endl );
   # endif
 }
 
-void GLCanvas::gl_remove_drawables( const bool remove_all )
+void GLCanvas::gl_initialize_all_drawables()
 {
   # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
-  std::clog << "gtk::GLCanvas::gl_remove_drawables\t| "
-            << "remove " << (remove_all ? "all" : ( m_gl_remove_list.empty() ? "no new" : "new" ) ) << "drawables"
+  std::clog << "gtk::GLCanvas::gl_initialize_all_drawables\t| " << "initialize all drawables" << std::endl;
+  # endif
+
+  assert( is_gl_context_valid() );
+
+  for( auto drawable : *this )
+  { drawable->gl_initialize_context( gl_context() ); }
+
+  m_gl_init_list.clear();
+
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_initialize_all_drawables\t| " << "error checkpoint" << std::endl );
+  # endif
+}
+
+void GLCanvas::gl_remove_queued_drawables( )
+{
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  std::clog << "gtk::GLCanvas::gl_remove_queued_drawables\t| "
+            << "remove " << ( m_gl_remove_list.empty() ? "no " : "" ) << "queued drawables"
             << std::endl;
   # endif
 
-  assert( m_target->is_valid() );
-
-  auto call_gl_remove_from_context = []( const flat::View< gl::Drawable >::drawable_pointer& drawable ) { drawable->gl_remove_from_context(); };
-
-  if( remove_all)
-    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_remove_from_context );
-  else
-    std::for_each( m_gl_remove_list.begin(), m_gl_remove_list.end(), call_gl_remove_from_context );
+  for( auto drawable : m_gl_remove_list )
+  {
+    drawable->gl_remove_from_context( gl_context() );
+  }
 
   m_gl_remove_list.clear();
 
   # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
-  gl::PrintError( std::clog << "gtk::GLCanvas::gl_remove_drawables\t| drawable error checkpoint" << std::endl );
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_remove_queued_drawables\t| error checkpoint" << std::endl );
+  # endif
+}
+
+
+void GLCanvas::gl_remove_all_drawables()
+{
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  std::clog << "gtk::GLCanvas::gl_remove_all_drawables\t| "
+            << "removing all drawables..." << std::endl;
+  # endif
+
+  for( auto drawable : *this )
+  {
+    drawable->gl_remove_from_context( gl_context() );
+  }
+
+  m_gl_remove_list.clear();
+
+  # if defined DBG_GTK_GLCANVAS_GL_INITIALIZE_CONTEXT
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_remove_all_drawables\t| error checkpoint" << std::endl );
   # endif
 }
 
@@ -196,203 +230,146 @@ void GLCanvas::gl_setup_view( const float width, const float height )
   glLoadIdentity();
 
   # if defined DBG_GTK_GLCANVAS_GL_SETUP_VIEW
-  gl::PrintError( std::clog << "gtk::GLCanvas::gl_setup_view\t| error checkpoint" << std::endl );
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_setup_view\t| error checkpoint" << std::endl );
   # endif
 
 }
 
-void GLCanvas::set_render_target( const GLRenderTarget::types_t target_type )
+void GLCanvas::on_realize()
 {
-  # if defined DBG_GTK_GLCANVAS_SET_RENDER_TARGET
-  std::clog << "gtk::GLCanvas::set_render_targets\t|"
-            << ( target_type == GLRenderTarget::WINDOW ? " window" : "" )
-            << ( target_type == GLRenderTarget::PIXMAP ? " pixmap" : "" )
-            << std::endl;
+  # if defined DBG_GTK_GLCANVAS_ON_REALIZE
+  std::clog << "gtk::GLCanvas::on_realize\t| " << std::endl;
   # endif
 
+  GLDrawingArea::on_realize();
 
-  if( m_target->get_type() == target_type ) return;
+  gl_begin_context();
 
-  Glib::RefPtr< const Gdk::GL::Context>  old_context = m_target->get_gdk_gl_context();
+    gl_initialize_context();
 
-  std::shared_ptr< GLRenderTarget > new_target;
-
-  switch(target_type)
-  {
-    case GLRenderTarget::WINDOW : new_target.reset( new GLWindowRenderTarget( *this, old_context ) ); break;
-    case GLRenderTarget::PIXMAP : new_target.reset( new GLPixmapRenderTarget( m_pixmap, get_width(), get_height(), old_context ) ); break;
-    default : assert(false);
-  }
-
-  assert( new_target );
-
-  set_colormap( new_target->get_gdk_gl_config()->get_colormap() );
-
-  m_target = new_target;
-
-  configure_target( get_width(), get_height() );
-
-  request_redraw();
-}
-
-bool GLCanvas::configure_target( const size_t width, const size_t height )
-{
-  if( !m_target ) return false;
-
-  // TODO: why need ???
-  const bool old_context_was_not_shared = ! m_target->get_gdk_gl_context() || ! m_target->get_gdk_gl_context()->get_share_list();
-
-  const bool configured = m_target->configure( width, height );
-
-  # if defined DBG_GTK_GLCANVAS_CONFIGURE
-  std::clog << "gtk::GLCanvas::configure_target\t| preparing context" << std::endl;
-  # endif
-
-  m_target->gl_begin_context();
-
-    if( ! m_target->get_gdk_gl_context()->get_share_list() || old_context_was_not_shared )
-    {
-      gl_initialize_context();
-      gl_initialize_drawables( true );
-
-    }else
-    {
-      gl_remove_drawables();
-      gl_initialize_drawables();
-    }
-
-    gl_setup_view( get_width(), get_height() );
-
-  m_target->gl_end_context();
-
-  return configured;
+  gl_end_context();
 }
 
 bool GLCanvas::on_configure_event( GdkEventConfigure* event )
 {
-  return configure_target( event->width, event->height );
+  bool success = configure( event->width, event->height );
+
+  // TODO: should be called here, not in update_context()
+  /* set up the viewport and set view matrix to identity
+  gl_begin_context();
+    gl_setup_view( event->width, event->height );
+  gl_end_context();*/
+
+  std::clog << "gtk::GLCanvas::on_configure_event\t| success " << success << std::endl;
+
+  return success;
 }
 
-void GLCanvas::gl_render_scene()
+void GLCanvas::gl_draw_scene()
 {
   # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
-  const bool context_double_buffered = Gdk::GL::Context::get_current()->get_gl_config()->is_double_buffered();
-
-  GLint draw_buffer;
-  glGetIntegerv(GL_DRAW_BUFFER, &draw_buffer );
-  GLboolean gl_double_buffered;
-  glGetBooleanv(GL_DOUBLEBUFFER, &gl_double_buffered );
-  std::clog << "gtk::GLCanvas::gl_render_scene\t\t| double buffered " << bool(gl_double_buffered) << "(gl)/" << context_double_buffered << "(gtk)"
-  << " draw buffer " << (draw_buffer == GL_FRONT ? "FRONT" : (draw_buffer == GL_BACK ? "BACK" : "unknown")) << std::endl;
+  std::clog << "gtk::GLCanvas::gl_draw_scene\t| "<< std::endl;
   # endif
 
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glPushMatrix();
   {
-    gl::InvTrafo( cam_inertial );
+    uv::gl::gl_apply_inverse_transform( cam_inertial );
 
     // draw viewing pivot
     if( get_pivot_visibility() )
     {
       glPushMatrix();
-        gl::Translate( cam_center );
-        gl::DrawCoords(.2f);
+
+        uv::gl::Translate( cam_center );
+
+        uv::gl::DrawCoords( .2 );
+
       glPopMatrix();
     }
 
     // draw origin
 
     if( get_origin_visibility() )
-      gl::DrawCoords( 1. );
+      uv::gl::DrawCoords( 1. );
 
     // draw drawables
 
-    auto call_gl_draw = []( const flat::View< gl::Drawable >::drawable_pointer& drawable )
+    auto context = gl_context();
+
+    auto call_gl_draw = [&context]( const uv::View< uv::gl::Drawable >::drawable_pointer& drawable )
                         {
                           glPushAttrib( GL_ALL_ATTRIB_BITS );
-                          drawable->gl_draw();
+
+                            drawable->gl_draw( context );
+
                           glPopAttrib();
                         };
 
-    std::for_each( flat::View< gl::Drawable >::begin(), flat::View< gl::Drawable >::end(), call_gl_draw );
-
+    std::for_each( uv::View< uv::gl::Drawable >::begin(), uv::View< uv::gl::Drawable >::end(), call_gl_draw );
   }
 
   glPopMatrix();
 
   # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
-  gl::PrintError( std::clog << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl );
+  uv::gl::PrintError( std::clog << "gtk::GLCanvas::gl_render_scene\t| error checkpoint" << std::endl );
   # endif
 
-}
-
-bool GLCanvas::render_to_window()
-{
-  # if defined DBG_GTK_GL_CANVAS
-  std::clog << "gtk::GLCanvas::render_to_window\t\t|" << std::endl;
-  # endif
-
-  m_target->gl_begin_context();
-
-    gl_render_scene();
-
-    m_target->gl_flush();
-
-  m_target->gl_end_context();
-
-  if( m_target->get_type() == GLRenderTarget::PIXMAP )
-  {
-
-    get_window()->draw_drawable( get_style()->get_fg_gc(get_state()),
-                                 m_pixmap,
-                                 0, 0, 0, 0,
-                                 get_width(), get_height() );
-
-    m_pixmap_update_signal( m_pixmap );
-
-  } else assert( m_target->get_type() == GLRenderTarget::WINDOW );
-
-  return true;
-}
-
-bool  GLCanvas::render_to_pixmap()
-{
-
-  const auto target_type = m_target->get_type();
-
-  // TODO: try to create pixmap context in parallel
-  set_render_target( GLRenderTarget::PIXMAP );
-
-  render_to_window();
-
-  set_render_target( target_type );
-
-  return true;
 }
 
 bool GLCanvas::on_expose_event( GdkEventExpose* event )
 {
   # if defined DBG_GTK_GLCANVAS_ON_EXPOSE_EVENT
   std::clog << "gtk::GLCanvas::on_expose_event\t\t|"
-        <<"count "<<event->count
-      <<" x "<<event->area.x
-      <<" y "<<event->area.y
-      <<" width "<<event->area.width
-      <<" height "<<event->area.height
+      <<" width " << event->area.width
+      <<" height " << event->area.height
       << std::flush<<std::endl;
   # endif
 
-  return render_to_window();
+  gl_begin_context();
+
+    // process queued gl resource initializations and removals
+
+    gl_remove_queued_drawables();
+
+    gl_initialize_queued_drawables();
+
+    // set up the viewport and set view matrix to identity
+    // NOTE: should be called from on_configure_event
+    gl_setup_view( get_width(), get_height() );
+
+    // draw the drawables
+    gl_draw_scene();
+
+    // swap buffers if double buffered
+    gl_flush();
+
+  gl_end_context();
+
+  /*if( m_gl_pixmap )
+  {
+    // TODO ??? (*gl_drawable)->wait_gl();
+
+    get_window()->draw_drawable( get_style()->get_fg_gc(get_state()),
+                                 m_gl_pixmap->pixmap(),
+                                 0, 0, 0, 0,
+                                 get_width(), get_height() );
+
+    m_pixmap_update_signal( m_gl_pixmap->pixmap() );
+
+  }*/
+
+  return true;
 }
 
 
 bool GLCanvas::on_button_press_event( GdkEventButton* event )
 {
   # if defined DBG_GTK_GLCANVAS_ON_BUTTON_PRESS_EVENT
-  std::clog << "gtk::GLCanvas::on_button_press_event"
-        << std::flush<<std::endl;
+  std::clog << "gtk::GLCanvas::on_button_press_event" << std::endl;
   # endif
+
   old_cam_inertial = cam_inertial;
   old_cam_center   = cam_center;
   old_mouse_pos.x() = event->x;
@@ -404,7 +381,7 @@ bool GLCanvas::on_button_press_event( GdkEventButton* event )
 
 bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
 {
-  const location2d_t  cur_mouse_pos(event->x,event->y);
+  const flat::location2d_t  cur_mouse_pos(event->x,event->y);
   const utk::size_t width = get_width();
   const utk::size_t height= get_height();
 
@@ -420,9 +397,10 @@ bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
     cam_center = old_cam_center;
     cam_inertial.quat()=old_cam_inertial.quat();
 
-    location2d_t       oldpos( 2*old_mouse_pos.x()/(width-1.)-1., 2*(1.-old_mouse_pos.y()/(height-1.))-1.);
-    location2d_t       newpos( 2*cur_mouse_pos.x()/(width-1.)-1., 2*(1.-cur_mouse_pos.y()/(height-1.))-1.);
-    utk::veca<coord_t,4> axan  (utk::get_axis_angle_from_trackball( oldpos, newpos ));
+    flat::location2d_t       oldpos( 2*old_mouse_pos.x()/(width-1.)-1., 2*(1.-old_mouse_pos.y()/(height-1.))-1.);
+    flat::location2d_t       newpos( 2*cur_mouse_pos.x()/(width-1.)-1., 2*(1.-cur_mouse_pos.y()/(height-1.))-1.);
+
+    utk::veca< flat::coord_t, 4 > axan  ( utk::get_axis_angle_from_trackball( oldpos, newpos ));
 
     axan.xyz() = old_cam_inertial.rot_vec( axan.xyz() );
 
@@ -430,7 +408,7 @@ bool GLCanvas::on_motion_notify_event(GdkEventMotion* event)
     cam_inertial.quat().normalize();
   }
 
-  location_t  loc( 0.,0.,cam_dist );
+  flat::location_t  loc( 0.,0.,cam_dist );
   cam_inertial.position() = cam_inertial.rot_vec(loc) + cam_center;
 
   request_redraw();
@@ -446,7 +424,7 @@ bool  GLCanvas::on_scroll_event( GdkEventScroll* event )
   if( event->direction == GDK_SCROLL_DOWN )
     cam_dist += cam_dist_step;
 
-  location_t pos( coord_t(0.), coord_t(0.), cam_dist );
+  flat::location_t pos( flat::coord_t(0.), flat::coord_t(0.), cam_dist );
   cam_inertial.position() = cam_inertial.rot_vec( pos ) + cam_center;
 
   request_redraw();

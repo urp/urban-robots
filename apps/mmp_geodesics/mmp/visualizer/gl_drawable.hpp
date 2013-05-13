@@ -21,8 +21,8 @@
 
 # include "mmp/geodesics.hpp"
 
+# include "gl/drawable.hpp"
 # include "gtk/gl_view/gl_view.hpp"
-# include "gtk/gl_view/gl_drawable.hpp"
 
 # include <utk/geometry.h>
 
@@ -31,121 +31,123 @@
 
 //#define DBG_FLAT_MMP_VISUALIZER_DRAW_WINDOW
 
-namespace gl
+namespace uv
 {
-  using namespace mmp;
-
-  class GeodesicsDrawable : public ::gl::Drawable
+  namespace gl
   {
-    public: // types
 
-      typedef enum { FLAT_SHADING
-                   , ABSOLUTE_DISTANCE_SHADING
-                   , TEXTURE_DISTANCE_SHADING   }   shading_t;
+    class GeodesicsDrawable : public uv::gl::Drawable
+    {
+      public: // types
 
-    private: // data members
+        typedef enum { FLAT_SHADING
+                     , ABSOLUTE_DISTANCE_SHADING
+                     , TEXTURE_DISTANCE_SHADING   }   shading_t;
 
-      std::shared_ptr< Geodesics > m_geodesics;
+      private: // data members
 
-      bool m_covering_visible;
+        std::shared_ptr< mmp::Geodesics > m_geodesics;
 
-      GLuint m_equidist_texture;
+        bool m_covering_visible;
 
-    private: // functions
+        GLuint m_equidist_texture;
 
-      void gl_draw_wavefront_indicators( EventPoint* ev
-                                       , const rgba_color_ref_t crossing_color
-                                       , const rgba_color_ref_t colinear_color
+      private: // functions
+
+        void gl_draw_wavefront_indicators( mmp::EventPoint* ev
+                                         , const mmp::rgba_color_ref_t crossing_color
+                                         , const mmp::rgba_color_ref_t colinear_color
+                                         );
+
+        void gl_draw_window_edges( const mmp::Window& window, const mmp::Window::types& window_type
+                                 , const mmp::location_t& win_left, const mmp::location_t& win_right
+                                 , const mmp::location_t& pre_left, const mmp::location_t& pre_right
+                                 , const mmp::rgba_color_ref_t edge_color
+                                 , const mmp::rgba_color_ref_t source_edge_color );
+
+        bool gl_draw_window( const mmp::Window&     window
+                           , const mmp::rgba_color_ref_t edge_color
+                           , const mmp::rgba_color_ref_t fill_color
+                           , const mmp::rgba_color_ref_t source_color
+                           , const shading_t        shading );
+
+        bool gl_draw_window_subdivision( const mmp::Window&     window
+                                       , const mmp::rgba_color_ref_t edge_color
+                                       , const mmp::rgba_color_ref_t fill_color
+                                       , const mmp::rgba_color_ref_t source_color
+                                       , const shading_t shading
                                        );
 
-      void gl_draw_window_edges( const Window& window, const Window::types& window_type
-                               , const location_t& win_left, const location_t& win_right
-                               , const location_t& pre_left, const location_t& pre_right
-                               , const rgba_color_ref_t edge_color
-                               , const rgba_color_ref_t source_edge_color );
+        void gl_do_draw_subdivision( const mmp::Window&           window
+                                   , const mmp::Window::types     window_type
+                                   , const mmp::distance_t        recursion_threshold
+                                   , const mmp::rgba_color_ref_t  edge_color
+                                   , const mmp::rgba_color_ref_t  fill_color
+                                   , const mmp::rgba_color_ref_t  source_color
+                                   , const shading_t         shading
+                                   , const mmp::location_ref_t    normal
+                                   , const std::pair< const mmp::coord_t&   , const mmp::coord_t&    >& bounds
+                                   , const std::pair< const mmp::distance_t&, const mmp::distance_t& >& win_distances
+                                   , const std::pair< const mmp::distance_t&, const mmp::distance_t& >& pre_distances
+                                   , const std::pair< const mmp::location_t&, const mmp::location_t& >& win_points
+                                   , const std::pair< const mmp::location_t&, const mmp::location_t& >& pre_points
+                                   , const mmp::ps_t& ps
+                                   , const mmp::ps_t& pre_ps
+                                   );
 
-      bool gl_draw_window( const Window&          window
-                         , const rgba_color_ref_t edge_color
-                         , const rgba_color_ref_t fill_color
-                         , const rgba_color_ref_t source_color
-                         , const shading_t        shading );
-
-      bool gl_draw_window_subdivision( const Window& window
-                                     , const rgba_color_ref_t edge_color
-                                     , const rgba_color_ref_t fill_color
-                                     , const rgba_color_ref_t source_color
-                                     , const shading_t shading
-                                     );
-
-      void gl_do_draw_subdivision( const Window&           window
-                                 , const Window::types     window_type
-                                 , const distance_t        recursion_threshold
-                                 , const rgba_color_ref_t  edge_color
-                                 , const rgba_color_ref_t  fill_color
-                                 , const rgba_color_ref_t  source_color
-                                 , const shading_t         shading
-                                 , const location_ref_t    normal
-                                 , const std::pair< const coord_t&   , const coord_t&    >& bounds
-                                 , const std::pair< const distance_t&, const distance_t& >& win_distances
-                                 , const std::pair< const distance_t&, const distance_t& >& pre_distances
-                                 , const std::pair< const location_t&, const location_t& >& win_points
-                                 , const std::pair< const location_t&, const location_t& >& pre_points
-                                 , const ps_t& ps
-                                 , const ps_t& pre_ps
-                                 );
-
-      void gl_draw_interval( const Window&             window
-                           , const Window::types       window_type
-                           , const rgba_color_ref_t    edge_color
-                           , const rgba_color_ref_t    fill_color
-                           , const rgba_color_ref_t    source_color
-                           , const shading_t           shading
-                           , const location_ref_t      normal
-                           , const std::pair< const distance_t&, const distance_t& >& win_distances
-                           , const std::pair< const distance_t&, const distance_t& >& pre_distances
-                           , const std::pair< const location_t&, const location_t& >& win_points
-                           , const std::pair< const location_t&, const location_t& >& pre_points );
+        void gl_draw_interval( const mmp::Window&        window
+                             , const mmp::Window::types  window_type
+                             , const mmp::rgba_color_ref_t    edge_color
+                             , const mmp::rgba_color_ref_t    fill_color
+                             , const mmp::rgba_color_ref_t    source_color
+                             , const shading_t           shading
+                             , const mmp::location_ref_t      normal
+                             , const std::pair< const mmp::distance_t&, const mmp::distance_t& >& win_distances
+                             , const std::pair< const mmp::distance_t&, const mmp::distance_t& >& pre_distances
+                             , const std::pair< const mmp::location_t&, const mmp::location_t& >& win_points
+                             , const std::pair< const mmp::location_t&, const mmp::location_t& >& pre_points );
 
 
-      void gl_draw_event_point( EventPoint* ev, const bool is_top_event );
+        void gl_draw_event_point( mmp::EventPoint* ev, const bool is_top_event );
 
-      void gl_draw_window_sequence( const Window& window
-                                  , const rgba_color_ref_t edge_color
-                                  , const rgba_color_ref_t fill_color
-                                  , const rgba_color_ref_t source_color
-                                  , const shading_t         shading );
+        void gl_draw_window_sequence( const mmp::Window& window
+                                    , const mmp::rgba_color_ref_t edge_color
+                                    , const mmp::rgba_color_ref_t fill_color
+                                    , const mmp::rgba_color_ref_t source_color
+                                    , const shading_t         shading );
 
-      void gl_draw_wavefront( const shading_t );
+        void gl_draw_wavefront( const shading_t );
 
-      void gl_draw_covering( const shading_t );
+        void gl_draw_covering( const shading_t );
 
-    protected:
+      protected:
 
-       GeodesicsDrawable( const std::shared_ptr< Geodesics >& g );
+         GeodesicsDrawable( const std::shared_ptr< mmp::Geodesics >& g );
 
-    public: // functions
+      public: // functions
 
 
-      static std::shared_ptr< GeodesicsDrawable > create( const std::shared_ptr< Geodesics >& g )
-      { return std::shared_ptr< GeodesicsDrawable >( new GeodesicsDrawable( g ) ); }
+        static std::shared_ptr< GeodesicsDrawable > create( const std::shared_ptr< mmp::Geodesics >& g )
+        { return std::shared_ptr< GeodesicsDrawable >( new GeodesicsDrawable( g ) ); }
 
-      virtual ~GeodesicsDrawable()
-      {
-        std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl;
-      }
+        virtual ~GeodesicsDrawable()
+        {
+          std::clog << "flat::gl::GeodesicsDrawable::~GeodesicsDrawable\t" << std::endl;
+        }
 
-      virtual void gl_initialize_context();
+        virtual void gl_initialize_context( const std::shared_ptr< uv::gl::Context >& ) override;
 
-      virtual void gl_remove_from_context();
+        virtual void gl_remove_from_context( const std::shared_ptr< uv::gl::Context >& ) override;
 
-      virtual void gl_draw();
+        virtual void gl_draw( const std::shared_ptr< uv::gl::Context >& ) override;
 
-      const bool& get_covering_visibility() const
-      { return m_covering_visible; }
+        const bool& get_covering_visibility() const
+        { return m_covering_visible; }
 
-      void set_covering_visibility( const bool& visibility )
-      { m_covering_visible = visibility; }
+        void set_covering_visibility( const bool& visibility )
+        { m_covering_visible = visibility; }
 
-      const std::shared_ptr< Geodesics >& get_geodesics() const  { return m_geodesics; }
-  };
-}
+        const std::shared_ptr< mmp::Geodesics >& get_geodesics() const  { return m_geodesics; }
+    };
+  } // of gl::
+} // of ::uv::

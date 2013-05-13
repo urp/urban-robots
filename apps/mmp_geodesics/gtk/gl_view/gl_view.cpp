@@ -23,19 +23,17 @@
 #include "gtk/gl_view/gl_view.hpp"
 
 gtk::GLView::GLView( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& builder )
-: Gtk::VBox(cobject), m_builder( builder )
+: Gtk::VBox(cobject), m_builder( builder ), m_canvas( new GLCanvas() )
 {
-  m_builder->get_widget_derived( "gl_canvas" , m_canvas );
-  m_record_frames_connection = get_canvas()->connect_pixmap_observer ( std::bind( std::mem_fun( &GLView::on_record_frame), this ) );
-  m_record_frames_connection.block();
   // get control widgets
 
+/*
   m_builder->get_widget( "save_frame_as_button" , m_save_frame_as_button );
   m_save_frame_as_button->signal_clicked().connect( sigc::mem_fun( *this, &GLView::on_save_frame_as_clicked ) );
 
   m_builder->get_widget( "record_frames_toggle" , m_record_frames_toggle );
   m_record_frames_toggle->signal_toggled().connect( sigc::mem_fun( *this, &GLView::on_record_frames_toggled ) );
-
+*/
   m_builder->get_widget( "render_target_toolmenu" , m_render_target_menu );
   m_render_target_menu->signal_clicked().connect( sigc::mem_fun( *this, &GLView::on_block_renderer_clicked ) );
 
@@ -46,21 +44,36 @@ gtk::GLView::GLView( BaseObjectType* cobject, const Glib::RefPtr<Gtk::Builder>& 
   m_builder->get_widget( "show_pivot_checkbutton" , m_pivot_check );
   m_pivot_check->set_active( m_canvas->get_pivot_visibility() );
   m_pivot_check->signal_toggled().connect( sigc::mem_fun( *this, &GLView::on_pivot_toggled) );
+
+  // insert canvas
+
+  pack_start( *m_canvas );
+
+  m_canvas->show();
+
+  // record frames connection
+/*
+  m_record_frames_connection = get_canvas()->connect_pixmap_observer( std::bind( std::mem_fun( &GLView::on_record_frame), this ) );
+  m_record_frames_connection.block();
+*/
 }
 
-void   save_pixmap( const Glib::RefPtr<Gdk::Pixmap>& pixmap, const std::string& filename = "frame", const std::string& format = "png" ) //const
+void   save_pixmap( const Glib::RefPtr<Gdk::Pixmap>& pixmap, const boost::filesystem::path& file = "frame", const std::string& format = "png" ) //const
 {
   int width, height;
   pixmap->get_size( width, height );
   Glib::RefPtr<Gdk::Pixbuf> pixbuf = Gdk::Pixbuf::create( pixmap->get_image( 0, 0, width, height ), 0, 0, width, height );
 
-  pixbuf->save( filename, format );
+  pixbuf->save( file.string(), format );
 }
 
-void gtk::GLView::on_record_frame( /*const Glib::RefPtr<Gdk::Pixmap>& pixmap*/ )
+
+//void gtk::GLView::on_record_frame(
+                                     /*const Glib::RefPtr<Gdk::Pixmap>& pixmap*/
+                                /* )
 {
   std::clog << "gtk::GLView::on_record_frame\t|" << " file " << m_record_filename() << std::endl;
-  save_pixmap( m_canvas->get_pixmap(), m_record_filename(), m_record_filename.extension );
+  save_pixmap( m_canvas->get_pixmap(), m_record_filename(), m_record_filename.extension.string() );
 }
 
 void gtk::GLView::on_save_frame_as_clicked()
@@ -71,7 +84,7 @@ void gtk::GLView::on_save_frame_as_clicked()
   {
     m_canvas->render_to_pixmap();
 
-    save_pixmap( m_canvas->get_pixmap(), fcd.get_filename(), "png" );
+    save_pixmap( m_canvas->get_pixmap(), std::string( fcd.get_filename() ), "png" );
   }
 }
 
@@ -84,8 +97,8 @@ void gtk::GLView::on_record_frames_toggled()
 
     if( fcd.run() == Gtk::RESPONSE_OK )
     {
-      m_canvas->set_render_target( GLRenderTarget::PIXMAP );
-        m_record_filename = Filename( fcd.get_filename(), "frame", 0, "png" );
+      m_canvas->use_pixmap_target( true );
+      m_record_filename = Filename( std::string( fcd.get_filename() ), "frame", 0, "png" );
       m_record_frames_connection.unblock();
     }
     else m_record_frames_toggle->set_active( false );
@@ -93,9 +106,10 @@ void gtk::GLView::on_record_frames_toggled()
   else
   {
     m_record_frames_connection.block();
-    m_canvas->set_render_target( GLRenderTarget::WINDOW );
+    m_canvas->use_pixmap_target( false );
   }
 }
+*/
 
 void gtk::GLView::on_block_renderer_clicked()
 {

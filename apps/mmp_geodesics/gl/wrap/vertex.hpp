@@ -1,4 +1,4 @@
-// tools.cpp
+// tools.hpp
 // Copyright (C) 2006-2013  Peter Urban (peter.urban@s2003.tu-chemnitz.de)
 //
 //This program is free software; you can redistribute it and/or
@@ -15,41 +15,39 @@
 //along with this program; if not, write to the Free Software
 //Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-#include "gl/tools.hpp"
+# pragma once
 
-#include "gl/wrap/vertex.hpp"
+# include "utk/vecn.h"
 
-#include "gl/wrap/color.hpp"
+# include "gl/headers.hpp"
 
-using namespace uv::gl;
-
-void uv::gl::PrintError( std::ostream& os )
+namespace uv
 {
-  GLenum code = glGetError();
-
-  if(code != GL_NO_ERROR)
-    os << "gl::PrintError\t| "
-       << " WARNING: an OpenGL error has occured."
-       << " message: " << gluErrorString(code) << std::endl;
-
-}
-
-void uv::gl::DrawCoords( GLfloat size )
-{
-  //std::cerr<<"uv::gl::glDrawCoords\t|axis length "<<s<<std::endl;
-  glBegin(GL_LINES);
+  namespace gl
   {
-    Color ( 1.f , 0.f, 0.f );
-    Vertex( 0.f , 0.f, 0.f );
-    Vertex( size, 0.f, 0.f );
+    //---| glVertex
 
-    Color ( 0.f, 1.f , 0.f );
-    Vertex( 0.f, 0.f , 0.f );
-    Vertex( 0.f, size, 0.f );
+    inline void Vertex( GLfloat  x, GLfloat  y, GLfloat  z )
+    {
+      glVertex3f( x, y, z );
+    }
 
-    Color ( 0.f, 0.f, 1.f );
-    Vertex( 0.f, 0.f, 0.f );
-    Vertex( 0.f, 0.f, size );
-  }
-  glEnd();
-}
+    inline void Vertex( GLdouble x, GLdouble y, GLdouble z )
+    {
+      glVertex3d( x, y, z );
+    }
+
+
+    inline void Vertex( const utk::vecn< GLfloat , 3 >& v)
+    {
+      glVertex3fv( v.ptr() );
+    }
+
+    inline void Vertex( const utk::vecn< GLdouble, 3 >& v)
+    {
+      glVertex3dv( v.ptr() );
+    }
+
+  }// of gl::
+
+} // of ::uv::
