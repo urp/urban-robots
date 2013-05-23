@@ -46,14 +46,18 @@ void GeodesicsDrawable::gl_initialize_context( const std::shared_ptr< uv::gl::Co
   data[3] = 1.;
 
   const size_t subdivisions = 10;
-  const size_t gap = width / subdivisions;
+  const size_t gap = width / float(subdivisions);
+
   for( size_t i = 1; i < width; ++i )
   {
     const size_t pix = i * num_components;
-    data[pix + 0] = i % gap == 0 ? 1.f : .3f;
-    data[pix + 1] = i % gap == 0 ? 1.f : .3f;
-    data[pix + 2] = i % gap == 0 ? 1.f : .3 + float(i) / ( width - 1 ) * .3;
-    data[pix + 3] = i % gap == 0 ? 1.f : .9;
+
+    const bool no_gap = not (i % gap);
+
+    data[pix + 0] = no_gap ? 1.f : .6f;
+    data[pix + 1] = no_gap ? 1.f : .6f;
+    data[pix + 2] = no_gap ? 1.f : .6 /*+ float(i) / ( width - 1 ) * .3*/;
+    data[pix + 3] = no_gap ? 1.f : .9;
   }
 
   // allocate a texture name

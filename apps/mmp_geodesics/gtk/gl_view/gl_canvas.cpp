@@ -166,8 +166,6 @@ void GLCanvas::gl_initialize_all_drawables()
   std::clog << "gtk::GLCanvas::gl_initialize_all_drawables\t| " << "initialize all drawables" << std::endl;
   # endif
 
-  assert( is_gl_context_valid() );
-
   for( auto drawable : *this )
   { drawable->gl_initialize_context( gl_context() ); }
 
@@ -271,7 +269,7 @@ void GLCanvas::gl_draw_scene()
   std::clog << "gtk::GLCanvas::gl_draw_scene\t| "<< std::endl;
   # endif
 
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
 
   glPushMatrix();
   {
@@ -298,18 +296,16 @@ void GLCanvas::gl_draw_scene()
 
     auto context = gl_context();
 
-    auto call_gl_draw = [&context]( const uv::View< uv::gl::Drawable >::drawable_pointer& drawable )
-                        {
-                          glPushAttrib( GL_ALL_ATTRIB_BITS );
+    for( auto drawable : static_cast< uv::View< uv::gl::Drawable >& >( *this ) )
+    {
+      glPushAttrib( GL_ALL_ATTRIB_BITS );
 
-                            drawable->gl_draw( context );
+        drawable->gl_draw( context );
 
-                          glPopAttrib();
-                        };
+      glPopAttrib();
+    };
 
-    std::for_each( uv::View< uv::gl::Drawable >::begin(), uv::View< uv::gl::Drawable >::end(), call_gl_draw );
-  }
-
+  } // of glPushMatrix()
   glPopMatrix();
 
   # if defined DBG_GTK_GLCANVAS_GL_RENDER_SCENE
